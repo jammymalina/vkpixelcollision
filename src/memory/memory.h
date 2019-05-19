@@ -28,8 +28,8 @@
 #define is_128_byte_aligned(ptr) ((((uintptr_t) (ptr)) & 127) == 0)
 
 void *mem_alloc(size_t size);
-void mem_free(void *data);
-void mem_copy(void *dest, const void *src, size_t length);
+void mem_free(void* data);
+void mem_copy(void* dest, const void* src, size_t length);
 
 #endif
 

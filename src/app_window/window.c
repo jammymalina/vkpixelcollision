@@ -32,13 +32,13 @@ app_window create_window(const app_window_config *config) {
     return w;
 }
 
-void destroy_window(app_window *window) {
+void destroy_window(app_window* window) {
     SDL_DestroyWindow(window->handle);
     window->handle = NULL;
     SDL_Quit();
 }
 
-rendering_context get_rendering_context(const app_window *window) {
+rendering_context get_rendering_context(const app_window* window) {
     rendering_context ctx = { 0 };
 
     init_rendering_context(&ctx, window->handle);

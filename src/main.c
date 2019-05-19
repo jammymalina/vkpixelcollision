@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include "./logger/logger.h"
+#include "./vulkan/memory/allocator/vma.h"
 
 int main(int argc, char *args[]) {
     app_window_config window_config = {
@@ -15,6 +16,10 @@ int main(int argc, char *args[]) {
     log_info("Window size: %d %d", window.width, window.height);
     log_info("Rendering context size: %d %d", ctx.width, ctx.height);
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(window.mode.format));
+
+    vma_allocator allocator = retrieve_vma_allocator(ctx.gpu.physical_device, ctx.gpu.device);
+    vma_allocator allocator2 = retrieve_vma_allocator(ctx.gpu.physical_device, ctx.gpu.device);
+
 
     sleep(5);
     

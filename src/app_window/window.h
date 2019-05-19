@@ -20,9 +20,9 @@ typedef struct app_window {
 } app_window;
 
 
-app_window create_window(const app_window_config *config);
-void destroy_window(app_window *window);
+app_window create_window(const app_window_config* config);
+void destroy_window(app_window* window);
 
-rendering_context get_rendering_context(const app_window *window);
+rendering_context get_rendering_context(const app_window* window);
 
 #endif

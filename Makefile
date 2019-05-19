@@ -21,7 +21,7 @@ SHADER_DIR = shaders
 SHADER_SRC_DIR = $(SRCDIR)/$(SHADER_DIR)
 SHADER_OBJ_DIR = $(BINDIR)/$(SHADER_DIR)
 
-SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c)
+SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c $(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
 
 SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert $(SHADER_SRC_DIR)/basic/*.frag)
 
