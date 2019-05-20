@@ -8,7 +8,7 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-static uint32_t retrieve_number_of_images(const gpu_info *gpu) {
+static uint32_t retrieve_number_of_images(const gpu_info* gpu) {
     uint32_t image_count = gpu->surface_caps.minImageCount + 1;
     if (gpu->surface_caps.maxImageCount < 0) {
         return image_count;
@@ -16,7 +16,7 @@ static uint32_t retrieve_number_of_images(const gpu_info *gpu) {
     return clamp(image_count, gpu->surface_caps.minImageCount, gpu->surface_caps.maxImageCount);
 }
 
-vk_swapchain create_swapchain(const gpu_info *gpu, VkSurfaceKHR surface, const VkExtent2D *dimensions) 
+vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface, const VkExtent2D* dimensions) 
 {
     vk_swapchain sw = { 0 };
 
@@ -65,7 +65,7 @@ vk_swapchain create_swapchain(const gpu_info *gpu, VkSurfaceKHR surface, const V
     return sw;
 }
 
-void destroy_swapchain(vk_swapchain *sw, VkDevice device) {
+void destroy_swapchain(vk_swapchain* sw, VkDevice device) {
     if (sw->handle) {
         vkDestroySwapchainKHR(device, sw->handle, NULL);
     }

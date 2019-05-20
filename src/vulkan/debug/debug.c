@@ -52,7 +52,7 @@ bool is_validation_layer_available(const char *name, VkLayerProperties *availabl
     if (layers_size == 0 || available_layers == NULL) {
         return false;
     }
-    for (size_t i = 0; i < layers_size; i++) {
+    for (size_t i = 0; i < layers_size; ++i) {
         if (string_equal(name, available_layers[i].layerName)) {
             return true;
         }
@@ -71,7 +71,7 @@ bool are_validation_layers_available(const char **names,
         return false;
     }
     bool success = true;
-    for (size_t i = 0; i < names_size && success; i++) {
+    for (size_t i = 0; i < names_size && success; ++i) {
         success &= is_validation_layer_available(names[i], available_layers, layers_size);
     }
 

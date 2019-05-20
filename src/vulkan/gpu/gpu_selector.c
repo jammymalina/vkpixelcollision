@@ -7,7 +7,7 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-bool enumerate_graphical_physical_devices(gpu_info *gpus, uint32_t *gpus_size, VkInstance instance, 
+bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size, VkInstance instance, 
     VkSurfaceKHR surface)
 {
     if (!gpus_size) {
@@ -15,7 +15,7 @@ bool enumerate_graphical_physical_devices(gpu_info *gpus, uint32_t *gpus_size, V
     }
 
     uint32_t num_physical_devices = 0;
-    VkPhysicalDevice *physical_devices = NULL;
+    VkPhysicalDevice* physical_devices = NULL;
 
     CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices, NULL));
     CHECK_VK_VAL_BOOL(num_physical_devices > 0, "No physical_devices");
@@ -25,13 +25,13 @@ bool enumerate_graphical_physical_devices(gpu_info *gpus, uint32_t *gpus_size, V
         return true;
     }
 
-    physical_devices = mem_alloc(num_physical_devices * sizeof(VkPhysicalDevice));
+    physical_devices = mem_alloc(num_physical_devices*  sizeof(VkPhysicalDevice));
     CHECK_ALLOC(physical_devices, "Unable to allocate enough space for physical devices");
 
     CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices, physical_devices));
     CHECK_VK_VAL_BOOL(num_physical_devices > 0, "No physical devices");
 
-    for (size_t i = 0; i < num_physical_devices; i++) {
+    for (size_t i = 0; i < num_physical_devices; ++i) {
         init_gpu_info(&gpus[i]);
         init_gpu_info_props(&gpus[i], physical_devices[i], surface);
     }
@@ -41,10 +41,10 @@ bool enumerate_graphical_physical_devices(gpu_info *gpus, uint32_t *gpus_size, V
     return true;
 }
 
-static int find_best_suitable_gpu(const gpu_info *gpus, uint32_t gpus_size, VkSurfaceKHR surface) {
+static int find_best_suitable_gpu(const gpu_info* gpus, uint32_t gpus_size, VkSurfaceKHR surface) {
     int maxScore = -1;
     int selected_gpu = -1;
-    for (uint32_t i = 0; i < gpus_size; i++) {
+    for (uint32_t i = 0; i < gpus_size; ++i) {
         if (is_gpu_suitable_for_graphics(&gpus[i], surface))
         {
             int currentScore = default_rate_gpu(&gpus[i]);
@@ -66,7 +66,7 @@ gpu_info select_gpu(VkInstance instance, VkSurfaceKHR surface) {
         exit(EXIT_FAILURE);
     }
 
-    gpu_info *gpus = mem_alloc(gpus_size * sizeof(gpu_info));
+    gpu_info* gpus = mem_alloc(gpus_size*  sizeof(gpu_info));
     CHECK_ALLOC(gpus, "Unable to allocate space for gpus (physical devices)");
 
     enumerate_graphical_physical_devices(gpus, &gpus_size, instance, surface);
@@ -80,10 +80,10 @@ gpu_info select_gpu(VkInstance instance, VkSurfaceKHR surface) {
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < index; i++) {
+    for (size_t i = 0; i < index; ++i) {
         destroy_gpu_info(&gpus[i]);
     }
-    for (size_t i = index + 1; i < gpus_size; i++) {
+    for (size_t i = index + 1; i < gpus_size; ++i) {
         destroy_gpu_info(&gpus[i]);
     }
 

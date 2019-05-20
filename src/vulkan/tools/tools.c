@@ -1,6 +1,6 @@
 #include "./tools.h"
 
-const char *vulkan_result_to_string(VkResult result) {
+const char* vulkan_result_to_string(VkResult result) {
     switch(result) {
         case VK_SUCCESS:
             return "VK_SUCCESS";

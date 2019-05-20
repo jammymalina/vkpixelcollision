@@ -23,7 +23,7 @@ typedef struct rendering_context {
     #endif
 } rendering_context;
 
-void init_rendering_context(rendering_context *ctx, SDL_Window *w);
-void destroy_rendering_context(rendering_context *ctx);
+void init_rendering_context(rendering_context* ctx, SDL_Window* w);
+void destroy_rendering_context(rendering_context* ctx);
 
 #endif

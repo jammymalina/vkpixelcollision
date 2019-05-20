@@ -5,6 +5,6 @@
 
 #include "./lib/vma_allocator.h"
 
-vma_allocator retrieve_vma_allocator(VkPhysicalDevice physical_device, VkDevice device);
+vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device, VkDevice device);
 
 #endif

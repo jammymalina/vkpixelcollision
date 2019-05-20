@@ -16,7 +16,7 @@ typedef struct vk_swapchain {
     uint32_t image_count;
 } vk_swapchain;
 
-vk_swapchain create_swapchain(const gpu_info *gpu, VkSurfaceKHR surface, const VkExtent2D *dimensions);
-void destroy_swapchain(vk_swapchain *sw, VkDevice device);
+vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface, const VkExtent2D* dimensions);
+void destroy_swapchain(vk_swapchain* sw, VkDevice device);
 
 #endif

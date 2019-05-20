@@ -64,7 +64,7 @@ typedef struct vma_allocator {
     uint32_t next_pool_id;
 } vma_allocator;
 
-vma_allocator vma_create_allocator(const vma_allocator_create_info* alloc_create_info);
+void vma_create_allocator(vma_allocator* allocator, const vma_allocator_create_info* alloc_create_info);
 
 static inline VkDeviceSize vma_retrieve_buffer_image_granularity(const vma_allocator* allocator) {
     return allocator->physical_device_props.limits.bufferImageGranularity;

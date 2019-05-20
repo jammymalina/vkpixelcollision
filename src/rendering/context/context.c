@@ -25,7 +25,7 @@ static PFN_vkGetInstanceProcAddr retrieve_vulkan_loading_function() {
     return vk_get_proc;
 }
 
-static VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window *w) {
+static VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window* w) {
     VkSurfaceKHR surface;
     if (!SDL_Vulkan_CreateSurface(w, instance, &surface)) {
         log_error("SDL_Vulkan_CreateSurface(): %s", SDL_GetError());
@@ -34,7 +34,7 @@ static VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window *w) {
     return surface;
 }
 
-void init_rendering_context(rendering_context *ctx, SDL_Window *w) {
+void init_rendering_context(rendering_context* ctx, SDL_Window* w) {
     load_vulkan_library();
     SDL_Vulkan_GetDrawableSize(w, &ctx->width, &ctx->height);
     load_external_function(retrieve_vulkan_loading_function());
@@ -54,7 +54,7 @@ void init_rendering_context(rendering_context *ctx, SDL_Window *w) {
     ctx->swapchain = create_swapchain(&ctx->gpu, ctx->surface, &dimensions);
 }
 
-void destroy_rendering_context(rendering_context *ctx) {
+void destroy_rendering_context(rendering_context* ctx) {
     vkDeviceWaitIdle(ctx->gpu.device);
 
     destroy_swapchain(&ctx->swapchain, ctx->gpu.device);

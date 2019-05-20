@@ -9,7 +9,7 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-void init_gpu_info(gpu_info *gpu) {
+void init_gpu_info(gpu_info* gpu) {
     gpu->physical_device = VK_NULL_HANDLE;
 
     gpu->queue_family_props = NULL;
@@ -25,7 +25,7 @@ void init_gpu_info(gpu_info *gpu) {
     gpu->present_modes_size = 0;	
 }
 
-void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR surface) {
+void init_gpu_info_props(gpu_info* gpu, VkPhysicalDevice device, VkSurfaceKHR surface) {
     gpu->physical_device = device;
     
     // Queue family props
@@ -33,7 +33,7 @@ void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR su
     vkGetPhysicalDeviceQueueFamilyProperties(gpu->physical_device, &num_queues, NULL);
     CHECK_VK_VAL(num_queues > 0, "No queue family props");
     
-    gpu->queue_family_props = mem_alloc(num_queues * sizeof(VkQueueFamilyProperties));
+    gpu->queue_family_props = mem_alloc(num_queues*  sizeof(VkQueueFamilyProperties));
     CHECK_ALLOC(gpu->queue_family_props, "Allocation fail");
     
     vkGetPhysicalDeviceQueueFamilyProperties(gpu->physical_device, &num_queues, 
@@ -46,7 +46,7 @@ void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR su
     CHECK_VK(vkEnumerateDeviceExtensionProperties(gpu->physical_device, NULL, &num_extensions, NULL));
     CHECK_VK_VAL(num_extensions > 0, "No device extensions");
 
-    gpu->extension_props = mem_alloc(num_extensions * sizeof(VkExtensionProperties));
+    gpu->extension_props = mem_alloc(num_extensions*  sizeof(VkExtensionProperties));
     CHECK_ALLOC(gpu->extension_props, "Allocation fail");
 
     CHECK_VK(vkEnumerateDeviceExtensionProperties(gpu->physical_device, NULL, &num_extensions,
@@ -60,7 +60,7 @@ void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR su
         &num_formats, NULL));
     CHECK_VK_VAL(num_formats > 0, "No surface formats");
 
-    gpu->surface_formats = mem_alloc(num_formats * sizeof(VkSurfaceFormatKHR));
+    gpu->surface_formats = mem_alloc(num_formats*  sizeof(VkSurfaceFormatKHR));
     CHECK_ALLOC(gpu->surface_formats, "Allocation fail");
 
     CHECK_VK(vkGetPhysicalDeviceSurfaceFormatsKHR(gpu->physical_device, surface,
@@ -73,7 +73,7 @@ void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR su
         &num_present_modes, NULL));
     CHECK_VK_VAL(num_present_modes > 0, "No surface present modes");
 
-    gpu->present_modes = mem_alloc(num_present_modes * sizeof(VkPresentModeKHR));
+    gpu->present_modes = mem_alloc(num_present_modes*  sizeof(VkPresentModeKHR));
     CHECK_ALLOC(gpu->present_modes, "Allocation fail");
     
     CHECK_VK(vkGetPhysicalDeviceSurfacePresentModesKHR(gpu->physical_device, surface, 
@@ -87,14 +87,14 @@ void init_gpu_info_props(gpu_info *gpu, VkPhysicalDevice device, VkSurfaceKHR su
     vkGetPhysicalDeviceFeatures(gpu->physical_device, &gpu->features);   
 }
 
-bool check_desired_extensions(const gpu_info *gpu, const char *const desired_extensions[], size_t desired_extensions_size) {
+bool check_desired_extensions(const gpu_info* gpu, const char* const desired_extensions[], size_t desired_extensions_size) {
     size_t required = desired_extensions_size;
     size_t available = 0;
 
-    for (size_t i = 0; i < desired_extensions_size; i++) {
-        for (size_t j = 0; j < gpu->extension_props_size; j++) {
+    for (size_t i = 0; i < desired_extensions_size; ++i) {
+        for (size_t j = 0; j < gpu->extension_props_size; ++j) {
             if (string_equal(desired_extensions[i], gpu->extension_props[j].extensionName)) {
-                available++;
+                ++available;
                 break;
             }
         }
@@ -103,7 +103,7 @@ bool check_desired_extensions(const gpu_info *gpu, const char *const desired_ext
     return available == required;
 }
 
-VkSurfaceFormatKHR retrieve_surface_format(const gpu_info *gpu) {
+VkSurfaceFormatKHR retrieve_surface_format(const gpu_info* gpu) {
     VkSurfaceFormatKHR result = { 0 };
 
     if (gpu->surface_formats_size == 0) {
@@ -119,7 +119,7 @@ VkSurfaceFormatKHR retrieve_surface_format(const gpu_info *gpu) {
     }
 
     // Favor 32 bit rgba and srgb nonlinear colorspace
-    for (size_t i = 0; i < gpu->surface_formats_size; i++) {
+    for (size_t i = 0; i < gpu->surface_formats_size; ++i) {
         VkSurfaceFormatKHR  *fmt = &gpu->surface_formats[i];
         if (fmt->format == VK_FORMAT_B8G8R8A8_UNORM && fmt->colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             result.format = fmt->format;
@@ -140,7 +140,7 @@ VkPresentModeKHR retrieve_present_mode(const gpu_info *gpu) {
     const VkPresentModeKHR desired_mode = VK_PRESENT_MODE_MAILBOX_KHR;
 
     // Favor looking for mailbox mode.
-    for (size_t i = 0; i < gpu->present_modes_size; i++) {
+    for (size_t i = 0; i < gpu->present_modes_size; ++i) {
         if (gpu->present_modes[i] == desired_mode) {
             return desired_mode;
         }
@@ -168,7 +168,7 @@ VkExtent2D retrieve_extent(const gpu_info *gpu, const VkExtent2D *window_size) {
 VkFormat retrieve_supported_format(const gpu_info *gpu, VkFormat *formats, size_t num_formats, VkImageTiling tiling,
     VkFormatFeatureFlags features) 
 {
-    for (size_t i = 0; i < num_formats; i++) {
+    for (size_t i = 0; i < num_formats; ++i) {
         VkFormat format = formats[i];
 
         VkFormatProperties props;
@@ -210,7 +210,7 @@ bool is_gpu_suitable_for_graphics(const gpu_info *gpu, VkSurfaceKHR surface)
         return false;
     }
 
-    for (uint32_t i = 0; i < gpu->queue_family_props_size; i++) {
+    for (uint32_t i = 0; i < gpu->queue_family_props_size; ++i) {
         VkQueueFamilyProperties *props = &gpu->queue_family_props[i];
         if (props->queueCount == 0) {
             continue;
@@ -229,7 +229,7 @@ bool is_gpu_suitable_for_graphics(const gpu_info *gpu, VkSurfaceKHR surface)
 }
 
 uint32_t retrieve_graphics_queue_index(const gpu_info *gpu, VkSurfaceKHR surface) {
-    for (uint32_t i = 0; i < gpu->queue_family_props_size; i++) {
+    for (uint32_t i = 0; i < gpu->queue_family_props_size; ++i) {
         VkQueueFamilyProperties *props = &gpu->queue_family_props[i];
         if (props->queueCount == 0) {
             continue;

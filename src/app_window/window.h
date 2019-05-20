@@ -7,7 +7,7 @@
 #include "../rendering/context/context.h"
 
 typedef struct app_window_config {
-    const char *title;
+    const char* title;
     int width;
     int height;
     bool fullscreen;
@@ -15,7 +15,7 @@ typedef struct app_window_config {
 
 typedef struct app_window {
     SDL_DisplayMode mode;
-    SDL_Window *handle;
+    SDL_Window* handle;
     int width, height;
 } app_window;
 

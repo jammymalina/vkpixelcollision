@@ -38,6 +38,6 @@
 		}                                                                   \
 	} while (0)
 
-const char *vulkan_result_to_string(VkResult result);
+const char* vulkan_result_to_string(VkResult result);
 
 #endif

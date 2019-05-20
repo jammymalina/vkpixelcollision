@@ -10,8 +10,8 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-VkInstance create_instance(SDL_Window *w) {
-    const char **extensions = NULL;
+VkInstance create_instance(SDL_Window* w) {
+    const char** extensions = NULL;
     unsigned int extension_count = 0;
 
     if (!SDL_Vulkan_GetInstanceExtensions(w, &extension_count, NULL)) {
@@ -35,7 +35,7 @@ VkInstance create_instance(SDL_Window *w) {
     #ifdef DEBUG
         extension_count += debug_extension_count;
 
-        const char *validation_layer_names[] = { "VK_LAYER_LUNARG_standard_validation" };
+        const char* validation_layer_names[] = { "VK_LAYER_LUNARG_standard_validation" };
         uint32_t validation_layers_size = 1;
 
         if (!check_validation_layers(validation_layer_names, validation_layers_size)) {
@@ -45,7 +45,7 @@ VkInstance create_instance(SDL_Window *w) {
 
         extensions[extension_count - 1] = VK_EXT_DEBUG_REPORT_EXTENSION_NAME;
     #else
-        const char **validation_layer_names = NULL;
+        const char** validation_layer_names = NULL;
         uint32_t validation_layers_size = 0;
     #endif
 
