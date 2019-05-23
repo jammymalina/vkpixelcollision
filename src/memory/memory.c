@@ -6,6 +6,10 @@ void* mem_alloc(size_t size) {
     return SDL_malloc(size);
 }
 
+void* mem_realloc(void* mem, size_t size) {
+    return SDL_realloc(mem, size);
+}
+
 void mem_free(void* data) {
     SDL_free(data);
 }

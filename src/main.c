@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
+#include "./vulkan/memory/allocator/lib/vma_vector.h"
 
 int main(int argc, char* args[]) {
     app_window_config window_config = {
