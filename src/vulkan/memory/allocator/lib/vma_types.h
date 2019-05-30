@@ -1,6 +1,10 @@
 #ifndef VMA_TYPES_H
 #define VMA_TYPES_H
 
+#include "./vma_vector.h"
+
+typedef struct vma_block vma_block;
+
 typedef enum vma_memory_usage {
     VULKAN_MEMORY_USAGE_UNKNOWN,
     VULKAN_MEMORY_USAGE_GPU_ONLY,
@@ -20,5 +24,7 @@ typedef enum vma_allocation_type {
 } vma_allocation_type;
 
 typedef unsigned char vma_byte;
+
+typedef struct vma_block_vector VMA_VECTOR(vma_block) vma_block_vector;
 
 #endif

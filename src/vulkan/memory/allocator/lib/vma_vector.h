@@ -17,7 +17,7 @@
 #define vma_vector_init(pv) (void) (                                                                         \
     (pv)->cap = 0,                                                                                           \
     (pv)->size = 0,                                                                                          \
-    (pv)->data = 0 NULL                                                                                      \
+    (pv)->data = NULL                                                                                        \
 )
 
 #define vma_vector_destroy(pv) free((pv)->data)
