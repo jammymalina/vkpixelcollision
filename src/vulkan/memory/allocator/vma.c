@@ -14,16 +14,11 @@ vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device, VkDevice
     }
     shwaderytine = mem_alloc(sizeof(vma_allocator));
     assert(shwaderytine != NULL);
-    vma_allocator_create_info alloc_create_info = {
-        .physical_device = physical_device,
-        .device = device
-    };
-    vma_create_allocator(shwaderytine, &alloc_create_info);
-
-    if (!shwaderytine->status.initialized) {
-        log_error("Unable to create vulkan memory allocator: %s", shwaderytine->status.error);
-        exit(EXIT_FAILURE);
-    }
+    // vma_allocator_create_info alloc_create_info = {
+    //     .physical_device = physical_device,
+    //     .device = device
+    // };
+    // vma_create_allocator(shwaderytine, &alloc_create_info);
 
     return shwaderytine;
 }
