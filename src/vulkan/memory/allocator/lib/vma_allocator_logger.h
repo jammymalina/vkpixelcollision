@@ -1,4 +1,0 @@
-#ifndef VMA_ALLOCATOR_LOGGER_H
-#define VMA_ALLOCATOR_LOGGER_H
-
-#endif
