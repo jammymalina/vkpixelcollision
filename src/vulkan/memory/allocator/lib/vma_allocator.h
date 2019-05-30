@@ -6,8 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <assert.h>
 
-#include "./vma_allocation_object_allocator.h"
-#include "./vma_block_vector.h"
+#include "./vma_types.h"
 
 #define VMA_ALLOCATOR_ERROR_MAX_LENGTH 256
 
@@ -46,14 +45,14 @@ typedef struct vma_allocator {
 
     bool use_KHR_dedicated_allocation;
     VkDevice device;
-    vma_allocation_object_allocator allocation_object_allocator;
+    vma_allocation_object_allocator* allocation_object_allocator;
 
     VkDeviceSize heap_size_limit[VK_MAX_MEMORY_HEAPS];
 
     VkPhysicalDeviceProperties physical_device_props;
     VkPhysicalDeviceMemoryProperties mem_props;
 
-    vma_block_vector block_vectors[VK_MAX_MEMORY_TYPES];
+    vma_block_vector* block_vectors[VK_MAX_MEMORY_TYPES];
 
     VkDeviceSize preferred_large_heap_block_size;
     VkPhysicalDevice physical_device;

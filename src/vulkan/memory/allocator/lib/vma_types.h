@@ -1,0 +1,14 @@
+#ifndef VMA_TYPES_H
+#define VMA_TYPES_H
+
+typedef struct vma_allocator vma_allocator;
+typedef struct vma_pool vma_pool;
+typedef struct vma_allocation_create_info vma_allocation_create_info;
+typedef struct vma_allocation_create_info vma_allocation_create_info;
+typedef struct vma_suballocation_type vma_suballocation_type;
+typedef struct vma_stats vma_stats;
+typedef struct vma_block_vector vma_block_vector;
+typedef struct vma_allocation_object_allocator vma_allocation_object_allocator;
+typedef struct vma_device_memory_block vma_device_memory_block;
+
+#endif

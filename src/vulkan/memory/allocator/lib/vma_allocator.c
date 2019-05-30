@@ -38,6 +38,7 @@ void vma_create_allocator(vma_allocator* allocator, const vma_allocator_create_i
     allocator->use_KHR_dedicated_allocation 
         = (alloc_create_info->flags & VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT) != 0;
     allocator->device = alloc_create_info->device;
+    
     allocator->preferred_large_heap_block_size = 0;
     allocator->physical_device = alloc_create_info->physical_device;
     allocator->current_frame_index = 0;
