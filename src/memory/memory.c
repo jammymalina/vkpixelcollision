@@ -17,3 +17,7 @@ void mem_free(void* data) {
 void mem_copy(void* dest, const void* src, size_t length) {
     SDL_memcpy(dest, src, length);
 }
+
+void* mem_move(void* dest, const void* src, size_t length) {
+    return SDL_memmove(dest, src, length);
+}

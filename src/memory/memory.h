@@ -31,6 +31,6 @@ void* mem_alloc(size_t size);
 void* mem_realloc(void* mem, size_t size);
 void mem_free(void* data);
 void mem_copy(void* dest, const void* src, size_t length);
+void* mem_move(void* dest, const void* src, size_t length);
 
 #endif
-

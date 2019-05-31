@@ -18,9 +18,11 @@ app_window create_window(const app_window_config *config) {
     };
 
     init_SDL();
-    w.handle= config->fullscreen ? 
-        SDL_CreateWindow(config->title, 0, 0, 0, 0, SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_VULKAN) :
-        SDL_CreateWindow(config->title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, config->width, config->height, 
+    w.handle= config->fullscreen ?
+        SDL_CreateWindow(config->title, 0, 0, 0, 0,
+            SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_VULKAN) :
+        SDL_CreateWindow(config->title, SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED, config->width, config->height,
             SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
     if (!w.handle) {
         log_error("Unable to create SDL window");

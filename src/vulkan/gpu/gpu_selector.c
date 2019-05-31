@@ -7,8 +7,8 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size, VkInstance instance, 
-    VkSurfaceKHR surface)
+bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size,
+    VkInstance instance, VkSurfaceKHR surface)
 {
     if (!gpus_size) {
         return false;
@@ -17,7 +17,8 @@ bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size, V
     uint32_t num_physical_devices = 0;
     VkPhysicalDevice* physical_devices = NULL;
 
-    CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices, NULL));
+    CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices,
+        NULL));
     CHECK_VK_VAL_BOOL(num_physical_devices > 0, "No physical_devices");
     *gpus_size = num_physical_devices;
 
@@ -25,10 +26,13 @@ bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size, V
         return true;
     }
 
-    physical_devices = mem_alloc(num_physical_devices*  sizeof(VkPhysicalDevice));
-    CHECK_ALLOC(physical_devices, "Unable to allocate enough space for physical devices");
+    physical_devices =
+        mem_alloc(num_physical_devices * sizeof(VkPhysicalDevice));
+    CHECK_ALLOC(physical_devices, "Unable to allocate enough space for physical"
+        "devices");
 
-    CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices, physical_devices));
+    CHECK_VK_BOOL(vkEnumeratePhysicalDevices(instance, &num_physical_devices,
+        physical_devices));
     CHECK_VK_VAL_BOOL(num_physical_devices > 0, "No physical devices");
 
     for (size_t i = 0; i < num_physical_devices; ++i) {
@@ -41,7 +45,9 @@ bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size, V
     return true;
 }
 
-static int find_best_suitable_gpu(const gpu_info* gpus, uint32_t gpus_size, VkSurfaceKHR surface) {
+static int find_best_suitable_gpu(const gpu_info* gpus, uint32_t gpus_size,
+    VkSurfaceKHR surface)
+{
     int maxScore = -1;
     int selected_gpu = -1;
     for (uint32_t i = 0; i < gpus_size; ++i) {
@@ -61,7 +67,8 @@ static int find_best_suitable_gpu(const gpu_info* gpus, uint32_t gpus_size, VkSu
 gpu_info select_gpu(VkInstance instance, VkSurfaceKHR surface) {
     uint32_t gpus_size = 0;
 
-    bool enumeration_success = enumerate_graphical_physical_devices(NULL, &gpus_size, instance, surface);
+    bool enumeration_success = enumerate_graphical_physical_devices(NULL,
+        &gpus_size, instance, surface);
     if (!enumeration_success) {
         exit(EXIT_FAILURE);
     }
