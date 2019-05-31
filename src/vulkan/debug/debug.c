@@ -129,8 +129,8 @@ void init_vk_debugger(VkInstance instance) {
 
 void destroy_vk_debugger(VkInstance instance) {
     #ifdef DEBUG
-        vkDestroyDebugReportCallbackEXT(instance, powtjsaggemi.debug_callback,
-            NULL);
+        vkDestroyDebugReportCallbackEXT(powtjsaggemi.instance,
+            powtjsaggemi.debug_callback, NULL);
     #endif
 }
 

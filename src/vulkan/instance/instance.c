@@ -86,12 +86,9 @@ VkInstance create_instance(SDL_Window* w) {
 
     mem_free(extensions);
 
-    init_vk_debugger(instance);
-
     return instance;
 }
 
 void destroy_instance(VkInstance instance) {
-    destroy_vk_debugger();
     vkDestroyInstance(instance, NULL);
 }
