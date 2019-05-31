@@ -13,10 +13,12 @@ static uint32_t retrieve_number_of_images(const gpu_info* gpu) {
     if (gpu->surface_caps.maxImageCount < 0) {
         return image_count;
     }
-    return clamp(image_count, gpu->surface_caps.minImageCount, gpu->surface_caps.maxImageCount);
+    return clamp(image_count, gpu->surface_caps.minImageCount,
+        gpu->surface_caps.maxImageCount);
 }
 
-vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface, const VkExtent2D* dimensions) 
+vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface,
+    const VkExtent2D* dimensions)
 {
     vk_swapchain sw = { 0 };
 
@@ -56,9 +58,10 @@ vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface, const V
         .clipped = VK_TRUE,
         .oldSwapchain = VK_NULL_HANDLE
     };
-    
+
     VkSwapchainKHR swapchain;
-    CHECK_VK(vkCreateSwapchainKHR(gpu->device, &swapchain_info, NULL, &swapchain));
+    CHECK_VK(vkCreateSwapchainKHR(gpu->device, &swapchain_info, NULL,
+        &swapchain));
 
     sw.handle = swapchain;
 

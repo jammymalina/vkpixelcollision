@@ -43,10 +43,6 @@ void init_rendering_context(rendering_context* ctx, SDL_Window* w) {
     load_global_functions();
     ctx->instance = create_instance(w);
     load_instance_vulkan_functions(ctx->instance);
-    #ifdef DEBUG
-        ctx->debug_callback = setup_debug_callback(ctx->instance,
-            DEFAULT_VULKAN_DEBUG_FLAFS);
-    #endif
     ctx->surface = retrieve_surface(ctx->instance, w);
     ctx->gpu = select_gpu(ctx->instance, ctx->surface);
     init_gpu_device(&ctx->gpu, ctx->surface);
@@ -66,11 +62,6 @@ void destroy_rendering_context(rendering_context* ctx) {
 
     vkDestroySurfaceKHR(ctx->instance, ctx->surface, NULL);
     ctx->surface = VK_NULL_HANDLE;
-
-    #ifdef DEBUG
-        vkDestroyDebugReportCallbackEXT(ctx->instance, ctx->debug_callback,
-            NULL);
-    #endif
 
     destroy_instance(ctx->instance);
     ctx->instance = VK_NULL_HANDLE;

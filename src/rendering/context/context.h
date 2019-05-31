@@ -17,10 +17,6 @@ typedef struct rendering_context {
     VkQueue graphics_queue;
 
     vk_swapchain swapchain;
-
-    #ifdef DEBUG
-        VkDebugReportCallbackEXT debug_callback;
-    #endif
 } rendering_context;
 
 void init_rendering_context(rendering_context* ctx, SDL_Window* w);

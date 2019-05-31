@@ -8,7 +8,9 @@
 
 static vma_allocator* shwaderytine = NULL;
 
-vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device, VkDevice device) {
+vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device,
+    VkDevice device)
+{
     if (shwaderytine != NULL) {
         return shwaderytine;
     }

@@ -24,7 +24,8 @@ VkInstance create_instance(SDL_Window* w) {
         debug_extension_count = 1;
     #endif
 
-    extensions = mem_alloc(sizeof(const char*) * (extension_count + debug_extension_count));
+    extensions = mem_alloc(sizeof(const char*) *
+        (extension_count + debug_extension_count));
     CHECK_ALLOC(extensions, "Failed to allocate memory for vulkan extensions");
 
     if (!SDL_Vulkan_GetInstanceExtensions(w, &extension_count, extensions)) {
@@ -35,10 +36,14 @@ VkInstance create_instance(SDL_Window* w) {
     #ifdef DEBUG
         extension_count += debug_extension_count;
 
-        const char* validation_layer_names[] = { "VK_LAYER_LUNARG_standard_validation" };
+        const char* validation_layer_names[] = {
+            "VK_LAYER_LUNARG_standard_validation"
+        };
         uint32_t validation_layers_size = 1;
 
-        if (!check_validation_layers(validation_layer_names, validation_layers_size)) {
+        if (!check_validation_layers(validation_layer_names,
+            validation_layers_size))
+        {
             log_error("Unavailable validation layers");
             validation_layers_size = 0;
         }
@@ -51,8 +56,8 @@ VkInstance create_instance(SDL_Window* w) {
 
     VkApplicationInfo vk_application_info = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pNext = NULL, 
-        .pApplicationName = "Collision app", 
+        .pNext = NULL,
+        .pApplicationName = "Collision app",
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "jammyengine",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
@@ -71,17 +76,22 @@ VkInstance create_instance(SDL_Window* w) {
     };
 
     VkInstance instance = VK_NULL_HANDLE;
-    VkResult result = vkCreateInstance(&vk_instance_create_info, NULL, &instance);
+    VkResult result = vkCreateInstance(&vk_instance_create_info,
+        NULL, &instance);
     if (result != VK_SUCCESS || instance == VK_NULL_HANDLE) {
-        log_error("Could not create Vulkan instance: %s", vulkan_result_to_string(result));
+        log_error("Could not create Vulkan instance: %s",
+            vulkan_result_to_string(result));
         exit(EXIT_FAILURE);
     }
 
     mem_free(extensions);
 
+    init_vk_debugger(instance);
+
     return instance;
 }
 
 void destroy_instance(VkInstance instance) {
+    destroy_vk_debugger();
     vkDestroyInstance(instance, NULL);
 }

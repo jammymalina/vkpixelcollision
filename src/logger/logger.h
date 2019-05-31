@@ -3,28 +3,28 @@
 
 #include <SDL2/SDL.h>
 
-#define log_debug(message, ...)                                                  \
-    do {                                                                         \
+#define log_debug(message, ...)                                  \
+    do {                                                         \
         SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, message "\n", \
-            ##__VA_ARGS__); \
+            ##__VA_ARGS__);                                      \
     } while (0)
 
-#define log_info(message, ...)                                                   \
-    do {                                                                         \
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, message "\n", \
-            ##__VA_ARGS__);  \
+#define log_info(message, ...)                                   \
+    do {                                                         \
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, message "\n",  \
+            ##__VA_ARGS__);                                      \
     } while (0)
 
-#define log_error(message, ...)                                                  \
-    do {                                                                         \
+#define log_error(message, ...)                                  \
+    do {                                                         \
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, message "\n", \
-            ##__VA_ARGS__); \
+            ##__VA_ARGS__);                                      \
     } while (0)
 
-#define log_warning(message, ...)                                                \
-    do {                                                                         \
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, message "\n", \
-            ##__VA_ARGS__);  \
+#define log_warning(message, ...)                                \
+    do {                                                         \
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, message "\n",  \
+            ##__VA_ARGS__);                                      \
     } while (0)
 
 #endif

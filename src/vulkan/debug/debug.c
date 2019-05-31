@@ -8,18 +8,14 @@
 #include "../functions/functions.h"
 #include "../tools/tools.h"
 
-bool check_validation_layers(const char** names, uint32_t names_size) {
-    uint32_t layers_size = 0;
-    VkLayerProperties *available_layers =
-        get_available_validation_layers(&layers_size);
-    bool success = are_validation_layers_available(names, names_size,
-        available_layers, layers_size);
-    mem_free(available_layers);
+static vk_debugger powtjsaggemi = {
+    .instance = VK_NULL_HANDLE,
+    .debug_callback = VK_NULL_HANDLE
+};
 
-    return success;
-}
-
-VkLayerProperties *get_available_validation_layers(uint32_t* layers_size) {
+static inline VkLayerProperties* get_available_validation_layers(
+    uint32_t* layers_size)
+{
     *layers_size = 0;
     uint32_t count = 0;
     VkResult r = vkEnumerateInstanceLayerProperties(&count, NULL);
@@ -53,7 +49,7 @@ VkLayerProperties *get_available_validation_layers(uint32_t* layers_size) {
     return validation_layers;
 }
 
-bool is_validation_layer_available(const char* name,
+static inline bool is_validation_layer_available(const char* name,
     VkLayerProperties* available_layers, uint32_t layers_size)
 {
     if (layers_size == 0 || available_layers == NULL) {
@@ -68,7 +64,7 @@ bool is_validation_layer_available(const char* name,
     return false;
 }
 
-bool are_validation_layers_available(const char** names,
+static inline bool are_validation_layers_available(const char** names,
     uint32_t names_size, VkLayerProperties* available_layers,
     uint32_t layers_size)
 {
@@ -87,16 +83,18 @@ bool are_validation_layers_available(const char** names,
     return success;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
-    VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT obj_type,
-    uint64_t obj, size_t location, int32_t code, const char* layer_prefix,
-    const char* msg, void* user_data)
-{
-    log_info("VALIDATION LAYER %s: %s", layer_prefix, msg);
-    return VK_FALSE;
+bool check_validation_layers(const char** names, uint32_t names_size) {
+    uint32_t layers_size = 0;
+    VkLayerProperties *available_layers =
+        get_available_validation_layers(&layers_size);
+    bool success = are_validation_layers_available(names, names_size,
+        available_layers, layers_size);
+    mem_free(available_layers);
+
+    return success;
 }
 
-VkDebugReportCallbackEXT setup_debug_callback(VkInstance instance,
+static inline VkDebugReportCallbackEXT setup_debug_callback(VkInstance instance,
     VkDebugReportFlagsEXT flags)
 {
     VkDebugReportCallbackCreateInfoEXT debug_callback_info = {
@@ -110,4 +108,32 @@ VkDebugReportCallbackEXT setup_debug_callback(VkInstance instance,
     CHECK_VK(vkCreateDebugReportCallbackEXT(instance, &debug_callback_info,
         NULL, &debug_callback));
     return debug_callback;
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
+    VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT obj_type,
+    uint64_t obj, size_t location, int32_t code, const char* layer_prefix,
+    const char* msg, void* user_data)
+{
+    log_info("VALIDATION LAYER %s: %s", layer_prefix, msg);
+    return VK_FALSE;
+}
+
+void init_vk_debugger(VkInstance instance) {
+    #ifdef DEBUG
+        powtjsaggemi.instance = instance;
+        powtjsaggemi.debug_callback = setup_debug_callback(instance,
+            DEFAULT_VULKAN_DEBUG_FLAFS);
+    #endif
+}
+
+void destroy_vk_debugger(VkInstance instance) {
+    #ifdef DEBUG
+        vkDestroyDebugReportCallbackEXT(instance, powtjsaggemi.debug_callback,
+            NULL);
+    #endif
+}
+
+vk_debugger* retrieve_vk_debugger() {
+    return &powtjsaggemi;
 }
