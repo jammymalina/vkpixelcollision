@@ -1,6 +1,9 @@
 #ifndef VMA_TYPES_H
 #define VMA_TYPES_H
 
+#include <stdbool.h>
+#include <vulkan/vulkan.h>
+
 #include "./vma_vector.h"
 
 typedef struct vma_block vma_block;
@@ -49,6 +52,47 @@ static inline const char* vma_allocation_type_to_string(
     return allocation_type_strings[type];
 }
 
+static inline bool vma_is_on_same_page(VkDeviceSize rA_offset,
+    VkDeviceSize rA_size, VkDeviceSize rB_offset, VkDeviceSize page_size)
+{
+    if (!(rA_offset + rA_size <= rB_offset && rA_size > 0 && page_size > 0)) {
+        return false;
+    }
+
+    VkDeviceSize rA_end = rA_offset + rA_size - 1;
+    VkDeviceSize rA_end_page = rA_end & ~(page_size - 1);
+    VkDeviceSize rB_start = rB_offset;
+    VkDeviceSize rB_start_page = rB_start & ~(page_size - 1);
+
+    return rA_end_page == rB_start_page;
+}
+
+static inline bool vma_has_granularity_conflict(vma_allocation_type a,
+    vma_allocation_type b)
+{
+    if (a > b) {
+        vma_allocation_type tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    switch (a) {
+        case VMA_ALLOCATION_TYPE_FREE:
+            return false;
+        case VMA_ALLOCATION_TYPE_BUFFER:
+            return b == VMA_ALLOCATION_TYPE_IMAGE || b == VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+        case VMA_ALLOCATION_TYPE_IMAGE:
+            return b == VMA_ALLOCATION_TYPE_IMAGE ||
+                b == VMA_ALLOCATION_TYPE_IMAGE_LINEAR ||
+                b == VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+        case VMA_ALLOCATION_TYPE_IMAGE_LINEAR:
+            return b == VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+        case VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL:
+            return false;
+        default:
+            return false;
+    }
+}
 
 typedef unsigned char vma_byte;
 

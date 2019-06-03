@@ -80,10 +80,77 @@ void vma_block_destroy(vma_block* block) {
     mem_free(current);
 }
 
-bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
-    vma_block_allocation_info* block_alloc_info)
+static inline vma_block_chunk* vma_block_chunk_find_best_fit(
+    const vma_block* block, const vma_block_allocation_info* block_alloc_info)
 {
-    return false;
+    vma_block_chunk* current = NULL;
+    vma_block_chunk* best_fit = NULL;
+    vma_block_chunk* prev = NULL;
+
+    VkDeviceSize padding = 0;
+    VkDeviceSize offset = 0;
+    VkDeviceSize aligned_size = 0;
+
+    for (current = block->head; current != NULL; prev = current,
+        current = current->next)
+    {
+        if (current->allocation_type != VMA_ALLOCATION_TYPE_FREE) {
+            continue;
+        }
+        if (block_alloc_info->size > current->size) {
+            continue;
+        }
+
+        offset = ALIGN(current->offset, block_alloc_info->align);
+
+        if (prev != NULL && block_alloc_info->granularity > 1) {
+            bool is_on_same_page = vma_is_on_same_page(prev->offset, prev->size,
+                offset, block_alloc_info->granularity);
+            bool has_granularity_conflict = vma_has_granularity_conflict(
+                prev->allocation_type, block_alloc_info->allocation_type);
+            if (is_on_same_page && has_granularity_conflict) {
+                offset = ALIGN(offset, block_alloc_info->granularity);
+            }
+        }
+
+        padding = offset - current->offset;
+        aligned_size = padding + block_alloc_info->size;
+
+        if (aligned_size > current->size) {
+            continue;
+        }
+        if (aligned_size + block->allocated >= block->size) {
+            return NULL;
+        }
+
+        if (block_alloc_info->granularity > 1 && current->next != NULL) {
+            vma_block_chunk* next = current->next;
+            bool is_on_same_page = vma_is_on_same_page(offset,
+                block_alloc_info->size, next->offset,
+                block_alloc_info->granularity);
+            bool has_granularity_conflict = vma_has_granularity_conflict(
+                block_alloc_info->allocation_type, next->allocation_type);
+            if (is_on_same_page && has_granularity_conflict) {
+                continue;
+            }
+        }
+
+        best_fit = current;
+        break;
+    }
+
+    return best_fit;
+}
+
+bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
+    const vma_block_allocation_info* block_alloc_info)
+{
+    const VkDeviceSize free_size = block->size - block->allocated;
+    if (free_size < block_alloc_info->size) {
+        return false;
+    }
+
+    return true;
 }
 
 static inline vma_block_chunk* vma_block_chunk_find_by_alloc_id(
@@ -112,7 +179,7 @@ void vma_block_print_json(const vma_block* block) {
     for (vma_block_chunk* current = block->head;
         current != NULL; current = current->next)
     {
-        count++;
+        ++count;
     }
 
     log_info("{");

@@ -11,7 +11,7 @@ typedef struct vma_block_allocation_info {
     uint32_t size;
     uint32_t align;
     VkDeviceSize granularity;
-    vma_allocation_type alloc_type;
+    vma_allocation_type allocation_type;
 } vma_block_allocation_info;
 
 typedef struct vma_block_chunk {
@@ -46,7 +46,7 @@ static inline bool vma_block_is_host_visible(const vma_block* block) {
 }
 
 bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
-    vma_block_allocation_info* block_alloc_info);
+    const vma_block_allocation_info* block_alloc_info);
 
 void vma_block_free_allocation(vma_block* block, vma_allocation* allocation);
 void vma_block_print(const vma_block* block);
