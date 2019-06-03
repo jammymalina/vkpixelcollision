@@ -6,13 +6,13 @@
 
 #include "./vma_types.h"
 
-typedef struct vma_allocation_h {
+typedef struct vma_allocation {
     vma_block* block;
     uint32_t id;
     VkDeviceMemory device_memory;
     VkDeviceSize offset;
     VkDeviceSize size;
     vma_byte* data;
-} vma_allocation_h;
+} vma_allocation;
 
 #endif
