@@ -44,7 +44,7 @@ bool vma_allocator_init(vma_allocator* allocator,
         VMA_MB_TO_BYTES(allocator_info->desired_host_visible_memory_MB);
     allocator->buffer_image_granularity =
         allocator_info->buffer_image_granularity;
-    allocator->number_of_frames = allocator_info->number_of_frames;
+    allocator->number_of_frames = max(allocator_info->number_of_frames, 1);
 
     allocator->garbage =
         mem_alloc(sizeof(vma_allocation_vector) * allocator->number_of_frames);

@@ -8,20 +8,19 @@
 
 static vma_allocator* shwaderytine = NULL;
 
-vma_allocator* retrieve_vma_allocator(vma_allocator_create_info*
+void create_vma_allocator(const vma_allocator_create_info*
     allocator_create_info)
 {
-    if (shwaderytine != NULL) {
-        return shwaderytine;
-    }
     shwaderytine = mem_alloc(sizeof(vma_allocator));
-    assert(shwaderytine != NULL);
-    // vma_allocator_create_info alloc_create_info = {
-    //     .physical_device = physical_device,
-    //     .device = device
-    // };
-    // vma_create_allocator(shwaderytine, &alloc_create_info);
+    CHECK_ALLOC(shwaderytine, "Unable to create allocator - mem alloc issue");
+    if (!vma_allocator_init(shwaderytine, allocator_create_info)) {
+        log_error("Unable to create allocator");
+        exit(EXIT_FAILURE);
+    }
+}
 
+vma_allocator* retrieve_vma_allocator()
+{
     return shwaderytine;
 }
 

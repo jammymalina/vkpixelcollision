@@ -19,6 +19,17 @@ int main(int argc, char* args[]) {
     log_info("Window size: %d %d", window.width, window.height);
     log_info("Rendering context size: %d %d", ctx.width, ctx.height);
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(window.mode.format));
+    log_info("Number of frames: %u", ctx.swapchain.image_count);
+
+    vma_allocator_create_info allocator_info = {
+        .desired_device_local_memory_MB = 32,
+        .desired_host_visible_memory_MB = 16,
+        .min_blocks_size = 30,
+        .min_garbage_size = 20,
+        .number_of_frames = ctx.swapchain.image_count,
+        .buffer_image_granularity = ctx.gpu.props.limits.bufferImageGranularity
+    };
+    create_vma_allocator(&allocator_info);
 
     bool is_running = true;
 

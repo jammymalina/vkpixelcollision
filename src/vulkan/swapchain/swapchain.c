@@ -10,11 +10,9 @@
 
 static uint32_t retrieve_number_of_images(const gpu_info* gpu) {
     uint32_t image_count = gpu->surface_caps.minImageCount + 1;
-    if (gpu->surface_caps.maxImageCount < 0) {
-        return image_count;
-    }
-    return clamp(image_count, gpu->surface_caps.minImageCount,
-        gpu->surface_caps.maxImageCount);
+    uint32_t max_image_count = gpu->surface_caps.maxImageCount == 0 ?
+        UINT32_MAX : gpu->surface_caps.maxImageCount;
+    return clamp(image_count, gpu->surface_caps.minImageCount, max_image_count);
 }
 
 vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface,
@@ -64,6 +62,7 @@ vk_swapchain create_swapchain(const gpu_info* gpu, VkSurfaceKHR surface,
         &swapchain));
 
     sw.handle = swapchain;
+    sw.image_count = image_count;
 
     return sw;
 }
