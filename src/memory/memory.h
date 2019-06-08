@@ -25,6 +25,17 @@
         }                                          \
     } while (0)
 
+#define COUNT_ONE_BITS(n) ({                       \
+    __typeof__ (n) _count = 0;                     \
+    __typeof__ (n) _n = (n);                       \
+    __typeof__ (n) _one = 1;                       \
+    while (_n) {                                   \
+        _count += _n & _one;                       \
+        _n >>= _one;                               \
+    }                                              \
+    _count;                                        \
+})
+
 #define ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
 #define ALIGN_MEM(x, a) ((((uintptr_t) (x)) + ((a) - 1) ) & ~(((uintptr_t) (a)) - 1))
 

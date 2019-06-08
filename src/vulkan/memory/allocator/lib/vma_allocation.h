@@ -19,9 +19,10 @@ typedef struct vma_allocation {
     vma_block* block;
     uint32_t id;
     VkDeviceMemory device_memory;
-    VkDeviceSize offset;
-    VkDeviceSize size;
+    vma_allocation_segment segment;
     vma_byte* data;
 } vma_allocation;
+
+void vma_allocation_init_empty(vma_allocation* alloc);
 
 #endif

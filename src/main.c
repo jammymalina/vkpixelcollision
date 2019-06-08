@@ -52,7 +52,7 @@ int main(int argc, char* args[]) {
         }
     }
 
-
+    destroy_vma_allocator();
     destroy_rendering_context(&ctx);
     destroy_window(&window);
 }

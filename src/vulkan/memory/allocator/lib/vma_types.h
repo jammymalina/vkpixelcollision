@@ -6,7 +6,8 @@
 
 #include "./vma_vector.h"
 
-#define VMA_MB_TO_BYTES(MB_SIZE) ((MB_SIZE) * 1024 * 1024)
+#define VMA_MB_TO_BYTES(MB_SIZE) ((MB_SIZE) << 20)
+#define VMA_BYTES_TO_MB(BYTE_SIZE) ((BYTE_SIZE) >> 20)
 
 typedef struct vma_block vma_block;
 typedef struct vma_allocation vma_allocation;
@@ -104,7 +105,7 @@ static inline bool vma_has_granularity_conflict(vma_allocation_type a,
 
 typedef unsigned char vma_byte;
 
-typedef struct vma_block_vector VMA_VECTOR(vma_block) vma_block_vector;
+typedef struct vma_block_vector VMA_VECTOR(vma_block*) vma_block_vector;
 typedef struct vma_allocation_vector VMA_VECTOR(vma_allocation)
     vma_allocation_vector;
 

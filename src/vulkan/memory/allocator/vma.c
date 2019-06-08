@@ -8,8 +8,8 @@
 
 static vma_allocator* shwaderytine = NULL;
 
-vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device,
-    VkDevice device)
+vma_allocator* retrieve_vma_allocator(vma_allocator_create_info*
+    allocator_create_info)
 {
     if (shwaderytine != NULL) {
         return shwaderytine;
@@ -23,4 +23,11 @@ vma_allocator* retrieve_vma_allocator(VkPhysicalDevice physical_device,
     // vma_create_allocator(shwaderytine, &alloc_create_info);
 
     return shwaderytine;
+}
+
+void destroy_vma_allocator() {
+    if (!shwaderytine) {
+        return;
+    }
+    vma_allocator_destroy(shwaderytine);
 }

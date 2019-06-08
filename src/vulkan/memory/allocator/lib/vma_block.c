@@ -204,14 +204,14 @@ bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
 
     block->allocated += seg.size;
 
-    allocation->size = best_fit->mem_segment.size;
+    allocation->segment.size = best_fit->mem_segment.size;
     allocation->id = best_fit->allocation_id;
     allocation->device_memory = block->device_memory;
     allocation->data = NULL;
     if (vma_block_is_host_visible(block)) {
         allocation->data = block->data + seg.offset;
     }
-    allocation->offset = seg.offset;
+    allocation->segment.offset = seg.offset;
     allocation->block = block;
 
     return true;
@@ -235,7 +235,7 @@ void vma_block_free_allocation(vma_block* block, vma_allocation* allocation) {
         return;
     }
 
-    block->allocated -= allocation->size;
+    block->allocated -= allocation->segment.size;
 }
 
 void vma_block_print_json(const vma_block* block) {

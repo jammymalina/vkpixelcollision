@@ -11,14 +11,16 @@
 #include "./vma_block.h"
 #include "./vma_allocation.h"
 
-#define VMA_MINIMUM_EXPECTED_NUMBER_OF_ALLOCATIONS 10
+#define VMA_MINIMUM_BLOCKS_SIZE 10
+#define VMA_MINIMUM_GARBAGE_SIZE 10
 
 typedef struct vma_allocator_create_info {
     VkDeviceSize desired_device_local_memory_MB;
     VkDeviceSize desired_host_visible_memory_MB;
     VkDeviceSize buffer_image_granularity;
     uint32_t number_of_frames;
-    uint32_t expected_number_of_allocations;
+    uint32_t min_blocks_size;
+    uint32_t min_garbage_size;
 } vma_allocator_create_info;
 
 typedef struct vma_allocator {
