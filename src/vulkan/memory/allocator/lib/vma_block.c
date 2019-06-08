@@ -23,7 +23,7 @@ bool vma_block_init(vma_block* block) {
         return false;
     }
 
-    VkMemoryAllocateInfo mem_alloc_info = {
+    const VkMemoryAllocateInfo mem_alloc_info = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .pNext = NULL,
         .allocationSize = block->size,
@@ -47,8 +47,8 @@ bool vma_block_init(vma_block* block) {
 
     vma_block_chunk* head = block->head;
     head->allocation_id = block->next_block_id++;
-    head->size = block->size;
-    head->offset = 0;
+    head->mem_segment.size = block->size;
+    head->mem_segment.offset = 0;
     head->prev = NULL;
     head->next = NULL;
     head->allocation_type = VMA_ALLOCATION_TYPE_FREE;
@@ -80,8 +80,9 @@ void vma_block_destroy(vma_block* block) {
     mem_free(current);
 }
 
-static inline vma_block_chunk* vma_block_chunk_find_best_fit(
-    const vma_block* block, const vma_block_allocation_info* block_alloc_info)
+static inline vma_allocation_segment vma_block_chunk_find_best_fit(
+    const vma_block* block, vma_block_chunk **best_fit_chunk,
+    const vma_block_allocation_info* block_alloc_info)
 {
     vma_block_chunk* current = NULL;
     vma_block_chunk* best_fit = NULL;
@@ -97,15 +98,15 @@ static inline vma_block_chunk* vma_block_chunk_find_best_fit(
         if (current->allocation_type != VMA_ALLOCATION_TYPE_FREE) {
             continue;
         }
-        if (block_alloc_info->size > current->size) {
+        if (block_alloc_info->size > current->mem_segment.size) {
             continue;
         }
 
-        offset = ALIGN(current->offset, block_alloc_info->align);
+        offset = ALIGN(current->mem_segment.offset, block_alloc_info->align);
 
         if (prev != NULL && block_alloc_info->granularity > 1) {
-            bool is_on_same_page = vma_is_on_same_page(prev->offset, prev->size,
-                offset, block_alloc_info->granularity);
+            bool is_on_same_page = vma_is_on_same_page(prev->mem_segment.offset,
+                prev->mem_segment.size, offset, block_alloc_info->granularity);
             bool has_granularity_conflict = vma_has_granularity_conflict(
                 prev->allocation_type, block_alloc_info->allocation_type);
             if (is_on_same_page && has_granularity_conflict) {
@@ -113,22 +114,24 @@ static inline vma_block_chunk* vma_block_chunk_find_best_fit(
             }
         }
 
-        padding = offset - current->offset;
+        padding = offset - current->mem_segment.offset;
         aligned_size = padding + block_alloc_info->size;
 
-        if (aligned_size > current->size) {
+        if (aligned_size > current->mem_segment.size) {
             continue;
         }
         if (aligned_size + block->allocated >= block->size) {
-            return NULL;
+            best_fit = NULL;
+            const vma_allocation_segment zero_seg = { 0 };
+            return zero_seg;
         }
 
         if (block_alloc_info->granularity > 1 && current->next != NULL) {
             vma_block_chunk* next = current->next;
-            bool is_on_same_page = vma_is_on_same_page(offset,
-                block_alloc_info->size, next->offset,
+            const bool is_on_same_page = vma_is_on_same_page(offset,
+                block_alloc_info->size, next->mem_segment.offset,
                 block_alloc_info->granularity);
-            bool has_granularity_conflict = vma_has_granularity_conflict(
+            const bool has_granularity_conflict = vma_has_granularity_conflict(
                 block_alloc_info->allocation_type, next->allocation_type);
             if (is_on_same_page && has_granularity_conflict) {
                 continue;
@@ -139,12 +142,17 @@ static inline vma_block_chunk* vma_block_chunk_find_best_fit(
         break;
     }
 
-    return best_fit;
+    *best_fit_chunk = best_fit;
+    const vma_allocation_segment new_mem_seg = {
+        .offset = offset,
+        .size = aligned_size
+    };
+    return new_mem_seg;
 }
 
 static inline bool vma_block_split_chunk(vma_block* block,
-    vma_block_chunk* chunk, VkDeviceSize aligned_size, VkDeviceSize size,
-    VkDeviceSize offset)
+    vma_block_chunk* chunk, VkDeviceSize size,
+    const vma_allocation_segment* mem_seg)
 {
     vma_block_chunk* new_chunk = mem_alloc(sizeof(vma_block_chunk));
     CHECK_ALLOC_BOOL(new_chunk, "Unable to allocate new block chunk");
@@ -160,8 +168,8 @@ static inline bool vma_block_split_chunk(vma_block* block,
         next->prev = new_chunk;
     }
 
-    new_chunk->size = chunk->size - aligned_size;
-    new_chunk->offset = offset + size;
+    new_chunk->mem_segment.size = chunk->mem_segment.size - mem_seg->size;
+    new_chunk->mem_segment.offset = mem_seg->offset + size;
     new_chunk->allocation_type = VMA_ALLOCATION_TYPE_FREE;
 
     return true;
@@ -175,17 +183,36 @@ bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
         return false;
     }
 
-    const vma_block_chunk* best_fit = vma_block_chunk_find_best_fit(block,
-        block_alloc_info);
+    vma_block_chunk* best_fit = NULL;
+
+    vma_allocation_segment seg = vma_block_chunk_find_best_fit(block,
+        &best_fit, block_alloc_info);
     if (!best_fit) {
         return false;
     }
 
-    if (best_fit->size > block_alloc_info->size) {
-        bool split_status = vma_block_split_chunk(block, best_fit, aligned_size,
-            block_alloc_info->size, offset);
-
+    if (best_fit->mem_segment.size > block_alloc_info->size) {
+        bool split_status = vma_block_split_chunk(block, best_fit,
+            block_alloc_info->size, &seg);
+        if (!split_status) {
+            return false;
+        }
     }
+
+    best_fit->allocation_type = block_alloc_info->allocation_type;
+    best_fit->mem_segment.size = block_alloc_info->size;
+
+    block->allocated += seg.size;
+
+    allocation->size = best_fit->mem_segment.size;
+    allocation->id = best_fit->allocation_id;
+    allocation->device_memory = block->device_memory;
+    allocation->data = NULL;
+    if (vma_block_is_host_visible(block)) {
+        allocation->data = block->data + seg.offset;
+    }
+    allocation->offset = seg.offset;
+    allocation->block = block;
 
     return true;
 }
@@ -240,8 +267,8 @@ void vma_block_print_json(const vma_block* block) {
     {
         log_info("    {");
         log_info("      \"allocationId\": %u", current->allocation_id);
-        log_info("      \"size\": %zu,", current->size);
-        log_info("      \"offset\": %zu,", current->offset);
+        log_info("      \"size\": %zu,", current->mem_segment.size);
+        log_info("      \"offset\": %zu,", current->mem_segment.offset);
         log_info("      \"type\": \"%s\"",
             vma_allocation_type_to_string(current->allocation_type));
         if (i < count) {

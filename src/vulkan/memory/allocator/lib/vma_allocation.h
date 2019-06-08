@@ -6,6 +6,15 @@
 
 #include "./vma_types.h"
 
+typedef struct vma_allocation_create_info {
+    uint32_t size;
+    uint32_t align;
+    uint32_t memory_type_bits;
+
+    vma_memory_usage usage;
+    vma_allocation_type type;
+} vma_allocation_create_info;
+
 typedef struct vma_allocation {
     vma_block* block;
     uint32_t id;

@@ -5,6 +5,8 @@
 #include "./vulkan/memory/allocator/vma.h"
 #include "./vulkan/memory/allocator/lib/vma_vector.h"
 
+#define MS_PER_UPDATE 16
+
 int main(int argc, char* args[]) {
     app_window_config window_config = {
         .title = "Collision app",
@@ -18,12 +20,38 @@ int main(int argc, char* args[]) {
     log_info("Rendering context size: %d %d", ctx.width, ctx.height);
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(window.mode.format));
 
-    vma_allocator* allocator = retrieve_vma_allocator(ctx.gpu.physical_device,
-        ctx.gpu.device);
-    vma_allocator* allocator2 = retrieve_vma_allocator(ctx.gpu.physical_device,
-        ctx.gpu.device);
+    bool is_running = true;
 
-    sleep(5);
+    uint32_t previous_time = SDL_GetTicks();
+    double lag = 0.0;
+    while (is_running) {
+        uint32_t current_time = SDL_GetTicks();
+        uint32_t elapsed_time = current_time - previous_time;
+
+        previous_time = current_time;
+        lag += elapsed_time;
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    is_running = false;
+                    break;
+                case SDL_KEYUP:
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        is_running = false;
+                    }
+                    break;
+            }
+            // update_input(&event);
+        }
+
+        while (lag >= MS_PER_UPDATE) {
+            double delta = lag / MS_PER_UPDATE;
+            lag -= MS_PER_UPDATE;
+        }
+    }
+
 
     destroy_rendering_context(&ctx);
     destroy_window(&window);

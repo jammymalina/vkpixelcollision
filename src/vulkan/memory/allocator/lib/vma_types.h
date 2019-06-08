@@ -6,6 +6,8 @@
 
 #include "./vma_vector.h"
 
+#define VMA_MB_TO_BYTES(MB_SIZE) ((MB_SIZE) * 1024 * 1024)
+
 typedef struct vma_block vma_block;
 typedef struct vma_allocation vma_allocation;
 typedef struct vma_allocator vma_allocator;
@@ -27,6 +29,11 @@ typedef enum vma_allocation_type {
     VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL,
     VMA_ALLOCATION_TYPES_COUNT
 } vma_allocation_type;
+
+typedef struct vma_allocation_segment {
+    VkDeviceSize offset;
+    VkDeviceSize size;
+} vma_allocation_segment;
 
 static inline const char* vma_memory_usage_to_string(vma_memory_usage usage) {
     static const char* memory_usage_strings[VMA_MEMORY_USAGES_COUNT] = {
@@ -80,7 +87,8 @@ static inline bool vma_has_granularity_conflict(vma_allocation_type a,
         case VMA_ALLOCATION_TYPE_FREE:
             return false;
         case VMA_ALLOCATION_TYPE_BUFFER:
-            return b == VMA_ALLOCATION_TYPE_IMAGE || b == VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+            return b == VMA_ALLOCATION_TYPE_IMAGE ||
+                b == VMA_ALLOCATION_TYPE_IMAGE_OPTIMAL;
         case VMA_ALLOCATION_TYPE_IMAGE:
             return b == VMA_ALLOCATION_TYPE_IMAGE ||
                 b == VMA_ALLOCATION_TYPE_IMAGE_LINEAR ||
@@ -97,5 +105,7 @@ static inline bool vma_has_granularity_conflict(vma_allocation_type a,
 typedef unsigned char vma_byte;
 
 typedef struct vma_block_vector VMA_VECTOR(vma_block) vma_block_vector;
+typedef struct vma_allocation_vector VMA_VECTOR(vma_allocation)
+    vma_allocation_vector;
 
 #endif

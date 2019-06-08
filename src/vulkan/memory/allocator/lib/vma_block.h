@@ -16,8 +16,7 @@ typedef struct vma_block_allocation_info {
 
 typedef struct vma_block_chunk {
     uint32_t allocation_id;
-    VkDeviceSize size;
-    VkDeviceSize offset;
+    vma_allocation_segment mem_segment;
     struct vma_block_chunk* prev;
     struct vma_block_chunk* next;
     vma_allocation_type allocation_type;

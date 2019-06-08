@@ -17,7 +17,7 @@
 #define vma_vector_init(pv) (void) (                                           \
     (pv)->cap = 0,                                                             \
     (pv)->size = 0,                                                            \
-    (pv)->data = 0 NULL                                                        \
+    (pv)->data = NULL                                                          \
 )
 
 #define vma_vector_destroy(pv) free((pv)->data)
@@ -92,13 +92,11 @@ static inline size_t vma_vector_growsize_(size_t value) {
     vma_vector_reserve_internal_(pv,                                           \
         vma_vector_max_(min_cap, VMA_VECTOR_MINCAP_))
 
-#define vma_vector_reserve_internal_(pv, min_cap) (                            \
-    (min_cap) <= (pv)->cap ((min_cap) <= vma_vector_max_cap_(pv) &&            \
-        vma_vector_realloc_(pv,                                                \
-            vma_vector_between_(vma_vector_growsize_((pv)->cap),               \
-                min_cap, vma_vector_max_cap_(pv))                              \
-        )                                                                      \
-    )                                                                          \
+#define vma_vector_reserve_internal_(pv, min_cap) ((min_cap) <= (pv)->cap || ( \
+    (min_cap) <= vma_vector_max_cap_(pv) &&                                    \
+    vma_vector_realloc_(pv,                                                    \
+        vma_vector_between_(vma_vector_growsize_((pv)->cap), min_cap,          \
+        vma_vector_max_cap_(pv))))                                             \
 )
 
 #define vma_vector_shrink_to_fit(pv) (void)                                    \
