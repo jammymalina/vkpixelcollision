@@ -43,7 +43,7 @@ bool vma_block_init(vma_block* block) {
     }
 
     block->head = mem_alloc(sizeof(vma_block_chunk));
-    CHECK_ALLOC(block->head, "Allocation of vma_block_chunk failed");
+    CHECK_ALLOC_BOOL(block->head, "Allocation of vma_block_chunk failed");
 
     vma_block_chunk* head = block->head;
     head->allocation_id = block->next_block_id++;
@@ -142,12 +142,49 @@ static inline vma_block_chunk* vma_block_chunk_find_best_fit(
     return best_fit;
 }
 
+static inline bool vma_block_split_chunk(vma_block* block,
+    vma_block_chunk* chunk, VkDeviceSize aligned_size, VkDeviceSize size,
+    VkDeviceSize offset)
+{
+    vma_block_chunk* new_chunk = mem_alloc(sizeof(vma_block_chunk));
+    CHECK_ALLOC_BOOL(new_chunk, "Unable to allocate new block chunk");
+
+    vma_block_chunk* next = chunk->next;
+
+    new_chunk->allocation_id = block->next_block_id++;
+    new_chunk->prev = chunk;
+    chunk->next = new_chunk;
+
+    new_chunk->next = next;
+    if (next) {
+        next->prev = new_chunk;
+    }
+
+    new_chunk->size = chunk->size - aligned_size;
+    new_chunk->offset = offset + size;
+    new_chunk->allocation_type = VMA_ALLOCATION_TYPE_FREE;
+
+    return true;
+}
+
 bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
     const vma_block_allocation_info* block_alloc_info)
 {
     const VkDeviceSize free_size = block->size - block->allocated;
     if (free_size < block_alloc_info->size) {
         return false;
+    }
+
+    const vma_block_chunk* best_fit = vma_block_chunk_find_best_fit(block,
+        block_alloc_info);
+    if (!best_fit) {
+        return false;
+    }
+
+    if (best_fit->size > block_alloc_info->size) {
+        bool split_status = vma_block_split_chunk(block, best_fit, aligned_size,
+            block_alloc_info->size, offset);
+
     }
 
     return true;

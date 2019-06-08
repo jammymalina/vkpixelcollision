@@ -16,6 +16,15 @@
         }                                          \
     } while (0)
 
+#define CHECK_ALLOC_BOOL(x, s)                     \
+    do {                                           \
+        if ((x) == NULL) {                         \
+            SDL_OutOfMemory();                     \
+            log_error("%s: %s", s, #x " == NULL"); \
+            return false;                          \
+        }                                          \
+    } while (0)
+
 #define ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
 #define ALIGN_MEM(x, a) ((((uintptr_t) (x)) + ((a) - 1) ) & ~(((uintptr_t) (a)) - 1))
 

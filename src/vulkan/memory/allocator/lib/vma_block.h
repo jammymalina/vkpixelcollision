@@ -47,9 +47,8 @@ static inline bool vma_block_is_host_visible(const vma_block* block) {
 
 bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
     const vma_block_allocation_info* block_alloc_info);
-
 void vma_block_free_allocation(vma_block* block, vma_allocation* allocation);
-void vma_block_print(const vma_block* block);
 
+void vma_block_print_json(const vma_block* block);
 
 #endif
