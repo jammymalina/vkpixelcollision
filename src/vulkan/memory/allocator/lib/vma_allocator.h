@@ -44,6 +44,7 @@ bool vma_allocator_free_allocation(vma_allocator* allocator,
     const vma_allocation* allocation);
 
 void vma_allocator_empty_garbage(vma_allocator* allocator);
+void vma_allocator_empty_all_garbage(vma_allocator* allocator);
 
 void vma_allocator_print_json(const vma_allocator* allocator);
 

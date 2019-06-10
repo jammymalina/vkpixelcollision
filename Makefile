@@ -1,9 +1,10 @@
 TARGET   = vulkanapp
 
 CC       = gcc
+DEFINES  = -DVK_NO_PROTOTYPES -D_XOPEN_SOURCE=700 -DDEBUG
 # compiling flags here
-# CFLAGS = -std=c11 -flto -O3 -march=native -DVK_NO_PROTOTYPES
-CFLAGS = -std=c11 -Wall -g3 -DDEBUG -DVK_NO_PROTOTYPES
+# CFLAGS = -std=c11 -flto -O3 -march=native
+CFLAGS = -std=c11 -Wall -g3
 
 LINKER   = gcc -o
 # linking flags here
@@ -32,8 +33,6 @@ OBJECTS         := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 SHADER_OBJECTS  := $(SHADER_SOURCES:$(SHADER_SRC_DIR)/%=$(SHADER_OBJ_DIR)/%.svm)
 
 rm       = rm -rf
-
-DEFINES :=
 
 default: $(BINDIR)/$(TARGET)
 all: default

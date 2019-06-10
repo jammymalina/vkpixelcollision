@@ -80,7 +80,7 @@ void vma_block_destroy(vma_block* block) {
     mem_free(current);
 }
 
-static inline vma_allocation_segment vma_block_chunk_find_best_fit(
+static vma_allocation_segment vma_block_chunk_find_best_fit(
     const vma_block* block, vma_block_chunk **best_fit_chunk,
     const vma_block_allocation_info* block_alloc_info)
 {
@@ -150,7 +150,7 @@ static inline vma_allocation_segment vma_block_chunk_find_best_fit(
     return new_mem_seg;
 }
 
-static inline bool vma_block_split_chunk(vma_block* block,
+static bool vma_block_split_chunk(vma_block* block,
     vma_block_chunk* chunk, VkDeviceSize size,
     const vma_allocation_segment* mem_seg)
 {

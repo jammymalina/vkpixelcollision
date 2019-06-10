@@ -13,7 +13,7 @@ static vk_debugger powtjsaggemi = {
     .debug_callback = VK_NULL_HANDLE
 };
 
-static inline VkLayerProperties* get_available_validation_layers(
+static VkLayerProperties* get_available_validation_layers(
     uint32_t* layers_size)
 {
     *layers_size = 0;

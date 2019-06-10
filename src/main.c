@@ -1,33 +1,39 @@
-#include "./app_window/window.h"
-
 #include <unistd.h>
+
+#include "./app/vk_app.h"
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
-#include "./vulkan/memory/allocator/lib/vma_vector.h"
 
 #define MS_PER_UPDATE 16
 
 int main(int argc, char* args[]) {
-    app_window_config window_config = {
-        .title = "Collision app",
-        .width = 800,
-        .height = 600
-    };
-    app_window window = create_window(&window_config);
-    rendering_context ctx = get_rendering_context(&window);
+    vk_app app;
 
-    log_info("Window size: %d %d", window.width, window.height);
-    log_info("Rendering context size: %d %d", ctx.width, ctx.height);
-    log_info("Screen BPP: %d", SDL_BITSPERPIXEL(window.mode.format));
-    log_info("Number of frames: %u", ctx.swapchain.image_count);
+    vk_app_create_info app_info = {
+        .name = "pixelcollision",
+        .window_config = {
+            .title = "Pixel collision",
+            .width = 800,
+            .height = 600,
+            .fullscreen = false
+        }
+    };
+    vk_app_init(&app, &app_info);
+
+    log_info("Executable file path: %s", app.exe_filepath);
+    log_info("Executable file directory: %s", app.exe_directory);
+    log_info("Window size: %d %d", app.window.width, app.window.height);
+    log_info("Rendering context size: %d %d", app.ctx.width, app.ctx.height);
+    log_info("Screen BPP: %d", SDL_BITSPERPIXEL(app.window.mode.format));
+    log_info("Number of frames: %u", app.ctx.swapchain.image_count);
 
     vma_allocator_create_info allocator_info = {
         .desired_device_local_memory_MB = 32,
         .desired_host_visible_memory_MB = 16,
         .min_blocks_size = 30,
         .min_garbage_size = 20,
-        .number_of_frames = ctx.swapchain.image_count,
-        .buffer_image_granularity = ctx.gpu.props.limits.bufferImageGranularity
+        .number_of_frames = app.ctx.swapchain.image_count,
+        .buffer_image_granularity = app.ctx.gpu.props.limits.bufferImageGranularity
     };
     create_vma_allocator(&allocator_info);
 
@@ -64,6 +70,6 @@ int main(int argc, char* args[]) {
     }
 
     destroy_vma_allocator();
-    destroy_rendering_context(&ctx);
-    destroy_window(&window);
+
+    vk_app_destroy(&app);
 }

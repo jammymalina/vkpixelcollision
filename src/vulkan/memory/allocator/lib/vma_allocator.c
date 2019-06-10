@@ -72,8 +72,36 @@ static inline void vma_allocator_blocks_destroy(vma_allocator* allocator) {
     }
 }
 
+static void vma_allocator_remove_empty_blocks(vma_allocator *allocator,
+    const vma_allocation_vector* garbage_alloc_vec)
+{
+    vma_allocation allocation;
+    vma_vector_foreach(allocation, garbage_alloc_vec) {
+        vma_block_free_allocation(allocation.block, &allocation);
+
+        if (allocation.block->allocated == 0) {
+            vma_block_vector* blocks =
+                &allocator->blocks[allocation.block->memory_type_index];
+            ssize_t block_remove_idx = -1;
+            vma_vector_index_of(blocks, allocation.block, &block_remove_idx);
+            vma_vector_remove_noshrink(blocks, block_remove_idx);
+        }
+        vma_block_destroy(allocation.block);
+        allocation.block = NULL;
+    }
+}
+
+static inline void vma_allocator_empty_garbage_idx(vma_allocator* allocator, int
+    garbage_index)
+{
+    vma_allocation_vector* garbage_alloc_vec =
+        &allocator->garbage[garbage_index];
+    vma_allocator_remove_empty_blocks(allocator, garbage_alloc_vec);
+    garbage_alloc_vec->size = 0;
+}
+
 static inline void vma_allocator_garbage_destroy(vma_allocator* allocator) {
-    vma_allocator_empty_garbage(allocator);
+    vma_allocator_empty_all_garbage(allocator);
     if (allocator->garbage) {
         for (size_t i = 0; i < allocator->number_of_frames; ++i) {
             vma_vector_destroy(&allocator->garbage[i]);
@@ -81,6 +109,7 @@ static inline void vma_allocator_garbage_destroy(vma_allocator* allocator) {
         mem_free(allocator->garbage);
     }
 }
+
 
 void vma_allocator_destroy(vma_allocator* allocator) {
     vma_allocator_blocks_destroy(allocator);
@@ -125,7 +154,7 @@ static inline bool vma_allocator_allocate_new_block(vma_allocator* allocator,
     return vma_block_allocate(block, alloc, &block_alloc_info);
 }
 
-static inline int vma_allocator_allocate_existing_block(vma_allocator*
+static int vma_allocator_allocate_existing_block(vma_allocator*
     allocator, vma_allocation* alloc, const vma_allocation_create_info*
     alloc_info, uint32_t memory_type_index)
 {
@@ -178,33 +207,16 @@ bool vma_allocator_free_allocation(vma_allocator* allocator,
     return status;
 }
 
-static inline void vma_allocator_remove_empty_blocks(vma_allocator *allocator,
-    const vma_allocation_vector* garbage_alloc_vec)
-{
-    vma_allocation allocation;
-    vma_vector_foreach(allocation, garbage_alloc_vec) {
-        vma_block_free_allocation(allocation.block, &allocation);
-
-        if (allocation.block->allocated == 0) {
-            vma_block_vector* blocks =
-                &allocator->blocks[allocation.block->memory_type_index];
-            ssize_t block_remove_idx = -1;
-            vma_vector_index_of(blocks, allocation.block, &block_remove_idx);
-            vma_vector_remove_noshrink(blocks, block_remove_idx);
-        }
-        vma_block_destroy(allocation.block);
-        allocation.block = NULL;
-    }
-}
-
 void vma_allocator_empty_garbage(vma_allocator* allocator) {
     allocator->garbage_index = (allocator->garbage_index + 1) %
         allocator->number_of_frames;
+    vma_allocator_empty_garbage_idx(allocator, allocator->garbage_index);
+}
 
-    vma_allocation_vector* garbage_alloc_vec =
-        &allocator->garbage[allocator->garbage_index];
-    vma_allocator_remove_empty_blocks(allocator, garbage_alloc_vec);
-    garbage_alloc_vec->size = 0;
+void vma_allocator_empty_all_garbage(vma_allocator* allocator) {
+    for (int i = 0; i < allocator->number_of_frames; ++i) {
+        vma_allocator_empty_garbage_idx(allocator, i);
+    }
 }
 
 void vma_allocator_print_json(const vma_allocator* allocator) {
