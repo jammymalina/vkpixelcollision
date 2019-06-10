@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include "./app/vk_app.h"
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
@@ -21,7 +19,6 @@ int main(int argc, char* args[]) {
     vk_app_init(&app, &app_info);
 
     log_info("Executable file path: %s", app.exe_filepath);
-    log_info("Executable file directory: %s", app.exe_directory);
     log_info("Window size: %d %d", app.window.width, app.window.height);
     log_info("Rendering context size: %d %d", app.ctx.width, app.ctx.height);
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(app.window.mode.format));
@@ -33,7 +30,8 @@ int main(int argc, char* args[]) {
         .min_blocks_size = 30,
         .min_garbage_size = 20,
         .number_of_frames = app.ctx.swapchain.image_count,
-        .buffer_image_granularity = app.ctx.gpu.props.limits.bufferImageGranularity
+        .buffer_image_granularity =
+            app.gpu.props.limits.bufferImageGranularity
     };
     create_vma_allocator(&allocator_info);
 
@@ -64,7 +62,7 @@ int main(int argc, char* args[]) {
         }
 
         while (lag >= MS_PER_UPDATE) {
-            double delta = lag / MS_PER_UPDATE;
+            // double delta = lag / MS_PER_UPDATE;
             lag -= MS_PER_UPDATE;
         }
     }

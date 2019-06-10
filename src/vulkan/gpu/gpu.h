@@ -34,9 +34,9 @@ typedef struct gpu_info {
 } gpu_info;
 
 void init_gpu_info(gpu_info* gpu);
-void init_gpu_info_props(gpu_info* gpu, VkPhysicalDevice device,
+void gpu_info_props_init(gpu_info* gpu, VkPhysicalDevice device,
     VkSurfaceKHR surface);
-void init_gpu_device(gpu_info* gpu, VkSurfaceKHR surface);
+void gpu_device_init(gpu_info* gpu, VkSurfaceKHR surface);
 
 bool check_desired_extensions(const gpu_info* gpu,
     const char* const desired_extensions[], size_t desired_extensions_size);

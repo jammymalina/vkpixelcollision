@@ -1,8 +1,11 @@
 #ifndef VULKAN_TOOLS_H
 #define VULKAN_TOOLS_H
 
+#include <SDL2/SDL_vulkan.h>
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
+
+#include "../../logger/logger.h"
 
 #define CHECK_VK(x)                                        \
     do {                                                   \
@@ -39,6 +42,28 @@
             return false;                                  \
         }                                                  \
     } while (0)
+
+static inline void load_vulkan_library() {
+    if (SDL_Vulkan_LoadLibrary(NULL) != 0) {
+        log_error("Error while loading Vulkan library: %s", SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+}
+
+static inline void unload_vulkan_library() {
+    SDL_Vulkan_UnloadLibrary();
+}
+
+static inline PFN_vkGetInstanceProcAddr retrieve_vulkan_loading_function() {
+    PFN_vkGetInstanceProcAddr vk_get_proc =
+        SDL_Vulkan_GetVkGetInstanceProcAddr();
+    if(!vk_get_proc) {
+        log_error("SDL_Vulkan_GetVkGetInstanceProcAddr error: %s",
+            SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+    return vk_get_proc;
+}
 
 const char *vulkan_result_to_string(VkResult result);
 

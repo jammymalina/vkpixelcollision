@@ -39,11 +39,3 @@ void vk_app_window_destroy(vk_app_window* window) {
     window->handle = NULL;
     SDL_Quit();
 }
-
-rendering_context get_rendering_context(const vk_app_window* window) {
-    rendering_context ctx = { 0 };
-
-    init_rendering_context(&ctx, window->handle);
-
-    return ctx;
-}

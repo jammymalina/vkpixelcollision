@@ -37,7 +37,7 @@ bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size,
 
     for (size_t i = 0; i < num_physical_devices; ++i) {
         init_gpu_info(&gpus[i]);
-        init_gpu_info_props(&gpus[i], physical_devices[i], surface);
+        gpu_info_props_init(&gpus[i], physical_devices[i], surface);
     }
 
     mem_free(physical_devices);
@@ -73,7 +73,7 @@ gpu_info select_gpu(VkInstance instance, VkSurfaceKHR surface) {
         exit(EXIT_FAILURE);
     }
 
-    gpu_info* gpus = mem_alloc(gpus_size*  sizeof(gpu_info));
+    gpu_info* gpus = mem_alloc(gpus_size * sizeof(gpu_info));
     CHECK_ALLOC(gpus, "Unable to allocate space for gpus (physical devices)");
 
     enumerate_graphical_physical_devices(gpus, &gpus_size, instance, surface);

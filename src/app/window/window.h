@@ -24,6 +24,4 @@ void vk_app_window_init(vk_app_window* window, const vk_app_window_create_info*
     config);
 void vk_app_window_destroy(vk_app_window* window);
 
-rendering_context get_rendering_context(const vk_app_window* window);
-
 #endif
