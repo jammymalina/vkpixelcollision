@@ -88,10 +88,10 @@ gpu_info select_gpu(VkInstance instance, VkSurfaceKHR surface) {
     }
 
     for (size_t i = 0; i < index; ++i) {
-        destroy_gpu_info(&gpus[i]);
+        gpu_info_destroy(&gpus[i]);
     }
     for (size_t i = index + 1; i < gpus_size; ++i) {
-        destroy_gpu_info(&gpus[i]);
+        gpu_info_destroy(&gpus[i]);
     }
 
     gpu_info gpu = gpus[index];

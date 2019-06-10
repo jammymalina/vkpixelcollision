@@ -301,7 +301,7 @@ int default_rate_gpu(const gpu_info *gpu) {
     return score;
 }
 
-void destroy_gpu_info(gpu_info *gpu) {
+void gpu_info_destroy(gpu_info *gpu) {
     if (gpu->queue_family_props) {
         mem_free(gpu->queue_family_props);
         gpu->queue_family_props = NULL;

@@ -4,9 +4,11 @@
 #include <stdlib.h>
 
 #include "../../logger/logger.h"
+#include "../../vulkan/tools/tools.h"
 #include "../../vulkan/functions/functions.h"
 
-static inline VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window* w) {
+static inline VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window* w)
+{
     VkSurfaceKHR surface;
     if (!SDL_Vulkan_CreateSurface(w, instance, &surface)) {
         log_error("SDL_Vulkan_CreateSurface(): %s", SDL_GetError());
@@ -24,6 +26,8 @@ void rendering_context_init(rendering_context* ctx) {
     ctx->surface = VK_NULL_HANDLE;
     vk_swapchain empty_swapchain = { 0 };
     ctx->swapchain = empty_swapchain;
+    ctx->swapchain_images = NULL;
+    render_pass_init_empty(&ctx->render_pass);
 }
 
 void rendering_context_init_surface(rendering_context* ctx, SDL_Window* w) {
@@ -59,11 +63,34 @@ void rendering_context_init_swapchain(rendering_context* ctx) {
         exit(EXIT_FAILURE);
     }
     VkExtent2D dimensions = { .width = ctx->width, .height = ctx->height };
-    ctx->swapchain = create_swapchain(ctx->gpu, ctx->surface, &dimensions);
+    vk_swapchain_create_info sw_info = {
+        .gpu = ctx->gpu,
+        .dimensions = dimensions,
+        .surface = ctx->surface
+    };
+    if (!swapchain_init(&ctx->swapchain, &sw_info)) {
+        log_error("Unable to create swapchain");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void rendering_context_init_render_pass(rendering_context *ctx) {
+    if (!ctx->gpu) {
+        log_info("Rendering context gpu pointer doesn't point to valid gpu");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!render_pass_init_swapchain_default_2d(&ctx->render_pass,
+        ctx->gpu->device, ctx->swapchain.surface_format.format))
+    {
+        log_error("Unable to create render pass");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void rendering_context_destroy(rendering_context* ctx) {
-    destroy_swapchain(&ctx->swapchain, ctx->gpu->device);
+    render_pass_destroy(&ctx->render_pass);
+    swapchain_destroy(&ctx->swapchain);
     vkDestroySurfaceKHR(ctx->instance, ctx->surface, NULL);
     rendering_context_init(ctx);
 }

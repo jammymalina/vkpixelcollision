@@ -68,7 +68,7 @@ static inline void vma_allocator_blocks_destroy(vma_allocator* allocator) {
             if (!block) { continue; }
             vma_block_destroy(block);
         }
-        vma_vector_destroy(pv);
+        vma_vector_clear(pv);
     }
 }
 
@@ -101,13 +101,17 @@ static inline void vma_allocator_empty_garbage_idx(vma_allocator* allocator, int
 }
 
 static inline void vma_allocator_garbage_destroy(vma_allocator* allocator) {
+    if (!allocator->garbage) {
+        return;
+    }
     vma_allocator_empty_all_garbage(allocator);
     if (allocator->garbage) {
         for (size_t i = 0; i < allocator->number_of_frames; ++i) {
-            vma_vector_destroy(&allocator->garbage[i]);
+            vma_vector_clear(&allocator->garbage[i]);
         }
         mem_free(allocator->garbage);
     }
+    allocator->garbage = NULL;
 }
 
 

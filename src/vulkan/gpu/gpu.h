@@ -53,7 +53,7 @@ VkFormat retrieve_supported_format(const gpu_info* gpu, VkFormat*
 
 int default_rate_gpu(const gpu_info* gpu);
 
-void destroy_gpu_info(gpu_info* gpu);
+void gpu_info_destroy(gpu_info* gpu);
 
 void destroy_device(VkDevice device);
 
