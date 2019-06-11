@@ -44,7 +44,7 @@ VkInstance create_instance(SDL_Window* w) {
         if (!check_validation_layers(validation_layer_names,
             validation_layers_size))
         {
-            log_error("Unavailable validation layers");
+            log_warning("Unavailable validation layers");
             validation_layers_size = 0;
         }
 

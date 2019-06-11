@@ -85,7 +85,7 @@ static inline bool are_validation_layers_available(const char** names,
 
 bool check_validation_layers(const char** names, uint32_t names_size) {
     uint32_t layers_size = 0;
-    VkLayerProperties *available_layers =
+    VkLayerProperties* available_layers =
         get_available_validation_layers(&layers_size);
     bool success = are_validation_layers_available(names, names_size,
         available_layers, layers_size);
