@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "../../logger/logger.h"
+#include "../../memory/memory.h"
 #include "../../vulkan/tools/tools.h"
 #include "../../vulkan/functions/functions.h"
 
@@ -26,7 +27,7 @@ void rendering_context_init(rendering_context* ctx) {
     ctx->surface = VK_NULL_HANDLE;
     vk_swapchain empty_swapchain = { 0 };
     ctx->swapchain = empty_swapchain;
-    ctx->swapchain_images = NULL;
+    ctx->framebuffers = NULL;
     render_pass_init_empty(&ctx->render_pass);
 }
 
@@ -88,7 +89,28 @@ void rendering_context_init_render_pass(rendering_context *ctx) {
     }
 }
 
+void rendering_context_init_framebuffers(rendering_context* ctx) {
+    if (!ctx->render_pass.handle || !ctx->gpu->device) {
+        log_info("Unable to create framebuffers - render pass might not be "
+            "initialized yet");
+        exit(EXIT_FAILURE);
+    }
+    if (vk_framebuffer_init_from_swapchain(&ctx->framebuffers, &ctx->swapchain,
+        ctx->render_pass.handle) != ctx->swapchain.image_count)
+    {
+        log_error("Unable to create framebuffers from swapchain");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void rendering_context_destroy(rendering_context* ctx) {
+    if (ctx->framebuffers) {
+        for (size_t i = 0; i < ctx->swapchain.image_count; ++i) {
+            vk_framebuffer_destroy(&ctx->framebuffers[i]);
+        }
+        mem_free(ctx->framebuffers);
+        ctx->framebuffers = NULL;
+    }
     render_pass_destroy(&ctx->render_pass);
     swapchain_destroy(&ctx->swapchain);
     vkDestroySurfaceKHR(ctx->instance, ctx->surface, NULL);

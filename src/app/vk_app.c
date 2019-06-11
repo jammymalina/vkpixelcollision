@@ -60,6 +60,7 @@ static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info
 
 static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
     rendering_context_init_render_pass(&app->ctx);
+    rendering_context_init_framebuffers(&app->ctx);
 }
 
 static inline void vk_app_create_window(vk_app* app, const vk_app_create_info

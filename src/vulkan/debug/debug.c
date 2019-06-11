@@ -107,6 +107,7 @@ static inline VkDebugReportCallbackEXT setup_debug_callback(VkInstance instance,
     VkDebugReportCallbackEXT debug_callback;
     CHECK_VK(vkCreateDebugReportCallbackEXT(instance, &debug_callback_info,
         NULL, &debug_callback));
+
     return debug_callback;
 }
 
