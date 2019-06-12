@@ -6,7 +6,8 @@
 #include <vulkan/vulkan.h>
 
 #define DEFAULT_VULKAN_DEBUG_FLAFS \
-    (VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT)
+    (VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | \
+        VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
 
 bool check_validation_layers(const char** names, uint32_t names_size);
 

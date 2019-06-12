@@ -37,9 +37,12 @@ VkInstance create_instance(SDL_Window* w) {
         extension_count += debug_extension_count;
 
         const char* validation_layer_names[] = {
-            "VK_LAYER_LUNARG_standard_validation"
+            "VK_LAYER_LUNARG_standard_validation",
+            "VK_LAYER_VALVE_steam_overlay_64",
+            "VK_LAYER_VALVE_steam_fossilize_64"
         };
-        uint32_t validation_layers_size = 1;
+        uint32_t validation_layers_size =
+            sizeof(validation_layer_names) / sizeof(const char*);
 
         if (!check_validation_layers(validation_layer_names,
             validation_layers_size))

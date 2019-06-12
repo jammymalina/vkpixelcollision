@@ -18,10 +18,12 @@ bool string_copy(char* dest, size_t max_dest_length, const char* src) {
     }
 
     size_t i;
-    for (i = 0; i < max_dest_length - 1 && src[i] != '\0'; ++i) {
+    for (i = 0; i < max_dest_length; ++i) {
         dest[i] = src[i];
+        if (src[i] == '\0') {
+            break;
+        }
     }
-    dest[i] = '\0';
     return src[i] == '\0';
 }
 

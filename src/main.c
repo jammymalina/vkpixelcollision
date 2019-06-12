@@ -26,7 +26,7 @@ int main(int argc, char* args[]) {
     };
     vk_app_init(&app, &app_info);
 
-    log_info("Executable file path: %s", app.exe_filepath);
+    log_info("Executable file path: %s", app.basepath);
     log_info("Window size: %d %d", app.window.width, app.window.height);
     log_info("Rendering context size: %d %d", app.ctx.width, app.ctx.height);
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(app.window.mode.format));

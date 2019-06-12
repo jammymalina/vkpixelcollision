@@ -10,10 +10,8 @@
 #include "../vulkan/instance/instance.h"
 #include "../vulkan/tools/tools.h"
 
-static inline void vk_app_set_exe_filepath(vk_app* app) {
-    if (!path_retrieve_executable_filepath(app->exe_filepath) ||
-        !path_retrieve_executable_dir(app->exe_directory))
-    {
+static inline void vk_app_set_basepath(vk_app* app) {
+    if (!path_retrieve_basepath(app->basepath)) {
         exit(EXIT_FAILURE);
     }
 }
@@ -71,7 +69,7 @@ static inline void vk_app_create_window(vk_app* app, const vk_app_create_info
 }
 
 void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
-    vk_app_set_exe_filepath(app);
+    vk_app_set_basepath(app);
     vk_app_create_window(app, app_info);
     vk_app_init_vulkan(app);
     vk_app_init_rendering_context(app);

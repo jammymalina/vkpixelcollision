@@ -17,8 +17,7 @@ typedef struct vk_app_create_info {
 
 typedef struct vk_app {
     char name[APP_NAME_MAX_SIZE];
-    char exe_filepath[PATH_MAX_SIZE];
-    char exe_directory[PATH_MAX_SIZE];
+    char basepath[PATH_MAX_SIZE];
 
     vk_app_window window;
     rendering_context ctx;

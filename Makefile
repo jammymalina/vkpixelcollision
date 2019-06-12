@@ -1,7 +1,7 @@
 TARGET   = vulkanapp
 
 CC       = gcc
-DEFINES  = -DVK_NO_PROTOTYPES -D_XOPEN_SOURCE=700 -DDEBUG
+DEFINES  = -DVK_NO_PROTOTYPES -DDEBUG
 # compiling flags here
 # CFLAGS = -std=c11 -flto -O3 -march=native
 CFLAGS = -std=c11 -Wall -g3
