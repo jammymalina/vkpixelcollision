@@ -1,7 +1,12 @@
 #ifndef SHADER_TYPES_H
 #define SHADER_TYPES_H
 
+#include <stdint.h>
+
 #include "../../../string/string.h"
+#include "../../../collections/vector.h"
+
+#define SHADER_MAX_NAME_SIZE 256
 
 #define SHADER_TYPES_COUNT 7
 
@@ -24,6 +29,9 @@ typedef enum shader_binding {
 } shader_binding;
 
 typedef struct shader shader;
+typedef struct render_program render_program;
+
+typedef struct shader_vector VECTOR(shader*) shader_vector;
 
 static inline shader_type shader_extension_to_type(const char* extension) {
     if (string_equal(extension, "vert"))

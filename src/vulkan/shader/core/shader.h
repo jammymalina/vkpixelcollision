@@ -7,7 +7,6 @@
 
 #include "./shader_types.h"
 
-#define SHADER_MAX_NAME_SIZE 256
 #define SHADER_MAX_BINDINGS_SIZE 16
 
 typedef struct shader_create_info {
