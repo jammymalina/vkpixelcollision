@@ -29,7 +29,10 @@ typedef enum shader_binding {
 } shader_binding;
 
 typedef struct shader shader;
-typedef struct render_program render_program;
+
+typedef uint64_t pipeline_state_bits;
+typedef struct shader_program shader_program;
+typedef struct pipeline_cache pipeline_cache;
 
 typedef struct shader_vector VECTOR(shader*) shader_vector;
 
