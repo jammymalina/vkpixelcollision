@@ -50,7 +50,7 @@ static inline size_t vma_vector_enforce_size_t_(size_t value) {
 static inline void* vma_vector_reallocdata_(void* ptr, size_t count,
     size_t size, size_t* restrict pcap, size_t* restrict psize)
 {
-    void* n = mem_realloc(ptr, size);
+    void* n = mem_realloc(ptr, count * size);
     if (!n) {
         *pcap |= VMA_VECTOR_FAILFLAG_;
         return ptr;
@@ -108,6 +108,9 @@ static inline size_t vma_vector_growsize_(size_t value) {
     vma_vector_resize_(pv, vma_vector_max_((pv)->size+5, VMA_VECTOR_MINCAP_))  \
 )
 
+#define vma_vector_check_same_ptr_type_(a, b) \
+    (void) ((a) == (b))
+
 #define vma_vector_push(pv, item) (                                            \
     vma_vector_reserve(pv, (pv)->size + 1) && (                                \
         (pv)->data[(pv)->size++] = (item),                                     \
@@ -121,7 +124,8 @@ static inline size_t vma_vector_growsize_(size_t value) {
 #define vma_vector_push_all_internal_(pv, items, count) (                      \
     vma_vector_check_same_ptr_type_((pv)->data, items),                        \
     vma_vector_reserve(pv, (pv)->size + (count)) && (                          \
-        memcpy(&(pv)->data[(pv)->size], items, (count) * sizeof(*(pv)->data)), \
+        mem_copy(&(pv)->data[(pv)->size], items,                               \
+            (count) * sizeof(*(pv)->data)),                                    \
         (pv)->size += (count),                                                 \
         true                                                                   \
     )                                                                          \
@@ -154,7 +158,7 @@ static inline size_t vma_vector_growsize_(size_t value) {
 #define vma_vector_insert_all(pv, index, items, count) (                       \
     vma_vector_check_same_ptr_type_((pv)->data, items),                        \
     vma_vector_insert_hole(pv, index, count) && (                              \
-        memcpy(&(pv)->data[index], items, (count) * sizeof(*(pv)->data)),      \
+        mem_copy(&(pv)->data[index], items, (count) * sizeof(*(pv)->data)),    \
         true                                                                   \
     )                                                                          \
 )
@@ -219,9 +223,9 @@ static inline void vma_vector_move_(char* array, size_t index, size_t count,
 #define vma_vector_remove_slice_noshrink_internal_(pv, index, count)           \
     do {                                                                       \
         if ((index) + (count) < (pv)->size)                                    \
-            memmove(&(pv)->data[index],                                        \
-                    &(pv)->data[(index) + (count)],                            \
-                    ((pv)->size - (index) - (count)) * sizeof(*(pv)->data));   \
+            mem_move(&(pv)->data[index],                                       \
+                &(pv)->data[(index) + (count)],                                \
+                ((pv)->size - (index) - (count)) * sizeof(*(pv)->data));       \
         (pv)->size -= (count);                                                 \
     } while (0)
 
@@ -253,6 +257,12 @@ static inline void vma_vector_move_(char* array, size_t index, size_t count,
         *out = vma_vector_find_idx_ == (pv)->size ? -1 :                       \
             (ssize_t) vma_vector_find_idx_;                                    \
     } while (0)
+
+#define vma_vector_copy(pdst, psrc) (                                          \
+    (vma_vector_init(pdst), vma_vector_clear(pdst), true) &&                   \
+    vma_vector_reserve(pdst, (psrc)->size) &&                                  \
+    vma_vector_insert_all(pdst, 0, (psrc)->data, (psrc)->size)                 \
+)
 
 #define vma_vector_foreach(item, pv)                                           \
     for (size_t vma_vector_idx_##item = 0;                                     \

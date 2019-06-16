@@ -11,7 +11,6 @@
 typedef struct pipeline_state {
     VkPipeline handle;
     pipeline_state_bits state_bits;
-
     gpu_info* gpu;
     size_t counter;
 } pipeline_state;
@@ -27,6 +26,5 @@ VkPipelineMultisampleStateCreateInfo pipeline_state_get_multisample_info(const
     pipeline_state* ps);
 void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
     dynamic_states, size_t* dynamic_states_size);
-
 
 #endif

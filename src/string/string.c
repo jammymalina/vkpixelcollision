@@ -8,7 +8,7 @@ size_t string_length(const char* str) {
     return i;
 }
 
-bool is_empty_string(const char* str) {
+bool string_is_empty(const char* str) {
     return str[0] == '\0';
 }
 
@@ -27,14 +27,95 @@ bool string_copy(char* dest, size_t max_dest_length, const char* src) {
     return src[i] == '\0';
 }
 
+static inline ssize_t string_transform_idx(const char* str, ssize_t idx) {
+    ssize_t result_idx = idx;
+    const size_t str_len = string_length(str);
+    if (idx < 0) {
+        result_idx = str_len + (idx + 1);
+    }
+    if (result_idx < 0) {
+        return -1;
+    }
+
+    return result_idx <= str_len ? result_idx : -1;
+}
+
+bool string_substring_idx(char* dest, const size_t max_dest_length,
+    const char* str, const ssize_t start_index, const ssize_t end_index)
+{
+    string_copy(dest, max_dest_length, "");
+    ssize_t start_idx = string_transform_idx(str, start_index);
+    ssize_t end_idx = string_transform_idx(str, end_index);
+
+    if (start_idx == -1 || end_idx == -1 || start_idx > end_idx) {
+        return false;
+    }
+    size_t ext_len = end_idx - start_idx;
+    if (ext_len >= max_dest_length) {
+        return false;
+    }
+
+    for (size_t dest_idx = 0; dest_idx < ext_len; ++dest_idx) {
+        dest[dest_idx] = str[start_idx + dest_idx];
+    }
+    dest[ext_len] = '\0';
+
+    return true;
+}
+
+ssize_t string_index_of(const char* str, char c) {
+    for (ssize_t i = 0; str[i] != '\0'; ++i) {
+        if (str[i] == c) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+ssize_t string_last_index_of(const char* str, char c) {
+    for (ssize_t i = string_length(str) - 1; i >= 0; --i) {
+        if (str[i] == c) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 bool string_equal(const char* str1, const char* str2) {
     size_t i;
     for (i = 0; str1[i] == str2[i] && str1[i] != '\0' && str2[i] != '\0'; ++i);
     return str1[i] == str2[i];
 }
 
+bool string_starts_with(const char* str, const char* substr) {
+    size_t i;
+    for (i = 0; str[i] == substr[i] && str[i] != '\0' && substr[i] != '\0';
+        ++i);
+    return str[i] == substr[i] || substr[i] == '\0';
+}
+
+bool string_ends_with(const char* str, const char* substr) {
+    if (string_is_empty(substr)) {
+        return true;
+    }
+    if (string_is_empty(str)) {
+        return false;
+    }
+    size_t i = string_length(str) - 1, j = string_length(substr) - 1;
+    while (true) {
+        if (str[i] != substr[j]) {
+            return false;
+        }
+        if (i == 0 || j == 0) {
+            break;
+        }
+        --i, --j;
+    }
+    return j == 0;
+}
+
 bool string_append(char* dest, size_t max_dest_length, const char* src) {
-    if (is_empty_string(src)) {
+    if (string_is_empty(src)) {
         return true;
     }
     if (max_dest_length == 0) {

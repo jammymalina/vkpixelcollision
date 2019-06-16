@@ -2,9 +2,20 @@
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
 
+#include "./collections/hash_string_map.h"
+
 #define MS_PER_UPDATE 16
 
 int main(int argc, char* args[]) {
+    // typedef struct hash_boom_map HASH_STRING_MAP(int) hash_boom_map;
+
+    // hash_boom_map map;
+    // hash_string_map_init(&map, -1);
+    // bool status = hash_string_map_reserve(&map, 1000);
+    // log_info("%ld %ld", hash_string_map_get_capacity(&map),
+    //     hash_string_map_get_size(&map));
+    // hash_string_map_clear(&map);
+
     vk_app app;
 
     vk_app_create_info app_info = {

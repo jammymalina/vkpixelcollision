@@ -52,5 +52,7 @@ void* mem_realloc(void* mem, size_t size);
 void mem_free(void* data);
 void mem_copy(void* dest, const void* src, size_t length);
 void* mem_move(void* dest, const void* src, size_t length);
+int mem_cmp(const void* m1, const void* m2, size_t length);
+void mem_set(void* m1, int value, size_t length);
 
 #endif

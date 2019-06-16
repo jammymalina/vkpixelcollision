@@ -81,7 +81,7 @@ static bool swapchain_init_views(vk_swapchain* sw) {
     sw->views = mem_alloc(sizeof(VkImageView) * sw->image_count);
     CHECK_ALLOC_BOOL(sw->views, "Unable to allocate swapchain images");
 
-    for (size_t i = 0; i < sw->image_count; i++) {
+    for (size_t i = 0; i < sw->image_count; ++i) {
         VkImageViewCreateInfo image_view_info = {
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .pNext = NULL,

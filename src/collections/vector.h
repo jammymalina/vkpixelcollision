@@ -20,7 +20,7 @@
     (pv)->data = NULL                                                          \
 )
 
-#define vector_destroy(pv) free((pv)->data)
+#define vector_destroy(pv) mem_free((pv)->data)
 
 #define vector_clear(pv) (                                                     \
     vector_destroy(pv),                                                        \
@@ -50,7 +50,7 @@ static inline size_t vector_enforce_size_t_(size_t value) {
 static inline void* vector_reallocdata_(void* ptr, size_t count,
     size_t size, size_t* restrict pcap, size_t* restrict psize)
 {
-    void* n = mem_realloc(ptr, size);
+    void* n = mem_realloc(ptr, count * size);
     if (!n) {
         *pcap |= VECTOR_FAILFLAG_;
         return ptr;
@@ -104,9 +104,12 @@ static inline size_t vector_growsize_(size_t value) {
 
 #define vector_autoshrink(pv) (void) (                                         \
     (pv)->cap <= VECTOR_MINCAP_ ||                                             \
-    (pv)->cap < vector_growsize_((pv)->size+5) ||                              \
-    vector_resize_(pv, vector_max_((pv)->size+5, VECTOR_MINCAP_))              \
+    (pv)->cap < vector_growsize_((pv)->size + 5) ||                            \
+    vector_resize_(pv, vector_max_((pv)->size + 5, VECTOR_MINCAP_))            \
 )
+
+#define vector_check_same_ptr_type_(a, b)                                      \
+    (void) ((a) == (b))
 
 #define vector_push(pv, item) (                                                \
     vector_reserve(pv, (pv)->size + 1) && (                                    \
@@ -121,7 +124,8 @@ static inline size_t vector_growsize_(size_t value) {
 #define vector_push_all_internal_(pv, items, count) (                          \
     vector_check_same_ptr_type_((pv)->data, items),                            \
     vector_reserve(pv, (pv)->size + (count)) && (                              \
-        memcpy(&(pv)->data[(pv)->size], items, (count) * sizeof(*(pv)->data)), \
+        mem_copy(&(pv)->data[(pv)->size], items,                               \
+            (count) * sizeof(*(pv)->data)),                                    \
         (pv)->size += (count),                                                 \
         true                                                                   \
     )                                                                          \
@@ -154,7 +158,7 @@ static inline size_t vector_growsize_(size_t value) {
 #define vector_insert_all(pv, index, items, count) (                           \
     vector_check_same_ptr_type_((pv)->data, items),                            \
     vector_insert_hole(pv, index, count) && (                                  \
-        memcpy(&(pv)->data[index], items, (count) * sizeof(*(pv)->data)),      \
+        mem_copy(&(pv)->data[index], items, (count) * sizeof(*(pv)->data)),    \
         true                                                                   \
     )                                                                          \
 )
@@ -202,9 +206,9 @@ static inline void vector_move_(char* array, size_t index, size_t count,
 
 #define vector_move_slice_internal_(pv, index, count, target)                  \
     vector_move_((char *) (pv)->data,                                          \
-        (index) * sizeof((pv)->data[0]),                                       \
-        (count) * sizeof((pv)->data[0]),                                       \
-        (target) * sizeof((pv)->data[0])                                       \
+        (index) * sizeof(*(pv)->data)),                                        \
+        (count) * sizeof(*(pv)->data)),                                        \
+        (target) * sizeof(*(pv)->data))                                        \
     )
 
 #define vector_move(pv, index, target)                                         \
@@ -219,9 +223,9 @@ static inline void vector_move_(char* array, size_t index, size_t count,
 #define vector_remove_slice_noshrink_internal_(pv, index, count)               \
     do {                                                                       \
         if ((index) + (count) < (pv)->size)                                    \
-            memmove(&(pv)->data[index],                                        \
-                    &(pv)->data[(index) + (count)],                            \
-                    ((pv)->size - (index) - (count)) * sizeof(*(pv)->data));   \
+            mem_move(&(pv)->data[index],                                       \
+                &(pv)->data[(index) + (count)],                                \
+                ((pv)->size - (index) - (count)) * sizeof(*(pv)->data));       \
         (pv)->size -= (count);                                                 \
     } while (0)
 
@@ -253,6 +257,12 @@ static inline void vector_move_(char* array, size_t index, size_t count,
         *out = vector_find_idx_ == (pv)->size ? -1 :                           \
             (ssize_t) vector_find_idx_;                                        \
     } while (0)
+
+#define vector_copy(pdst, psrc) (                                              \
+    (vector_init(pdst), vector_clear(pdst), true) &&                           \
+    vector_reserve(pdst, (psrc)->size) &&                                      \
+    vector_insert_all(pdst, 0, (psrc)->data, (psrc)->size)                     \
+)
 
 #define vector_foreach(item, pv)                                               \
     for (size_t vector_idx_##item = 0;                                         \

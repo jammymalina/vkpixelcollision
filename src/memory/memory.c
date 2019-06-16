@@ -21,3 +21,11 @@ void mem_copy(void* dest, const void* src, size_t length) {
 void* mem_move(void* dest, const void* src, size_t length) {
     return SDL_memmove(dest, src, length);
 }
+
+int mem_cmp(const void* m1, const void* m2, size_t length) {
+    return SDL_memcmp(m1, m2, length);
+}
+
+void mem_set(void* m1, int value, size_t length) {
+    SDL_memset(m1, value, length);
+}

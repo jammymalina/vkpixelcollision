@@ -4,6 +4,6 @@
 #include <sys/types.h>
 
 ssize_t file_retrieve_byte_size(const char* filename);
-ssize_t file_read_binary_file(const char* filename, char** data);
+ssize_t file_read_binary(const char* filename, char** data);
 
 #endif
