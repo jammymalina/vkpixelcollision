@@ -45,7 +45,6 @@ bool shader_loader_load_shader(shader* shd, const char* filename,
         .program = (uint32_t*) shader_bytes,
         .program_size = shader_file_size,
     };
-    string_copy(shader_info.name, SHADER_MAX_NAME_SIZE, name);
     bool shader_status = shader_init(shd, &shader_info);
 
     mem_free(shader_bytes);

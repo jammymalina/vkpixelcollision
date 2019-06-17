@@ -6,10 +6,6 @@
 #include "./shader_types.h"
 
 typedef struct shader_program {
-    char name[SHADER_MAX_NAME_SIZE];
-
-    shader_vector shaders;
-
     VkDevice device;
     VkPipelineLayout pipeline_layout;
     VkDescriptorSetLayout descriptor_set_layout;

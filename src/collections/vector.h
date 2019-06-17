@@ -260,7 +260,7 @@ static inline void vector_move_(char* array, size_t index, size_t count,
 
 #define vector_copy(pdst, psrc) (                                              \
     (vector_init(pdst), vector_clear(pdst), true) &&                           \
-    vector_reserve(pdst, (psrc)->size) &&                                      \
+    vector_reserve(pdst, (psrc)->cap) &&                                       \
     vector_insert_all(pdst, 0, (psrc)->data, (psrc)->size)                     \
 )
 

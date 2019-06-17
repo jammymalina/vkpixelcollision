@@ -5,8 +5,9 @@
 
 #include "../../../string/string.h"
 #include "../../../collections/vector.h"
+#include "../../../collections/hash_string_map.h"
 
-#define SHADER_MAX_NAME_SIZE 256
+#define SHADER_MAX_NAME_SIZE HASH_KEY_MAX_SIZE
 
 #define SHADER_TYPES_COUNT 7
 

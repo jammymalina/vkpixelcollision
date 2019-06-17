@@ -4,7 +4,6 @@
 #include "../../functions/functions.h"
 
 void shader_program_init_empty(shader_program* prog) {
-    string_copy(prog->name, SHADER_MAX_NAME_SIZE, "");
     prog->device = VK_NULL_HANDLE;
     prog->pipeline_layout = VK_NULL_HANDLE;
     prog->descriptor_set_layout = VK_NULL_HANDLE;

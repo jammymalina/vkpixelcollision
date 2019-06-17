@@ -1,4 +1,4 @@
-#ifndef SHADER_LOADER_H
+#ifndef SHADER_LOADER_Hx
 #define SHADER_LOADER_H
 
 #include "../../gpu/gpu.h"

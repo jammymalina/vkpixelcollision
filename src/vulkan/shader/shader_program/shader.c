@@ -5,7 +5,6 @@
 
 
 void shader_init_empty(shader* shd) {
-    string_copy(shd->name, SHADER_MAX_NAME_SIZE, "");
     shd->module = VK_NULL_HANDLE;
     shd->device = VK_NULL_HANDLE;
     shd->type = SHADER_TYPE_UNDEFINED;
@@ -28,7 +27,7 @@ static VkShaderModule shader_create_vk_module(const shader_create_info
     const VkResult module_status = vkCreateShaderModule(shader_info->device,
         &module_info, NULL, &module);
     if (module_status != VK_SUCCESS) {
-        log_error("Unable to create shader module: %s", shader_info->name);
+        log_error("Unable to create shader module");
         return VK_NULL_HANDLE;
     }
 
@@ -38,13 +37,12 @@ static VkShaderModule shader_create_vk_module(const shader_create_info
 bool shader_init(shader* shd, const shader_create_info* shader_info) {
     shader_init_empty(shd);
 
-    string_copy(shd->name, SHADER_MAX_NAME_SIZE, shader_info->name);
     shd->type = shader_info->type;
     shd->device = shader_info->device;
 
     const VkShaderModule module = shader_create_vk_module(shader_info);
     if (!module) {
-        log_error("Unable to create shader: %s", shd->name);
+        log_error("Unable to create shader");
         return false;
     }
 

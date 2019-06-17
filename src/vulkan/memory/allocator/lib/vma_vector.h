@@ -260,7 +260,7 @@ static inline void vma_vector_move_(char* array, size_t index, size_t count,
 
 #define vma_vector_copy(pdst, psrc) (                                          \
     (vma_vector_init(pdst), vma_vector_clear(pdst), true) &&                   \
-    vma_vector_reserve(pdst, (psrc)->size) &&                                  \
+    vma_vector_reserve(pdst, (psrc)->cap) &&                                   \
     vma_vector_insert_all(pdst, 0, (psrc)->data, (psrc)->size)                 \
 )
 

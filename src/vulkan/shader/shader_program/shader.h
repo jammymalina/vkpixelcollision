@@ -10,7 +10,6 @@
 #define SHADER_MAX_BINDINGS_SIZE 16
 
 typedef struct shader_create_info {
-    char name[SHADER_MAX_NAME_SIZE];
     shader_type type;
     uint32_t* program;
     size_t program_size;
@@ -19,7 +18,6 @@ typedef struct shader_create_info {
 } shader_create_info;
 
 typedef struct shader {
-    char name[SHADER_MAX_NAME_SIZE];
     shader_type type;
 
     VkShaderModule module;

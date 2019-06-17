@@ -7,14 +7,14 @@
 #define MS_PER_UPDATE 16
 
 int main(int argc, char* args[]) {
-    // typedef struct hash_boom_map HASH_STRING_MAP(int) hash_boom_map;
+    typedef struct hash_boom_map HASH_STRING_MAP(int) hash_boom_map;
 
-    // hash_boom_map map;
-    // hash_string_map_init(&map, -1);
-    // bool status = hash_string_map_reserve(&map, 1000);
-    // log_info("%ld %ld", hash_string_map_get_capacity(&map),
-    //     hash_string_map_get_size(&map));
-    // hash_string_map_clear(&map);
+    hash_boom_map map;
+    hash_string_map_init(&map);
+    bool status = hash_string_map_reserve(&map, 1000);
+    log_info("%ld %ld", hash_string_map_get_capacity(&map),
+        hash_string_map_get_size(&map));
+    hash_string_map_clear(&map);
 
     vk_app app;
 
