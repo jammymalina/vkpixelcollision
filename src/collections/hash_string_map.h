@@ -109,47 +109,50 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
     return (3 * size) > (capacity << 1);
 }
 
-#define hash_string_map_set_item_idx_(phm, idx, key, value) (void) ({          \
-    hash_string_key_set_((phm)->nodes.data[idx].key, key);                     \
-    (phm)->nodes.data[idx].value = value;                                      \
+#define hash_string_map_set_item_idx_(phm, idx, map_key, map_value) (void) ({  \
+    hash_string_key_set_((phm)->nodes.data[idx].key, map_key);                 \
+    (phm)->nodes.data[idx].value = map_value;                                  \
 })
 
-#define hash_string_map_find_internal_(phm, key, pidx) ({                      \
+#define hash_string_map_find_internal_(phm, map_key, pidx) ({                  \
     size_t _n = hash_string_map_get_capacity(phm);                             \
-    size_t _idx = hash_string_1((key)) % _n;                                   \
+    size_t _find_idx = hash_string_1((map_key)) % _n;                          \
     size_t _i = 1;                                                             \
     *(pidx) = -1;                                                              \
     bool _node_found = false;                                                  \
     while (true) {                                                             \
-        if (hash_string_key_is_empty_((phm)->nodes.data[_idx].key)) {          \
+        if (hash_string_key_is_empty_((phm)->nodes.data[_find_idx].key)) {     \
             if (*(pidx) == -1) {                                               \
-                *(pidx) = _idx;                                                \
+                *(pidx) = _find_idx;                                           \
             }                                                                  \
             break;                                                             \
         }                                                                      \
-        if (hash_string_key_is_avail_((phm)->nodes.data[_idx].key)) {          \
+        if (hash_string_key_is_avail_((phm)->nodes.data[_find_idx].key)) {     \
             if (*(pidx) == -1) {                                               \
-                *(pidx) = _idx;                                                \
+                *(pidx) = _find_idx;                                           \
             }                                                                  \
         } else {                                                               \
-            if (hash_string_key_equal_((phm)->nodes.data[_idx].key, key)) {    \
+            if (hash_string_key_equal_((phm)->nodes.data[_find_idx].key,       \
+                map_key))                                                      \
+            {                                                                  \
                 _node_found = true;                                            \
                 break;                                                         \
             }                                                                  \
         }                                                                      \
-        _idx = (_idx + _i * hash_string_2(key)) % _n;                          \
+        _find_idx = (_find_idx + _i * hash_string_2(map_key)) % _n;            \
         ++_i;                                                                  \
     }                                                                          \
     _node_found;                                                               \
 })
 
-#define hash_string_map_add_nogrow(phm, key, value) ({                         \
-    ssize_t _idx = -1;                                                         \
-    bool _node_found = hash_string_map_find_internal_(phm, key, &_idx);        \
+#define hash_string_map_add_nogrow(phm, map_key, map_val) ({                   \
+    ssize_t _add_ng_idx = -1;                                                  \
+    bool _node_found = hash_string_map_find_internal_(phm, map_key,            \
+        &_add_ng_idx);                                                         \
     if (_node_found) {                                                         \
-        (phm)->nodes.data[_idx].value = value;                                 \
+        (phm)->nodes.data[_add_ng_idx].value = map_val;                        \
     } else {                                                                   \
-        hash_string_map_set_item_idx_(phm, _idx, key, value);                  \
+        hash_string_map_set_item_idx_(phm, _add_ng_idx, map_key, map_val);     \
         ++(phm)->size;                                                         \
     }                                                                          \
     true;                                                                      \
@@ -191,44 +194,48 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
     _res_status;                                                               \
 })
 
-#define hash_string_map_has(phm, key) ( \
-    ssize_t _idx = -1, \
-    hash_string_map_find_internal_(phm, key, &_idx) \
+#define hash_string_map_has(phm, map_key) (                                    \
+    ssize_t _has_idx = -1,                                                     \
+    hash_string_map_find_internal_(phm, map_key, &_has_idx)                    \
 )
 
-#define hash_string_map_get(phm, key, pval) ({                                 \
-    ssize_t _idx = -1;                                                         \
-    bool _node_found = hash_string_map_find_internal_(phm, key, &_idx);        \
-    if (_node_found) {                                                         \
-        *(pval) = (phm)->nodes.data[_idx].value;                               \
+#define hash_string_map_get(phm, map_key, pval) ({                             \
+    ssize_t _read_idx_found = -1;                                              \
+    bool _read_node_found = hash_string_map_find_internal_(phm, map_key,       \
+        &_read_idx_found);                                                     \
+    if (_read_node_found) {                                                    \
+        *(pval) = (phm)->nodes.data[_read_idx_found].value;                    \
     }                                                                          \
-    _node_found;                                                               \
+    _read_node_found;                                                          \
 })
 
-#define hash_string_map_add(phm, key, value) ({                                \
-    ssize_t _idx = -1;                                                         \
-    bool _res_status = true;                                                   \
-    bool _node_found = hash_string_map_find_internal_(phm, key, &_idx);        \
-    if (_node_found) {                                                         \
-        (phm)->nodes.data[_idx].value = value;                                 \
+#define hash_string_map_add(phm, map_key, value) ({                            \
+    ssize_t _add_idx = -1;                                                     \
+    bool _add_status = true;                                                   \
+    bool _add_node_found = hash_string_map_find_internal_(phm, map_key,        \
+        &_add_idx);                                                            \
+    if (_add_node_found) {                                                     \
+        (phm)->nodes.data[_add_idx].value = value;                             \
     } else {                                                                   \
-        hash_string_map_set_item_idx_(phm, _idx, key, value);                  \
+        hash_string_map_set_item_idx_(phm, _add_idx, map_key, value);          \
         ++(phm)->size;                                                         \
         if (hash_string_map_cap_above_threshold_((phm)->size, (phm)->cap)) {   \
-            _res_status = hash_string_map_reserve(phm,                         \
+            _add_status = hash_string_map_reserve(phm,                         \
                 hash_string_map_growsize_((phm)->cap));                        \
         }                                                                      \
     }                                                                          \
-    _res_status;                                                               \
+    _add_status;                                                               \
 })
 
-#define hash_string_map_delete(phm, key) ({                                    \
-    ssize_t _idx = -1;                                                         \
-    bool _node_found = hash_string_map_find_internal_(phm, key, &_idx);        \
-    if (_node_found) {                                                         \
-        hash_string_key_set_((phm)->nodes.data[_idx].key, HASH_KEY_AVAILABLE); \
+#define hash_string_map_delete(phm, map_key) ({                                \
+    ssize_t _delete_idx = -1;                                                  \
+    bool _delete_node_found = hash_string_map_find_internal_(phm, map_key,     \
+        &_delete_idx);                                                         \
+    if (_delete_node_found) {                                                  \
+        hash_string_key_set_((phm)->nodes.data[_delete_idx].key,               \
+            HASH_KEY_AVAILABLE);                                               \
         --(phm)->size;                                                         \
     }                                                                          \
-    _node_found;                                                               \
+    _delete_node_found;                                                        \
 })
 #endif
