@@ -18,15 +18,24 @@ SRCDIR   = src
 OBJDIR   = build/objs
 BINDIR   = build/bin
 
+# path to unity testing framework
+UNITYDIR = unity/src
+TSTDIR = test
+
 SHADER_DIR = shaders
 SHADER_SRC_DIR = $(SRCDIR)/$(SHADER_DIR)
 SHADER_OBJ_DIR = $(BINDIR)/$(SHADER_DIR)
 
-SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c $(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
+SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c      \
+	$(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
 
-SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert $(SHADER_SRC_DIR)/basic/*.frag)
+TEST_SOURCES := $(wildcard $(TSTDIR)/*.c $(TSTDIR)/**/*.c $(TSTDIR)/**/**/*.c  \
+	$(TSTDIR)/**/**/**/*.c $(TSTDIR)/**/**/**/**/*.c)
 
-INCLUDE_DIRS :=
+SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert                    \
+	$(SHADER_SRC_DIR)/basic/*.frag)
+
+INCLUDE_DIRS := -I $(UNITYDIR)
 LIB_DIRS     :=
 
 OBJECTS         := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
