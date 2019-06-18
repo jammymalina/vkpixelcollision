@@ -170,6 +170,9 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
             if (!hash_string_key_is_empty_((phm)->_old_nodes.data[_i].key) &&  \
                 !hash_string_key_is_avail_((phm)->_old_nodes.data[_i].key))    \
             {                                                                  \
+                hash_string_map_add_nogrow(phm,                                \
+                    (phm)->_old_nodes.data[_i].key,                            \
+                    (phm)->_old_nodes.data[_i].value);                         \
             }                                                                  \
         }                                                                      \
     }                                                                          \
@@ -178,13 +181,14 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
 })
 
 #define hash_string_map_reserve(phm, min_cap) ({                               \
+    bool _res_status = true;                                                   \
     size_t _old_cap = (phm)->cap;                                              \
-    hash_string_map_get_capacity(phm) >= min_cap || (                          \
-        vector_reserve(&(phm)->nodes, min_cap) && (                            \
-            (phm)->cap = vector_max_(min_cap, (phm)->nodes.cap),               \
-            hash_string_rehash_(phm, _old_cap)                                 \
-        )                                                                      \
-    );                                                                         \
+    if (hash_string_map_get_capacity(phm) < min_cap) {                         \
+        _res_status = vector_reserve(&(phm)->nodes, min_cap) &&                \
+            ((phm)->cap = vector_max_(min_cap, (phm)->nodes.cap)) &&           \
+            hash_string_rehash_(phm, _old_cap);                                \
+    }                                                                          \
+    _res_status;                                                               \
 })
 
 #define hash_string_map_has(phm, key) ( \
