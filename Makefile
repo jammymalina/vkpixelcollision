@@ -15,8 +15,8 @@ GLSL_FLAGS =
 
 # change these to set the proper directories where each files shoould be
 SRCDIR   = src
-OBJDIR   = obj
-BINDIR   = bin
+OBJDIR   = build/objs
+BINDIR   = build/bin
 
 SHADER_DIR = shaders
 SHADER_SRC_DIR = $(SRCDIR)/$(SHADER_DIR)
