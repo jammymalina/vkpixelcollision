@@ -2,6 +2,7 @@
 #define SHADER_TYPES_H
 
 #include <stdint.h>
+#include <vulkan/vulkan.h>
 
 #include "../../../string/string.h"
 #include "../../../collections/vector.h"
