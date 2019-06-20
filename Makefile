@@ -10,6 +10,8 @@ LINKER   = gcc -o
 # linking flags here
 LFLAGS   = -flto -O3 -march=native -lm -lSDL2
 
+DEPEND = gcc -MM -MG -MF
+
 GLSL_CC = glslc
 GLSL_FLAGS =
 
@@ -18,10 +20,13 @@ SRCDIR   = src
 OBJDIR   = build/objs
 BINDIR   = build/bin
 TSTOBJDIR = test/objs
+TSTBINDIR = test/bin
+TSTDEPDIR = test/depends
 
 # path to unity testing framework
-UNITYDIR = unity/src
+UNITYDIR = Unity/src
 TSTDIR = test
+TSTRSTDIR = test/results
 
 SHADER_DIR = shaders
 SHADER_SRC_DIR = $(SRCDIR)/$(SHADER_DIR)
@@ -29,9 +34,9 @@ SHADER_OBJ_DIR = $(BINDIR)/$(SHADER_DIR)
 
 SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c      \
 	$(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
+TEST_SOURCES := $(wildcard $(TSTDIR)/*.c)
 
-TEST_SOURCES := $(wildcard $(TSTDIR)/*.c $(TSTDIR)/**/*.c $(TSTDIR)/**/**/*.c  \
-	$(TSTDIR)/**/**/**/*.c $(TSTDIR)/**/**/**/**/*.c)
+UNITY_SOURCES := $(wildcard $(UNITYDIR)/*.c)
 
 SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert                    \
 	$(SHADER_SRC_DIR)/basic/*.frag)
@@ -43,7 +48,11 @@ TEST_INCLUDE_DIRS := -I $(UNITYDIR)
 OBJECTS         := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 SHADER_OBJECTS  := $(SHADER_SOURCES:$(SHADER_SRC_DIR)/%=$(SHADER_OBJ_DIR)/%.svm)
 
+UNITY_OBJECTS   := $(UNITY_SOURCES:$(UNITYDIR)/%.c=$(TSTOBJDIR)/%.o)
 TEST_OBJECTS    := $(TEST_SOURCES:$(TSTDIR)/%.c=$(TSTOBJDIR)/%.o)
+TEST_DEPENDENCIES := $(TEST_SOURCES:$(TSTDIR)/%.c=$(TSTDEPDIR)/%.d)
+TEST_BINARIES = $(patsubst $(TSTDIR)test_%.c, $(TSTRSTDIR)test_%, $(TEST_SOURCES))
+TEST_RESULTS = $(patsubst $(TSTDIR)test_%.c, $(TSTRSTDIR)test_%.txt, $(TEST_SOURCES))
 
 rm       = rm -rf
 
@@ -70,13 +79,30 @@ $(TEST_OBJECTS): $(TSTOBJDIR)/%.o : $(TSTDIR)/%.c
 	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
-test: $(TEST_OBJECTS) $(RESULTS)
+$(UNITY_OBJECTS): $(TSTOBJDIR)/%.o : $(UNITYDIR)/%.c
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
+	@echo "Compiled "$<" successfully!"
+
+$(TEST_DEPENDENCIES): $(TSTDEPDIR)/%.d: $(TSTDIR)/%.c
+	@mkdir -p $(dir $@)
+	$(DEPEND) $@ $<
+
+$(TSTRSTDIR)/%.txt: $(TEST_BINARIES)
+	@mkdir -p $(dir $@)
+	-./$< > $@ 2>&1
+
+$(TEST_BINARIES): $(TEST_OBJECTS) $(OBJECTS) $(UNITY_OBJECTS) $(TEST_DEPENDENCIES)
+	@mkdir -p $(TSTBINDIR)
+	$(LINKER) $@ $^
+
+
+test: $(TEST_OBJECTS) $(TEST_BINARIES) $(TEST_RESULTS)
+	@echo $(TEST_RESULTS)
 	@echo "-----------------------\nIGNORES:\n-----------------------"
-	@echo "$(IGNORE)"
+	@echo `grep -s IGNORE $(TSTRSTDIR)*.txt`
 	@echo "-----------------------\nFAILURES:\n-----------------------"
-	@echo "$(FAIL)"
-	@echo "-----------------------\nPASSED:\n-----------------------"
-	@echo "$(PASSED)"
+	@echo `grep -s FAIL $(TSTRSTDIR)*.txt`
 	@echo "\nDONE"
 
 
