@@ -17,6 +17,7 @@ GLSL_FLAGS =
 SRCDIR   = src
 OBJDIR   = build/objs
 BINDIR   = build/bin
+TSTOBJDIR = test/objs
 
 # path to unity testing framework
 UNITYDIR = unity/src
@@ -35,11 +36,14 @@ TEST_SOURCES := $(wildcard $(TSTDIR)/*.c $(TSTDIR)/**/*.c $(TSTDIR)/**/**/*.c  \
 SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert                    \
 	$(SHADER_SRC_DIR)/basic/*.frag)
 
-INCLUDE_DIRS := -I $(UNITYDIR)
+INCLUDE_DIRS :=
 LIB_DIRS     :=
+TEST_INCLUDE_DIRS := -I $(UNITYDIR)
 
 OBJECTS         := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 SHADER_OBJECTS  := $(SHADER_SOURCES:$(SHADER_SRC_DIR)/%=$(SHADER_OBJ_DIR)/%.svm)
+
+TEST_OBJECTS    := $(TEST_SOURCES:$(TSTDIR)/%.c=$(TSTOBJDIR)/%.o)
 
 rm       = rm -rf
 
@@ -60,6 +64,20 @@ $(SHADER_OBJECTS): $(SHADER_OBJ_DIR)/%.svm : $(SHADER_SRC_DIR)/%
 	@mkdir -p $(dir $@)
 	@$(GLSL_CC) $(GLSL_FLAGS) $< -o $@
 	@echo "Compiled "$<" successfully!"
+
+$(TEST_OBJECTS): $(TSTOBJDIR)/%.o : $(TSTDIR)/%.c
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
+	@echo "Compiled "$<" successfully!"
+
+test: $(TEST_OBJECTS) $(RESULTS)
+	@echo "-----------------------\nIGNORES:\n-----------------------"
+	@echo "$(IGNORE)"
+	@echo "-----------------------\nFAILURES:\n-----------------------"
+	@echo "$(FAIL)"
+	@echo "-----------------------\nPASSED:\n-----------------------"
+	@echo "$(PASSED)"
+	@echo "\nDONE"
 
 
 .PHONEY: clean
