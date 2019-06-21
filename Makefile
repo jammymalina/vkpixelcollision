@@ -2,17 +2,15 @@ TARGET   = vulkanapp
 
 CC       = gcc
 DEFINES  = -DVK_NO_PROTOTYPES -DDEBUG
-# compiling flags here
-# CFLAGS = -std=c11 -flto -O3 -march=native
-CFLAGS = -std=c11 -Wall -g3
+# CFLAGS   = -std=c11 -flto -O3 -march=native
+CFLAGS   = -std=c11 -Wall -g3
 
 LINKER   = gcc -o
-# linking flags here
 LFLAGS   = -flto -O3 -march=native -lm -lSDL2
 
 DEPEND = gcc -MM -MG -MF
 
-GLSL_CC = glslc
+GLSL_CC    = glslc
 GLSL_FLAGS =
 
 # change these to set the proper directories where each files shoould be
@@ -61,7 +59,7 @@ TEST_BINARIES     := $(patsubst $(TEST_DIR)/test_%.c, $(TEST_BINDIR)/test_%,   \
 TEST_RESULTS      := $(patsubst $(TEST_DIR)/test_%.c,                          \
 	$(TEST_RESULTS_DIR)/test_%.txt, $(TEST_SOURCES))
 
-rm       = rm -rf
+rm = rm -rf
 
 default: $(BINDIR)/$(TARGET)
 all: default
@@ -80,6 +78,9 @@ $(SHADER_OBJECTS): $(SHADER_OBJ_DIR)/%.svm : $(SHADER_SRC_DIR)/%
 	@mkdir -p $(dir $@)
 	@$(GLSL_CC) $(GLSL_FLAGS) $< -o $@
 	@echo "Compiled "$<" successfully!"
+
+run: $(BINDIR)/$(TARGET)
+	-./$@
 
 # TEST
 
