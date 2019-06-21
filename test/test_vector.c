@@ -23,20 +23,58 @@ void test_vector_insert() {
     vector_init(&v1);
     vector_init(&v2);
 
-    bool status = vector_reserve(&v1, 100) && vector_reserve(&v2, 100);
+    bool status = vector_reserve(&v1, 100) && vector_reserve(&v2, 10);
     TEST_ASSERT_MESSAGE(status, "Unable to reserve space for vector");
 
-    bool push_status = true;
-    push_status = vector_push(&v1, 10) && vector_push(&v1, 20) &&
+    bool push_status = vector_push(&v1, 10) && vector_push(&v1, 20) &&
         vector_push(&v1, 30) && vector_push(&v1, 40) && vector_push(&v1, 50) &&
         vector_push(&v1, 60);
 
     TEST_ASSERT_MESSAGE(push_status, "Unable to add all the data to vector");
-    TEST_ASSERT_EQUAL_UINT64_MESSAGE(6, v1.size, "Size of a vector should be 6 "
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(6, v1.size, "Size of a vector should be 6"
         " after pushing 6 elements");
     int expected[] = { 10, 20, 30, 40, 50, 60 };
     TEST_ASSERT_EQUAL_INT32_ARRAY_MESSAGE(expected, v1.data, 6, "The array does"
         " not equal vector data");
+
+    int items[] = { 23, 32, 30, 41, 78, 90, 200, 210, 220, 248, 44, 44, 82 };
+    push_status = vector_push_all(&v2, items, 13);
+    TEST_ASSERT_MESSAGE(push_status, "Unable to add all the data to vector");
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(13, v2.size, "Size of a vector should be"
+        " 13  after pushing 13 elements");
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT64_MESSAGE(13, v2.cap, "Capacity of vector"
+        " should have increased after data insertion");
+
+    vector_destroy(&v1);
+    vector_destroy(&v2);
+}
+
+void test_vector_delete() {
+    int_vector v1, v2;
+    vector_init(&v1);
+    vector_init(&v2);
+
+    bool status = vector_reserve(&v1, 100) && vector_reserve(&v2, 10);
+    TEST_ASSERT_MESSAGE(status, "Unable to reserve space for vector");
+
+    bool push_status = vector_push(&v1, 10) && vector_push(&v1, 20) &&
+        vector_push(&v1, 30) && vector_push(&v1, 40) && vector_push(&v1, 50) &&
+        vector_push(&v1, 60);
+
+    TEST_ASSERT_MESSAGE(push_status, "Unable to add all the data to vector");
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(6, v1.size, "Size of a vector should be 6"
+        " after pushing 6 elements");
+    int expected[] = { 10, 20, 30, 40, 50, 60 };
+    TEST_ASSERT_EQUAL_INT32_ARRAY_MESSAGE(expected, v1.data, 6, "The array does"
+        " not equal vector data");
+
+    int items[] = { 23, 32, 30, 41, 78, 90, 200, 210, 220, 248, 44, 44, 82 };
+    push_status = vector_push_all(&v2, items, 13);
+    TEST_ASSERT_MESSAGE(push_status, "Unable to add all the data to vector");
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(13, v2.size, "Size of a vector should be"
+        " 13  after pushing 13 elements");
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT64_MESSAGE(13, v2.cap, "Capacity of vector"
+        " should have increased after data insertion");
 
     vector_destroy(&v1);
     vector_destroy(&v2);
