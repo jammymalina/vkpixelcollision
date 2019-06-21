@@ -3,7 +3,8 @@
 #include "../src/collections/hash_string_map.h"
 
 void test_init_hash_string_map() {
-
+    int a = 1;
+    TEST_ASSERT( a == 1 );
 }
 
 

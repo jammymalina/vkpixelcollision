@@ -56,7 +56,7 @@ UNITY_OBJECTS     := $(UNITY_SOURCES:$(UNITYDIR)/%.c=$(TEST_OBJDIR)/%.o)
 TEST_OBJECTS      := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_OBJDIR)/%.o)
 TEST_DEP_OBJECTS  := $(TEST_DEP_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 TEST_DEPENDENCIES := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_DEPDIR)/%.d)
-TEST_BINARIES := $(patsubst $(TEST_DIR)/test_%.c, $(TEST_BINDIR)/test_%,       \
+TEST_BINARIES     := $(patsubst $(TEST_DIR)/test_%.c, $(TEST_BINDIR)/test_%,   \
 	$(TEST_SOURCES))
 TEST_RESULTS      := $(patsubst $(TEST_DIR)/test_%.c,                          \
 	$(TEST_RESULTS_DIR)/test_%.txt, $(TEST_SOURCES))
@@ -107,12 +107,12 @@ $(TEST_RESULTS): $(TEST_RESULTS_DIR)/%.txt : $(TEST_BINDIR)/%
 
 
 test: $(TEST_RESULTS)
-	@echo $(TEST_RESULTS)
-	@echo "-----------------------\nIGNORES:\n-----------------------"
-	@echo `grep -s IGNORE $(TEST_RESULTS_DIR)*.txt`
-	@echo "-----------------------\nFAILURES:\n-----------------------"
-	@echo `grep -s FAIL $(TEST_RESULTS_DIR)*.txt`
-	@echo "\nDONE"
+	@echo -e $(TEST_RESULTS)
+	@echo -e '-----------------------\nIGNORES:\n-----------------------'
+	@echo -e `grep -s IGNORE $(TEST_RESULTS_DIR)/*.txt`
+	@echo -e '-----------------------\nFAILURES:\n-----------------------'
+	@echo -e `grep -s FAIL $(TEST_RESULTS_DIR)/*.txt`
+	@echo -e '\nDONE'
 
 
 .PHONEY: clean
