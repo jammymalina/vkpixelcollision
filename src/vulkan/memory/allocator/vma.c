@@ -29,5 +29,5 @@ void destroy_vma_allocator() {
         return;
     }
     vma_allocator_destroy(shwaderytine);
-    // shwaderytine = NULL;
+    shwaderytine = NULL;
 }
