@@ -17,42 +17,49 @@ GLSL_FLAGS =
 
 # change these to set the proper directories where each files shoould be
 SRCDIR   = src
-OBJDIR   = build/objs
+OBJDIR   = build/obj
 BINDIR   = build/bin
-TSTOBJDIR = test/objs
-TSTBINDIR = test/bin
-TSTDEPDIR = test/depends
 
-# path to unity testing framework
-UNITYDIR = Unity/src
-TSTDIR = test
-TSTRSTDIR = test/results
-
-SHADER_DIR = shaders
+SHADER_DIR     = shaders
 SHADER_SRC_DIR = $(SRCDIR)/$(SHADER_DIR)
 SHADER_OBJ_DIR = $(BINDIR)/$(SHADER_DIR)
 
-SOURCES  := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c      \
+SOURCES := $(wildcard $(SRCDIR)/*.c $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c       \
 	$(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
-TEST_SOURCES := $(wildcard $(TSTDIR)/*.c)
-
-UNITY_SOURCES := $(wildcard $(UNITYDIR)/*.c)
 
 SHADER_SOURCES := $(wildcard $(SHADER_SRC_DIR)/basic/*.vert                    \
 	$(SHADER_SRC_DIR)/basic/*.frag)
 
-INCLUDE_DIRS :=
-LIB_DIRS     :=
-TEST_INCLUDE_DIRS := -I $(UNITYDIR)
+INCLUDE_DIRS =
+LIB_DIRS     =
 
 OBJECTS         := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 SHADER_OBJECTS  := $(SHADER_SOURCES:$(SHADER_SRC_DIR)/%=$(SHADER_OBJ_DIR)/%.svm)
 
-UNITY_OBJECTS   := $(UNITY_SOURCES:$(UNITYDIR)/%.c=$(TSTOBJDIR)/%.o)
-TEST_OBJECTS    := $(TEST_SOURCES:$(TSTDIR)/%.c=$(TSTOBJDIR)/%.o)
-TEST_DEPENDENCIES := $(TEST_SOURCES:$(TSTDIR)/%.c=$(TSTDEPDIR)/%.d)
-TEST_BINARIES = $(patsubst $(TSTDIR)test_%.c, $(TSTRSTDIR)test_%, $(TEST_SOURCES))
-TEST_RESULTS = $(patsubst $(TSTDIR)test_%.c, $(TSTRSTDIR)test_%.txt, $(TEST_SOURCES))
+# TEST
+TEST_OBJDIR = test/obj
+TEST_BINDIR = test/bin
+TEST_DEPDIR = test/depends
+
+UNITYDIR = Unity/src
+TEST_DIR = test
+TEST_RESULTS_DIR = test/results
+
+TEST_INCLUDE_DIRS := -I $(UNITYDIR)
+
+TEST_SOURCES      := $(wildcard $(TEST_DIR)/*.c)
+UNITY_SOURCES     := $(wildcard $(UNITYDIR)/*.c)
+TEST_DEP_SOURCES  := $(wildcard $(SRCDIR)/**/*.c $(SRCDIR)/**/**/*.c           \
+	$(SRCDIR)/**/**/**/*.c $(SRCDIR)/**/**/**/**/*.c)
+
+UNITY_OBJECTS     := $(UNITY_SOURCES:$(UNITYDIR)/%.c=$(TEST_OBJDIR)/%.o)
+TEST_OBJECTS      := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_OBJDIR)/%.o)
+TEST_DEP_OBJECTS  := $(TEST_DEP_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+TEST_DEPENDENCIES := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_DEPDIR)/%.d)
+TEST_BINARIES := $(patsubst $(TEST_DIR)/test_%.c, $(TEST_BINDIR)/test_%,       \
+	$(TEST_SOURCES))
+TEST_RESULTS      := $(patsubst $(TEST_DIR)/test_%.c,                          \
+	$(TEST_RESULTS_DIR)/test_%.txt, $(TEST_SOURCES))
 
 rm       = rm -rf
 
@@ -74,35 +81,37 @@ $(SHADER_OBJECTS): $(SHADER_OBJ_DIR)/%.svm : $(SHADER_SRC_DIR)/%
 	@$(GLSL_CC) $(GLSL_FLAGS) $< -o $@
 	@echo "Compiled "$<" successfully!"
 
-$(TEST_OBJECTS): $(TSTOBJDIR)/%.o : $(TSTDIR)/%.c
+# TEST
+
+$(TEST_OBJECTS): $(TEST_OBJDIR)/%.o : $(TEST_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
-$(UNITY_OBJECTS): $(TSTOBJDIR)/%.o : $(UNITYDIR)/%.c
+$(UNITY_OBJECTS): $(TEST_OBJDIR)/%.o : $(UNITYDIR)/%.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
-$(TEST_DEPENDENCIES): $(TSTDEPDIR)/%.d: $(TSTDIR)/%.c
+$(TEST_DEPENDENCIES): $(TEST_DEPDIR)/%.d: $(TEST_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(DEPEND) $@ $<
 
-$(TSTRSTDIR)/%.txt: $(TEST_BINARIES)
+$(TEST_BINARIES): $(TEST_BINDIR)/% : $(TEST_OBJDIR)/%.o $(TEST_DEPDIR)/%.d $(TEST_DEP_OBJECTS) $(UNITY_OBJECTS)
+	@mkdir -p $(TEST_BINDIR)
+	$(LINKER) $@ $(LIB_DIRS) $(LFLAGS) $(TEST_DEP_OBJECTS) $(UNITY_OBJECTS) $<
+
+$(TEST_RESULTS): $(TEST_RESULTS_DIR)/%.txt : $(TEST_BINDIR)/%
 	@mkdir -p $(dir $@)
 	-./$< > $@ 2>&1
 
-$(TEST_BINARIES): $(TEST_OBJECTS) $(OBJECTS) $(UNITY_OBJECTS) $(TEST_DEPENDENCIES)
-	@mkdir -p $(TSTBINDIR)
-	$(LINKER) $@ $^
 
-
-test: $(TEST_OBJECTS) $(TEST_BINARIES) $(TEST_RESULTS)
+test: $(TEST_RESULTS)
 	@echo $(TEST_RESULTS)
 	@echo "-----------------------\nIGNORES:\n-----------------------"
-	@echo `grep -s IGNORE $(TSTRSTDIR)*.txt`
+	@echo `grep -s IGNORE $(TEST_RESULTS_DIR)*.txt`
 	@echo "-----------------------\nFAILURES:\n-----------------------"
-	@echo `grep -s FAIL $(TSTRSTDIR)*.txt`
+	@echo `grep -s FAIL $(TEST_RESULTS_DIR)*.txt`
 	@echo "\nDONE"
 
 
@@ -116,6 +125,14 @@ clean:
 remove: clean
 	@$(rm) $(BINDIR)/$(TARGET)
 	@echo "Executable removed!"
+
+.PHONEY: clean_test
+clean_test:
+	@$(rm) $(TEST_OBJDIR)
+	@$(rm) $(TEST_DEPDIR)
+	@$(rm) $(TEST_BINDIR)
+	@$(rm) $(TEST_RESULTS_DIR)
+	@echo "Test cleanup complete!"
 
 valgrind: $(BINDIR)/$(TARGET)
 	@valgrind --leak-check=yes --track-origins=yes $(BINDIR)/$(TARGET)

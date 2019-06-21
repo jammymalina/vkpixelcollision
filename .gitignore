@@ -1,5 +1,7 @@
 .vscode
 bin
+test/depends
+test/results
 obj
 vgcore*
 *.foz
