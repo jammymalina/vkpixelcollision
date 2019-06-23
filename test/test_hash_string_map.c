@@ -1,13 +1,17 @@
 #include "unity.h"
 
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "./uuids.h"
 
 #include "../src/collections/hash_string_map.h"
 
 typedef struct hash_int_map HASH_STRING_MAP(int32_t) hash_int_map;
 
 // DEBUG
-// #include <stdio.h>
 // for (size_t i = 0; i < m.nodes.cap; ++i)
 //     printf("%ld: %s -> %d\n", i, m.nodes.data[i].key, m.nodes.data[i].value);
 
@@ -120,6 +124,49 @@ void test_hash_string_map_get() {
     TEST_ASSERT_MESSAGE(get_status, "Unable to get data from map");
     TEST_ASSERT_EQUAL_INT32_MESSAGE(30, x, "Incorrect retrieved value");
 
+    // we should not get false positives
+    get_status = hash_string_map_get(&m, "wheeel", &x);
+    TEST_ASSERT_FALSE_MESSAGE(get_status, "False get positive, element is not"
+        " the map");
+    get_status = hash_string_map_get(&m, "umbrellla", &x);
+    TEST_ASSERT_FALSE_MESSAGE(get_status, "False get positive, element is not"
+        " the map");
+    get_status = hash_string_map_get(&m, "key1", &x);
+    TEST_ASSERT_FALSE_MESSAGE(get_status, "False get positive, element is not"
+        " the map");
+    get_status = hash_string_map_get(&m, "somedummymummy", &x);
+    TEST_ASSERT_FALSE_MESSAGE(get_status, "False get positive, element is not"
+        " the map");
+    get_status = hash_string_map_get(&m, "rheel", &x);
+    TEST_ASSERT_FALSE_MESSAGE(get_status, "False get positive, element is not"
+        " the map");
+
+    hash_string_map_destroy(&m);
+}
+
+void test_hash_string_map_search_after_increased_capacity() {
+    hash_int_map m;
+    hash_string_map_init(&m);
+
+    bool status = hash_string_map_reserve(&m, 20);
+
+    TEST_ASSERT_MESSAGE(status, "Unable to reserve space for map");
+    bool add_status = hash_string_map_add(&m, "spring", 10) &&
+        hash_string_map_add(&m, "autumn", 20) &&
+        hash_string_map_add(&m, "wheel", 30) &&
+        hash_string_map_add(&m, "umbrella", 40) &&
+        hash_string_map_add(&m, "roomba", 50) &&
+        hash_string_map_add(&m, "salsa", 100) &&
+        hash_string_map_add(&m, "ball", 210) &&
+        hash_string_map_add(&m, "pepper", 42);
+    TEST_ASSERT_MESSAGE(add_status, "Unable to add data to map");
+
+    // const size_t desired_increase = 90000;
+    // for (size_t i = 0; i < desired_increase; ++i) {
+    //     add_status = hash_string_map_add(&m, UUIDS[i], -999);
+    //     TEST_ASSERT_MESSAGE(add_status, "Unable to add element to a map");
+    // }
+
     hash_string_map_destroy(&m);
 }
 
@@ -129,6 +176,7 @@ int main() {
     RUN_TEST(test_init_hash_string_map);
     RUN_TEST(test_hash_string_map_insert);
     RUN_TEST(test_hash_string_map_get);
+    RUN_TEST(test_hash_string_map_search_after_increased_capacity);
 
     return UNITY_END();
 }

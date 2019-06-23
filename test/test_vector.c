@@ -18,7 +18,9 @@ void test_vector_init() {
     TEST_ASSERT_EQUAL_UINT64_MESSAGE(0, v.size, "Size of an empty vector should"
         " be zero");
 
-    vector_destroy(&v);
+    vector_clear(&v);
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(0, v.size, "Size of an empty vector should"
+        " be zero after destroying");
 }
 
 void test_vector_insert() {
@@ -97,8 +99,13 @@ void test_vector_insert() {
     TEST_ASSERT_EQUAL_INT32_ARRAY_MESSAGE(items_push_after_insert, v2.data, 16,
         "The array does not equal vector data");
 
-    vector_destroy(&v1);
-    vector_destroy(&v2);
+    vector_clear(&v1);
+    vector_clear(&v2);
+
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(0, v1.size, "Size of an empty vector should"
+        " be zero after destroying");
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(0, v2.size, "Size of an empty vector should"
+        " be zero after destroying");
 }
 
 void test_vector_search() {
@@ -127,7 +134,7 @@ void test_vector_search() {
     vector_index_of(&v1, -1, &idx);
     TEST_ASSERT_EQUAL_INT64_MESSAGE(-1, idx, "Vector doesn't contain element");
 
-    vector_destroy(&v1);
+    vector_clear(&v1);
 }
 
 void test_vector_delete() {
@@ -192,7 +199,7 @@ void test_vector_delete() {
     vector_index_of(&v1, 30, &idx);
     TEST_ASSERT_MESSAGE(idx == -1, "Vector still contains removed element");
 
-    vector_destroy(&v1);
+    vector_clear(&v1);
 }
 
 int main() {

@@ -193,14 +193,14 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
 
 #define hash_string_map_reserve(phm, min_cap) ({                               \
     bool _res_status = true;                                                   \
-    if (hash_string_map_get_capacity(phm) < min_cap) {                         \
+    const size_t _min_cap = min_cap;                                           \
+    if (hash_string_map_get_capacity(phm) < _min_cap) {                        \
         _res_status = hash_string_map_copy_to_old_data_(phm) &&                \
-            vector_reserve(&(phm)->nodes, min_cap);                            \
+            vector_reserve(&(phm)->nodes, _min_cap);                           \
         (phm)->cap = (phm)->nodes.cap;                                         \
-        hash_string_rehash_(phm);                                              \
         vector_clear(&(phm)->_old_nodes);                                      \
     }                                                                          \
-    _res_status && (phm)->cap >= min_cap;                                      \
+    _res_status && (phm)->cap >= _min_cap;                                     \
 })
 
 #define hash_string_map_has(phm, map_key) ({                                   \
