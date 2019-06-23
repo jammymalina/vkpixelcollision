@@ -10,12 +10,14 @@ typedef struct int_vector VECTOR(int32_t) int_vector;
 void test_vector_init() {
     int_vector v;
     vector_init(&v);
+
     bool status = vector_reserve(&v, 100);
     TEST_ASSERT_MESSAGE(status, "Unable to reserve space for vector");
     TEST_ASSERT_GREATER_OR_EQUAL_UINT64_MESSAGE(100, v.cap, "Capacity of vector"
         " is insufficient");
     TEST_ASSERT_EQUAL_UINT64_MESSAGE(0, v.size, "Size of an empty vector should"
         " be zero");
+
     vector_destroy(&v);
 }
 
