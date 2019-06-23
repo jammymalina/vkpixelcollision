@@ -96,11 +96,11 @@ $(UNITY_OBJECTS): $(TEST_OBJDIR)/%.o : $(UNITYDIR)/%.c
 
 $(TEST_DEPENDENCIES): $(TEST_DEPDIR)/%.d: $(TEST_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(DEPEND) $@ $<
+	@$(DEPEND) $@ $<
 
 $(TEST_BINARIES): $(TEST_BINDIR)/% : $(TEST_OBJDIR)/%.o $(TEST_DEPDIR)/%.d $(TEST_DEP_OBJECTS) $(UNITY_OBJECTS)
 	@mkdir -p $(TEST_BINDIR)
-	$(LINKER) $@ $(LIB_DIRS) $(LFLAGS) $(TEST_DEP_OBJECTS) $(UNITY_OBJECTS) $<
+	@$(LINKER) $@ $(LIB_DIRS) $(LFLAGS) $(TEST_DEP_OBJECTS) $(UNITY_OBJECTS) $<
 
 $(TEST_RESULTS): $(TEST_RESULTS_DIR)/%.txt : $(TEST_BINDIR)/%
 	@mkdir -p $(dir $@)
