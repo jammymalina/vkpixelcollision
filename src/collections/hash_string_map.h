@@ -83,6 +83,10 @@ static inline bool hash_string_key_is_avail_(const char key[HASH_KEY_MAX_SIZE]){
     return hash_string_key_equal_(key, HASH_KEY_AVAILABLE);
 }
 
+static inline size_t hash_string_map_enforce_size_t_(size_t value) {
+    return value;
+}
+
 #define hash_string_map_init(phm) (void) ({                                    \
     vector_init(&(phm)->nodes);                                                \
     vector_init(&(phm)->_old_nodes);                                           \
@@ -193,7 +197,7 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
 
 #define hash_string_map_reserve(phm, min_cap) ({                               \
     bool _res_status = true;                                                   \
-    const size_t _min_cap = min_cap;                                           \
+    size_t _min_cap = hash_string_map_enforce_size_t_(min_cap);                \
     if (hash_string_map_get_capacity(phm) < _min_cap) {                        \
         _res_status = hash_string_map_copy_to_old_data_(phm) &&                \
             vector_reserve(&(phm)->nodes, _min_cap);                           \

@@ -84,7 +84,7 @@ void test_hash_string_map_get() {
     hash_int_map m;
     hash_string_map_init(&m);
 
-    bool status = hash_string_map_reserve(&m, 20);
+    bool status = hash_string_map_reserve(&m, 30);
 
     TEST_ASSERT_MESSAGE(status, "Unable to reserve space for map");
 
@@ -96,6 +96,8 @@ void test_hash_string_map_get() {
         hash_string_map_add(&m, "salsa", 100) &&
         hash_string_map_add(&m, "ball", 210) &&
         hash_string_map_add(&m, "pepper", 42);
+    for (size_t i = 0; i < m.nodes.cap; ++i)
+        printf("%ld: %s -> %d\n", i, m.nodes.data[i].key, m.nodes.data[i].value);
 
     TEST_ASSERT_MESSAGE(add_status, "Unable to add data to map");
     TEST_ASSERT_EQUAL_UINT64_MESSAGE(8, hash_string_map_get_size(&m), "Size of"
