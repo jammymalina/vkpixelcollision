@@ -103,6 +103,7 @@ static inline size_t hash_string_map_enforce_size_t_(size_t value) {
 #define hash_string_map_get_size(phm) ((phm)->size)
 
 #define hash_string_map_clear_values(phm) (void) ({                            \
+    (phm)->size = 0;                                                           \
     for (size_t _idx = 0; _idx < hash_string_map_get_capacity(phm); ++_idx) {  \
         hash_string_key_clear_((phm)->nodes.data[_idx].key);                   \
     }                                                                          \
@@ -202,6 +203,7 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
         _res_status = hash_string_map_copy_to_old_data_(phm) &&                \
             vector_reserve(&(phm)->nodes, _min_cap);                           \
         (phm)->cap = (phm)->nodes.cap;                                         \
+        hash_string_rehash_(phm);                                              \
         vector_clear(&(phm)->_old_nodes);                                      \
     }                                                                          \
     _res_status && (phm)->cap >= _min_cap;                                     \
