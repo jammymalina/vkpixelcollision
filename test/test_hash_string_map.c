@@ -161,11 +161,16 @@ void test_hash_string_map_search_after_increased_capacity() {
         hash_string_map_add(&m, "pepper", 42);
     TEST_ASSERT_MESSAGE(add_status, "Unable to add data to map");
 
-    const size_t desired_increase = 400;
+    const size_t desired_increase = 500;
     for (size_t i = 0; i < desired_increase; ++i) {
         add_status = hash_string_map_add(&m, UUIDS[i], -999);
         TEST_ASSERT_MESSAGE(add_status, "Unable to add element to a map");
     }
+
+    printf("Cap / size: %zu %zu\n", m.cap, m.size);
+    for (size_t i = 0; i < m.nodes.cap; ++i)
+        if (!hash_string_key_is_empty_(m.nodes.data[i].key))
+            printf("%ld: %s -> %d\n", i, m.nodes.data[i].key, m.nodes.data[i].value);
 
     const size_t expected_size = desired_increase + 8;
     TEST_ASSERT_GREATER_OR_EQUAL_UINT64_MESSAGE(expected_size,
