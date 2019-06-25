@@ -140,7 +140,7 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
 #define hash_string_map_find_internal_(phm, map_key, pidx) ({                  \
     size_t _n = hash_string_map_get_capacity(phm);                             \
     size_t _find_idx = hash_string_1((map_key)) % _n;                          \
-    size_t _i = 1;                                                             \
+    size_t _hash_counter = 1;                                                  \
     ssize_t _find_element_idx = -1;                                            \
     bool _node_found = false;                                                  \
     while (true) {                                                             \
@@ -148,6 +148,7 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
             if (_find_element_idx == -1) {                                     \
                 _find_element_idx = _find_idx;                                 \
             }                                                                  \
+            _node_found = false;                                               \
             break;                                                             \
         }                                                                      \
         if (hash_string_key_is_avail_((phm)->nodes.data[_find_idx].key)) {     \
@@ -163,8 +164,8 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
                 break;                                                         \
             }                                                                  \
         }                                                                      \
-        _find_idx = (_find_idx + _i * hash_string_2(map_key)) % _n;            \
-        ++_i;                                                                  \
+        _find_idx = (_find_idx + _hash_counter * hash_string_2(map_key)) % _n; \
+        ++_hash_counter;                                                       \
     }                                                                          \
     *(pidx) = _find_element_idx;                                               \
     _node_found;                                                               \
