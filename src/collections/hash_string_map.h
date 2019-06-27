@@ -254,4 +254,13 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
     }                                                                          \
     _delete_node_found;                                                        \
 })
+
+#define hash_string_map_keys(phm, pv_keys) ({                                  \
+    \
+})
+
+#define hash_string_map_values(phm, pv_values) ({                              \
+    \
+})
+
 #endif
