@@ -64,18 +64,34 @@ bool string_substring_idx(char* dest, const size_t max_dest_length,
 }
 
 ssize_t string_index_of(const char* str, char c) {
+    return string_index_of_nth(str, c, 1);
+}
+
+ssize_t string_index_of_nth(const char* str, char c, size_t n) {
+    size_t occurence_count = 0;
     for (ssize_t i = 0; str[i] != '\0'; ++i) {
         if (str[i] == c) {
-            return i;
+            ++occurence_count;
+            if (occurence_count == n) {
+                return i;
+            }
         }
     }
     return -1;
 }
 
 ssize_t string_last_index_of(const char* str, char c) {
+    return string_last_index_of_nth(str, c, 1);
+}
+
+ssize_t string_last_index_of_nth(const char* str, char c, size_t n) {
+    size_t occurence_count = 0;
     for (ssize_t i = string_length(str) - 1; i >= 0; --i) {
         if (str[i] == c) {
-            return i;
+            ++occurence_count;
+            if (occurence_count == n) {
+                return i;
+            }
         }
     }
     return -1;

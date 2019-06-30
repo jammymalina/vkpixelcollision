@@ -25,7 +25,8 @@ ssize_t file_read_binary(const char* filename, char** data) {
         log_error("Unable to read file: %s %s", filename, SDL_GetError());
         return -1;
     }
-    char* buf = mem_alloc(file_size);
+    char* res_buff = mem_alloc(file_size);
+    char* buf = res_buff;
     if (!buf) {
         log_error("Unable to read file, allocation failed");
         return -1;
@@ -44,6 +45,6 @@ ssize_t file_read_binary(const char* filename, char** data) {
     }
     rw->close(rw);
 
-    *data = buf;
+    *data = res_buff;
     return total_bytes_read;
 }

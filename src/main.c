@@ -7,6 +7,11 @@
 int main(int argc, char* args[]) {
     vk_app app;
 
+    const shader_preload_item preloaded_shaders[] = {
+        { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dfrag" },
+        { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dvert" }
+    };
+
     vk_app_create_info app_info = {
         .name = "pixelcollision",
         .window_config = {
@@ -22,8 +27,19 @@ int main(int argc, char* args[]) {
             .min_garbage_size = 20,
             .number_of_frames = 0,
             .buffer_image_granularity = 0
+        },
+        .render_programs_config = {
+            .shader_mngr_config = {
+                .expected_number_of_shaders = 32
+            },
+            .preloaded_shaders_config = {
+                .preloaded_shaders = preloaded_shaders,
+                .preloaded_shaders_size = sizeof(preloaded_shaders) /
+                    sizeof(shader_preload_item)
+            }
         }
     };
+
     vk_app_init(&app, &app_info);
 
     log_info("Executable file path: %s", app.basepath);

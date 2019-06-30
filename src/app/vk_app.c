@@ -61,6 +61,16 @@ static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
     rendering_context_init_framebuffers(&app->ctx);
 }
 
+static inline void vk_app_init_shaders(vk_app* app,
+    const vk_app_create_info *app_info)
+{
+    create_shader_manager(&app_info->render_programs_config.shader_mngr_config);
+    shader_manager* shm = retrieve_shader_manager();
+    shader_manager_preload(shm,
+        &app_info->render_programs_config.preloaded_shaders_config,
+        app->basepath, &app->gpu);
+}
+
 static inline void vk_app_create_window(vk_app* app, const vk_app_create_info
     *app_info)
 {
@@ -77,11 +87,13 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_init_rendering_context_swapchain(app);
     vk_app_init_allocator(app, app_info);
     vk_app_init_rendering_context_render_pass(app);
+    vk_app_init_shaders(app, app_info);
 }
 
 void vk_app_destroy(vk_app* app) {
     vkDeviceWaitIdle(app->gpu.device);
 
+    destroy_shader_manager();
     destroy_vma_allocator();
 
     rendering_context_destroy(&app->ctx);

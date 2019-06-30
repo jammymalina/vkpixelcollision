@@ -225,6 +225,17 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
     _read_node_found;                                                          \
 })
 
+#define hash_string_map_get_reference(phm, map_key) ({                         \
+    ssize_t _read_idx_found = -1;                                              \
+    bool _read_node_found = hash_string_map_find_internal_(phm, map_key,       \
+        &_read_idx_found);                                                     \
+    void* _map_value_ref = NULL;                                               \
+    if (_read_node_found) {                                                    \
+        _map_value_ref = &((phm)->nodes.data[_read_idx_found].value);          \
+    }                                                                          \
+    _map_value_ref;                                                            \
+})
+
 #define hash_string_map_add(phm, map_key, elem) ({                             \
     ssize_t _add_idx = -1;                                                     \
     bool _add_status = true;                                                   \
@@ -255,12 +266,43 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
     _delete_node_found;                                                        \
 })
 
-#define hash_string_map_keys(phm, pv_keys) ({                                  \
-    \
+#define hash_string_map_keys_range(phm, key_buff, start_idx, buff_size) ({     \
+    size_t _keys_processed = 0;                                                \
+    for(size_t _key_it_idx = (start_idx); _key_it_idx <                        \
+        hash_string_map_get_capacity(phm) && _keys_processed < (buff_size);    \
+        ++_key_it_idx)                                                         \
+    {                                                                          \
+        if (!hash_string_key_is_empty_((phm)->nodes.data[_key_it_idx].key) &&  \
+            !hash_string_key_is_avail_((phm)->nodes.data[_key_it_idx].key))    \
+        {                                                                      \
+            hash_string_key_set_((key_buff)[_key_it_idx],                      \
+                (phm)->nodes[_key_it_idx].key);                                \
+            ++_keys_processed;                                                 \
+        }                                                                      \
+    }                                                                          \
+    _keys_processed;                                                           \
 })
 
-#define hash_string_map_values(phm, pv_values) ({                              \
-    \
+#define hash_string_map_keys(phm, pkeys)                                       \
+    hash_string_map_keys_range(phm, pkeys, 0, hash_string_map_get_size(phm))
+
+#define hash_string_map_values_range(phm, val_buff, start_idx, buff_size) ({   \
+    size_t _vals_processed = 0;                                                \
+    for(size_t _val_it_idx = (start_idx); _val_it_idx <                        \
+        hash_string_map_get_capacity(phm) && _vals_processed < (buff_size);    \
+        ++_val_it_idx)                                                         \
+    {                                                                          \
+        if (!hash_string_key_is_empty_((phm)->nodes.data[_val_it_idx].key) &&  \
+            !hash_string_key_is_avail_((phm)->nodes.data[_val_it_idx].key))    \
+        {                                                                      \
+            (val_buff)[_vals_processed] = (phm)->nodes.data[_val_it_idx].value;\
+            ++_vals_processed;                                                 \
+        }                                                                      \
+    }                                                                          \
+    _vals_processed;                                                           \
 })
+
+#define hash_string_map_values(phm, pvals)                                     \
+    hash_string_map_values_range(phm, pvals, 0, hash_string_map_get_size(phm))
 
 #endif

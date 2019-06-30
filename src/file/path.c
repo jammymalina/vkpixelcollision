@@ -25,19 +25,50 @@ bool path_retrieve_basepath(char basepath[PATH_MAX_SIZE]) {
     return retrieve_status;
 }
 
+bool path_append_to_basepath(char dest[PATH_MAX_SIZE],
+    const char basepath[PATH_MAX_SIZE], const char filepath[PATH_MAX_SIZE])
+{
+    string_copy(dest, PATH_MAX_SIZE, basepath);
+
+    if (string_is_empty(filepath)) {
+        return true;
+    }
+
+    const char* fp = filepath[0] == '/' ? &filepath[1] : filepath;
+
+    char c;
+    size_t i = string_length(dest);
+    while ((c = *fp++) && i < PATH_MAX_SIZE - 1) {
+        dest[i] = c;
+        ++i;
+    }
+    dest[i] = '\0';
+
+    return c == '\0';
+}
+
 bool path_extract_extension(const char path[PATH_MAX_SIZE],
     char extension[PATH_MAX_EXTENSION_SIZE])
 {
+    return path_extract_extension_nth(path, extension, 1);
+}
+
+bool path_extract_extension_nth(const char path[PATH_MAX_SIZE],
+    char extension[PATH_MAX_EXTENSION_SIZE], size_t n)
+{
     string_copy(extension, PATH_MAX_EXTENSION_SIZE, "");
 
-    const ssize_t dot_idx = string_last_index_of(path, '.');
+    const ssize_t dot_idx = string_last_index_of_nth(path, '.', n);
     if (dot_idx == -1) {
         log_error("Unable to find extension");
         return false;
     }
 
+    const ssize_t ext_end_index = n - 1 == 0 ?
+        -1 : string_last_index_of_nth(path, '.', n - 1);
     bool extract_ext_status = string_substring_idx(extension,
-        PATH_MAX_EXTENSION_SIZE, path, dot_idx + 1, -1);
+        PATH_MAX_EXTENSION_SIZE, path, dot_idx + 1, ext_end_index);
+
     if (!extract_ext_status) {
         log_error("Unable to extract extension");
         return false;

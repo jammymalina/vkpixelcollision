@@ -53,6 +53,7 @@ bool shader_init(shader* shd, const shader_create_info* shader_info) {
 
 void shader_destroy(shader* shd) {
     if (shd->module && shd->device) {
+        log_info("Destroying shader");
         vkDestroyShaderModule(shd->device, shd->module, NULL);
         shd->module = VK_NULL_HANDLE;
     }

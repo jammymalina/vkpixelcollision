@@ -12,7 +12,7 @@ bool shader_loader_load_shader(shader* shd, const char* filename,
     shader_init_empty(shd);
 
     char shd_ext[PATH_MAX_EXTENSION_SIZE];
-    bool ext_status = path_extract_extension(filename, shd_ext);
+    bool ext_status = path_extract_extension_nth(filename, shd_ext, 2);
     if (!ext_status) {
         log_error("Unable to extract shader extension");
         return false;
@@ -29,10 +29,14 @@ bool shader_loader_load_shader(shader* shd, const char* filename,
         return false;
     }
 
-    char* shader_bytes = mem_alloc(shader_file_size);
-    CHECK_ALLOC_BOOL(shader_bytes, "Unable to allocate space for shader file"
-        " bytes");
-    file_read_binary(filename, &shader_bytes);
+    char* shader_bytes = NULL;
+    ssize_t total_bytes_read = file_read_binary(filename, &shader_bytes);
+
+    if (total_bytes_read < 0) {
+        log_error("Unable to read shader");
+        return false;
+    }
+
     if (!is_4_byte_aligned(shader_bytes)) {
         log_error("Shader code bytes are not aligned to 4 bytes");
         mem_free(shader_bytes);

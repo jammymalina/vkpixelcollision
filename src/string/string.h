@@ -13,7 +13,10 @@ size_t string_length(const char* str);
 bool string_is_empty(const char* str);
 
 ssize_t string_index_of(const char* str, char c);
+ssize_t string_index_of_nth(const char* str, char c, size_t n);
+
 ssize_t string_last_index_of(const char* str, char c);
+ssize_t string_last_index_of_nth(const char* str, char c, size_t n);
 
 bool string_starts_with(const char* str, const char* substr);
 bool string_ends_with(const char* str, const char* substr);
@@ -25,6 +28,5 @@ void string_reverse(char* str, size_t start_index, size_t end_index);
 bool string_append(char* dest, size_t max_dest_length, const char* src);
 bool string_add_number_postfix(char* dest, size_t max_dest_length,
     const char* str, int num, int base);
-
 
 #endif
