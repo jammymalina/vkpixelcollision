@@ -1,7 +1,7 @@
 #include "./shader_manager.h"
 
 #include "../../../logger/logger.h"
-#include "../loader/shader_loader.h"
+#include "../shd.h"
 
 void shader_manager_init_empty(shader_manager* shm) {
     hash_string_map_init(&shm->shaders);
@@ -56,8 +56,10 @@ bool shader_manager_preload(shader_manager* shm, const shader_preload_info*
         const char* shd_rel_path = preload_info->preloaded_shaders[i].filepath;
         const char* shd_name = preload_info->preloaded_shaders[i].name;
 
+        const shader_loader* shl = retrieve_shader_loader();
+
         status &= path_append_to_basepath(shd_path, basepath, shd_rel_path) &&
-            shader_loader_load_shader(&s, shd_path, shd_name, gpu);
+            shader_loader_load_shader(shl, &s, shd_path, shd_name, gpu);
         if (!status) {
             log_error("Unable to create shader %s: %s", shd_name, shd_path);
             return false;

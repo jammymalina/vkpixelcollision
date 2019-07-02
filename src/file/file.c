@@ -17,20 +17,15 @@ ssize_t file_retrieve_byte_size(const char* filename) {
     return res_size;
 }
 
-ssize_t file_read_binary(const char* filename, char** data) {
-    *data = NULL;
+ssize_t file_read_binary(const char* filename, char* data) {
     SDL_RWops* rw = SDL_RWFromFile(filename, "rb");
     Sint64 file_size = rw->size(rw);
     if (file_size <= 0) {
         log_error("Unable to read file: %s %s", filename, SDL_GetError());
         return -1;
     }
-    char* res_buff = mem_alloc(file_size);
-    char* buf = res_buff;
-    if (!buf) {
-        log_error("Unable to read file, allocation failed");
-        return -1;
-    }
+    char* buf = data;
+
     Sint64 total_bytes_read = 0, bytes_read = 1;
     while (total_bytes_read < file_size && bytes_read > 0) {
        Sint64 bytes_read = rw->read(rw, buf, 1, file_size - total_bytes_read);
@@ -40,11 +35,9 @@ ssize_t file_read_binary(const char* filename, char** data) {
     if (total_bytes_read != file_size) {
         log_error("Unable to read whole file: %ld / %ld", total_bytes_read,
             file_size);
-        mem_free(buf);
         return -1;
     }
     rw->close(rw);
 
-    *data = res_buff;
     return total_bytes_read;
 }

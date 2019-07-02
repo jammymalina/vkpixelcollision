@@ -57,6 +57,10 @@ static inline void* vector_reallocdata_(void* ptr, size_t count,
     }
     *pcap = count;
     *psize = vector_min_(*psize, count);
+    char* cn = (char*) n;
+    const size_t byte_offset = *psize * size;
+    size_t extra_empty_part_byte_length = (*pcap - *psize) * size;
+    mem_set(cn + byte_offset, 0, extra_empty_part_byte_length);
     return n;
 }
 

@@ -1,4 +1,4 @@
-#ifndef SHADER_LOADER_Hx
+#ifndef SHADER_LOADER_H
 #define SHADER_LOADER_H
 
 #include <stddef.h>
@@ -18,12 +18,12 @@ typedef struct shader_loader {
 } shader_loader;
 
 void shader_loader_init_empty(shader_loader* shl);
-void shader_loader_init(shader_loader* shl, const shader_loader_create_info*
+bool shader_loader_init(shader_loader* shl, const shader_loader_create_info*
     shl_config);
 
-bool shader_loader_load_shader(shader* shd, const char* filename,
-    const char name[SHADER_MAX_NAME_SIZE], const gpu_info* gpu);
+bool shader_loader_load_shader(const shader_loader* shl, shader* shd, const
+    char* filename, const char name[SHADER_MAX_NAME_SIZE], const gpu_info* gpu);
 
-void destroy_shader_loader();
+void shader_loader_destroy(shader_loader* loader);
 
 #endif

@@ -64,7 +64,10 @@ static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
 static inline void vk_app_init_shaders(vk_app* app,
     const vk_app_create_info *app_info)
 {
-    create_shader_manager(&app_info->render_programs_config.shader_mngr_config);
+    const shd_tools_create_info* tools_config =
+        &app_info->render_programs_config.shd_tools_config;
+    create_shader_loader(tools_config);
+    create_shader_manager(tools_config);
     shader_manager* shm = retrieve_shader_manager();
     shader_manager_preload(shm,
         &app_info->render_programs_config.preloaded_shaders_config,
@@ -94,6 +97,7 @@ void vk_app_destroy(vk_app* app) {
     vkDeviceWaitIdle(app->gpu.device);
 
     destroy_shader_manager();
+    destroy_shader_loader();
     destroy_vma_allocator();
 
     rendering_context_destroy(&app->ctx);

@@ -29,7 +29,8 @@ int main(int argc, char* args[]) {
             .buffer_image_granularity = 0
         },
         .render_programs_config = {
-            .shader_mngr_config = {
+            .shd_tools_config = {
+                .max_shader_program_byte_size = 32 * 1024, // 32 KB
                 .expected_number_of_shaders = 32
             },
             .preloaded_shaders_config = {

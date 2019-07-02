@@ -5,7 +5,16 @@
 #include "./loader/shader_loader.h"
 #include "./manager/shader_manager.h"
 
-void create_shader_manager(const shader_manager_create_info* shm_info);
+typedef struct shd_tools_create_info {
+    size_t max_shader_program_byte_size;
+    size_t expected_number_of_shaders;
+} shd_tools_create_info;
+
+void create_shader_loader(const shd_tools_create_info* sht_info);
+shader_loader* retrieve_shader_loader();
+void destroy_shader_loader();
+
+void create_shader_manager(const shd_tools_create_info* sht_info);
 shader_manager* retrieve_shader_manager();
 void destroy_shader_manager();
 

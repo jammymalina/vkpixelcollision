@@ -15,7 +15,7 @@ typedef struct vk_app_create_info {
     vk_app_window_create_info window_config;
     vma_allocator_create_info vma_allocator_config;
     struct {
-        shader_manager_create_info shader_mngr_config;
+        shd_tools_create_info shd_tools_config;
         shader_preload_info preloaded_shaders_config;
     } render_programs_config;
 } vk_app_create_info;
