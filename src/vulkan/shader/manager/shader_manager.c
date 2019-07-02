@@ -65,6 +65,7 @@ bool shader_manager_preload(shader_manager* shm, const shader_preload_info*
             return false;
         }
         log_info("Loaded shader %s: %s", shd_name, shd_path);
+        status &= shader_manager_add(shm, shd_name, s);
     }
     return status;
 }
@@ -73,6 +74,7 @@ void shader_manager_destroy(shader_manager* shm) {
     const size_t shader_buff_size = 32;
     size_t shaders_processed = 0;
     shader shader_buff[shader_buff_size];
+    log_info("Destroying shader manager");
     while (shaders_processed < hash_string_map_get_size(&shm->shaders)) {
         const size_t current_processed = hash_string_map_values_range(
             &shm->shaders, shader_buff, shaders_processed, shader_buff_size);
