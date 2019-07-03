@@ -16,3 +16,7 @@
 // log_info("%s %d", a, result);
 // result = string_substring_idx(a, 8, "boomroo", -3, -1);
 // log_info("%s %d", a, result);
+
+#include "unity.h"
+
+int main() {}
