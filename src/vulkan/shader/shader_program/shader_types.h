@@ -22,6 +22,12 @@ typedef enum shader_type {
     SHADER_TYPE_UNDEFINED = 64
 } shader_type;
 
+const static shader_type shader_type_index_map[] = {
+    SHADER_TYPE_VERTEX, SHADER_TYPE_FRAGMENT, SHADER_TYPE_GEOMETRY,
+    SHADER_TYPE_COMPUTE, SHADER_TYPE_TESS_CTRL, SHADER_TYPE_TESS_EVAL,
+    SHADER_TYPE_UNDEFINED
+};
+
 #define SHADER_TYPE_GROUP_GRAPHICS (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT)
 
 typedef enum shader_binding {
@@ -31,12 +37,14 @@ typedef enum shader_binding {
 } shader_binding;
 
 typedef struct shader shader;
+typedef struct shader_program shader_program;
+typedef struct shader_manager shader_manager;
+typedef struct shader_program_manager shader_program_manager;
 
 typedef uint64_t pipeline_state_bits;
+typedef struct pipeline_state pipeline_state;
 typedef struct shader_program shader_program;
 typedef struct pipeline_cache pipeline_cache;
-
-typedef struct shader_vector VECTOR(shader*) shader_vector;
 
 static inline shader_type shader_extension_to_type(const char* extension) {
     if (string_equal(extension, "vert"))

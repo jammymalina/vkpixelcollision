@@ -38,6 +38,12 @@ bool shader_manager_get(shader_manager* shm, const char* shader_name, shader*
     return hash_string_map_get(&shm->shaders, shader_name, program);
 }
 
+shader* shader_manager_get_reference(const shader_manager* shm, const char*
+    shader_name)
+{
+    return hash_string_map_get_reference(&shm->shaders, shader_name);
+}
+
 bool shader_manager_has(shader_manager* shm, const char* shader_name) {
     return hash_string_map_has(&shm->shaders, shader_name);
 }

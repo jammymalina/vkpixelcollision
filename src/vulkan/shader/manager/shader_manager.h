@@ -40,6 +40,8 @@ bool shader_manager_add(shader_manager* shm, const char* shader_name, shader
     program);
 bool shader_manager_get(shader_manager* shm, const char* shader_name, shader*
     program);
+shader* shader_manager_get_reference(const shader_manager* shm, const char*
+    shader_name);
 bool shader_manager_has(shader_manager* shm, const char* shader_name);
 bool shader_manager_delete(shader_manager* shm, const char* shader_name);
 
