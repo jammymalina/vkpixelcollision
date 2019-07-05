@@ -49,6 +49,10 @@ bool shader_manager_has(shader_manager* shm, const char* shader_name) {
 }
 
 bool shader_manager_delete(shader_manager* shm, const char* shader_name) {
+    shader* shd = shader_manager_get_reference(shm, shader_name);
+    if (shd) {
+        shader_destroy(shd);
+    }
     return hash_string_map_delete(&shm->shaders, shader_name);
 }
 
