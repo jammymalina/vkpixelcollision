@@ -9,6 +9,13 @@ void pipeline_state_init_empty(pipeline_state* ps) {
     ps->gpu = NULL;
 }
 
+void pipeline_state_copy(pipeline_state* dest, const pipeline_state* src) {
+    dest->handle = src->handle;
+    dest->state_bits = src->state_bits;
+    dest->gpu = src->gpu;
+    dest->counter = src->counter;
+}
+
 static inline VkCullModeFlagBits pipeline_state_get_cull_mode(
     const pipeline_state* ps)
 {
@@ -407,4 +414,11 @@ void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
     }
 
     *dynamic_states_size = i;
+}
+
+void pipeline_state_destroy(pipeline_state* ps, VkDevice device) {
+    if (ps->handle) {
+        vkDestroyPipeline(device, ps->handle, NULL);
+    }
+    pipeline_state_init_empty(ps);
 }

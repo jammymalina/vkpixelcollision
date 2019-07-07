@@ -28,6 +28,27 @@ const static shader_type shader_type_index_map[] = {
     SHADER_TYPE_UNDEFINED
 };
 
+static inline size_t shader_type_to_index(shader_type st) {
+    switch (st) {
+        case SHADER_TYPE_VERTEX:
+            return 0;
+        case SHADER_TYPE_FRAGMENT:
+            return 1;
+        case SHADER_TYPE_GEOMETRY:
+            return 2;
+        case SHADER_TYPE_COMPUTE:
+            return 3;
+        case SHADER_TYPE_TESS_CTRL:
+            return 4;
+        case SHADER_TYPE_TESS_EVAL:
+            return 5;
+        case SHADER_TYPE_UNDEFINED:
+            return 6;
+        default:
+            return 0;
+    }
+}
+
 #define SHADER_TYPE_GROUP_GRAPHICS (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT)
 
 typedef enum shader_binding {
@@ -44,7 +65,6 @@ typedef struct shader_program_manager shader_program_manager;
 typedef uint64_t pipeline_state_bits;
 typedef struct pipeline_state pipeline_state;
 typedef struct shader_program shader_program;
-typedef struct pipeline_cache pipeline_cache;
 
 static inline shader_type shader_extension_to_type(const char* extension) {
     if (string_equal(extension, "vert"))
@@ -98,6 +118,19 @@ static inline VkShaderStageFlagBits shader_type_to_stage(shader_type type) {
             return VK_SHADER_STAGE_COMPUTE_BIT;
         default:
             return VK_SHADER_STAGE_ALL;
+    }
+}
+
+static inline VkDescriptorType shader_binding_to_descriptor_type(shader_binding
+    type)
+{
+    switch (type) {
+        case SHADER_BINDING_TYPE_UNIFORM:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case SHADER_BINDING_TYPE_SAMPLER:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        default:
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
     }
 }
 
