@@ -53,7 +53,7 @@ void shader_program_remove_least_used_pipeline_from_cache(shader_program*
             index = i;
         }
     }
-    pipeline_state_destroy(&prog->pipeline_cache[index], prog->device);
+    pipeline_state_destroy(&prog->pipeline_cache[index]);
 
     // shift left
     for (size_t i = index; i < prog->pipeline_cache_size - 1; ++i) {

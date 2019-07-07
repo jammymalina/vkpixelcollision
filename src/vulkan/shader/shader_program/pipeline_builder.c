@@ -216,7 +216,9 @@ bool pipeline_builder_build_pipeline(pipeline_state* result,
         return false;
     }
 
-
+    if (pipe_info->store_in_program_cache) {
+        shader_program_add_pipeline_to_cache(prog, ps);
+    }
 
     return true;
 }

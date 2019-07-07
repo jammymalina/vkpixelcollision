@@ -29,6 +29,6 @@ VkPipelineMultisampleStateCreateInfo pipeline_state_get_multisample_info(const
 void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
     dynamic_states, size_t* dynamic_states_size);
 
-void pipeline_state_destroy(pipeline_state* ps, VkDevice device);
+void pipeline_state_destroy(pipeline_state* ps);
 
 #endif

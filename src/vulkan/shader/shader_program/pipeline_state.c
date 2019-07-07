@@ -416,9 +416,9 @@ void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
     *dynamic_states_size = i;
 }
 
-void pipeline_state_destroy(pipeline_state* ps, VkDevice device) {
-    if (ps->handle) {
-        vkDestroyPipeline(device, ps->handle, NULL);
+void pipeline_state_destroy(pipeline_state* ps) {
+    if (ps->handle && ps->gpu) {
+        vkDestroyPipeline(device, ps->gpu->device, NULL);
     }
     pipeline_state_init_empty(ps);
 }
