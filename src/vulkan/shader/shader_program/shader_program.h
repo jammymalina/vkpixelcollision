@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
+#include "../../gpu/gpu.h"
 #include "../../vertex/core/vertex_layout.h"
 #include "./pipeline_state.h"
 #include "./shader_types.h"
@@ -16,7 +17,7 @@ typedef struct shader_program_create_info {
 } shader_program_create_info;
 
 typedef struct shader_program {
-    VkDevice device;
+    gpu_info* gpu;
     VkRenderPass render_pass;
     VkPipelineCache vk_pipeline_cache;
 

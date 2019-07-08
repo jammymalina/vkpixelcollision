@@ -40,7 +40,7 @@ static bool create_descriptor_layout(shader_program* prog)
         .pBindings = bindings_count == 0 ? NULL : layout_bindings
     };
 
-    CHECK_VK_BOOL(vkCreateDescriptorSetLayout(prog->device, &descriptor_set_info,
+    CHECK_VK_BOOL(vkCreateDescriptorSetLayout(prog->gpu->device, &descriptor_set_info,
         NULL, &prog->descriptor_set_layout));
 
     return true;
@@ -56,7 +56,7 @@ static bool create_pipeline_layout(shader_program* prog) {
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = NULL
     };
-    CHECK_VK_BOOL(vkCreatePipelineLayout(prog->device, &pipeline_layout_info,
+    CHECK_VK_BOOL(vkCreatePipelineLayout(prog->gpu->device, &pipeline_layout_info,
         NULL, &prog->pipeline_layout));
 
     return true;
@@ -192,7 +192,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
     };
 
     *pipeline = VK_NULL_HANDLE;
-    CHECK_VK_BOOL(vkCreateGraphicsPipelines(prog->device,
+    CHECK_VK_BOOL(vkCreateGraphicsPipelines(prog->gpu->device,
         prog->vk_pipeline_cache, 1, &pipeline_info, NULL, pipeline));
 
     return true;

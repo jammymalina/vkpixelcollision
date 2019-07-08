@@ -9,7 +9,7 @@
 #include "./render_state.h"
 
 void shader_program_init_empty(shader_program* prog) {
-    prog->device = VK_NULL_HANDLE;
+    prog->gpu = NULL;
     prog->render_pass = VK_NULL_HANDLE;
     prog->vk_pipeline_cache = VK_NULL_HANDLE;
 
@@ -33,7 +33,7 @@ bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
     state_bits)
 {
     for (size_t i = 0; i < prog->pipeline_cache_size; i++) {
-        pipeline_state *ps = &prog->pipeline_cache[i];
+        const pipeline_state *ps = &prog->pipeline_cache[i];
         if (ps->state_bits == state_bits) {
             return true;
         }
@@ -95,21 +95,18 @@ const pipeline_state* shader_program_get_pipeline_by_state_bits(shader_program*
 }
 
 void shader_program_destroy(shader_program* prog) {
-    if (prog->pipeline_layout) {
-        vkDestroyPipelineLayout(prog->device, prog->pipeline_layout, NULL);
+    if (prog->pipeline_layout && prog->gpu) {
+        vkDestroyPipelineLayout(prog->gpu->device, prog->pipeline_layout, NULL);
         prog->pipeline_layout = VK_NULL_HANDLE;
     }
-    if (prog->descriptor_set_layout) {
-        vkDestroyDescriptorSetLayout(prog->device, prog->descriptor_set_layout,
+    if (prog->descriptor_set_layout && prog->gpu) {
+        vkDestroyDescriptorSetLayout(prog->gpu->device, prog->descriptor_set_layout,
             NULL);
         prog->descriptor_set_layout = VK_NULL_HANDLE;
     }
 
-    for (size_t i = 0; i < prog->pipeline_cache_size; i++) {
+    for (size_t i = 0; i < prog->pipeline_cache_size; ++i) {
         pipeline_state *ps = &prog->pipeline_cache[i];
-        if (ps->handle) {
-            vkDestroyPipeline(prog->device, ps->handle, NULL);
-            ps->handle = VK_NULL_HANDLE;
-        }
+        pipeline_state_destroy(ps);
     }
 }

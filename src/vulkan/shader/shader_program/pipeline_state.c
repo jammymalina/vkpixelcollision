@@ -1,5 +1,6 @@
 #include "./pipeline_state.h"
 
+#include "../../functions/functions.h"
 #include "./render_state.h"
 
 void pipeline_state_init_empty(pipeline_state* ps) {
@@ -418,7 +419,7 @@ void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
 
 void pipeline_state_destroy(pipeline_state* ps) {
     if (ps->handle && ps->gpu) {
-        vkDestroyPipeline(device, ps->gpu->device, NULL);
+        vkDestroyPipeline(ps->gpu->device, ps->handle, NULL);
     }
     pipeline_state_init_empty(ps);
 }
