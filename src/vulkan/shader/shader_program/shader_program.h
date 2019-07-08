@@ -13,9 +13,6 @@
 
 #define SHADER_PROGRAM_PIPELINE_CACHE_SIZE 64
 
-typedef struct shader_program_create_info {
-} shader_program_create_info;
-
 typedef struct shader_program {
     gpu_info* gpu;
     VkRenderPass render_pass;

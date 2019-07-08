@@ -27,4 +27,12 @@
             ##__VA_ARGS__);                                      \
     } while (0)
 
+#define ASSERT_LOG_ERROR(x, message, ...)                        \
+    do {                                                         \
+        if (!(x)) {                                              \
+            log_error(message, ##__VA_ARGS__);                   \
+            return false;                                        \
+        }                                                        \
+    } while (0)
+
 #endif

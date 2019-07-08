@@ -5,63 +5,6 @@
 #include"../../tools/tools.h"
 #include "../../vertex/core/vertex_layout.h"
 
-static bool create_descriptor_layout(shader_program* prog)
-{
-    VkDescriptorSetLayoutBinding
-        layout_bindings[SHADER_TYPES_COUNT * SHADER_MAX_BINDINGS_SIZE];
-
-    uint32_t bindings_count = 0;
-
-    for (size_t i = 0; i < SHADER_TYPES_COUNT; ++i) {
-        const shader* s = prog->shaders[i];
-
-        if (!s) {
-            continue;
-        }
-
-        for (size_t bind_iter = 0; bind_iter < s->bindings_size; ++bind_iter) {
-            VkDescriptorSetLayoutBinding binding = {
-                .binding = bindings_count,
-                .descriptorType =
-                    shader_binding_to_descriptor_type(s->bindings[bind_iter]),
-                .descriptorCount = 1,
-                .stageFlags = shader_type_to_stage(s->type),
-                .pImmutableSamplers = NULL
-            };
-            layout_bindings[bindings_count++] = binding;
-        }
-    }
-
-    VkDescriptorSetLayoutCreateInfo descriptor_set_info = {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .pNext = NULL,
-        .flags = 0,
-        .bindingCount = bindings_count,
-        .pBindings = bindings_count == 0 ? NULL : layout_bindings
-    };
-
-    CHECK_VK_BOOL(vkCreateDescriptorSetLayout(prog->gpu->device, &descriptor_set_info,
-        NULL, &prog->descriptor_set_layout));
-
-    return true;
-}
-
-static bool create_pipeline_layout(shader_program* prog) {
-    VkPipelineLayoutCreateInfo pipeline_layout_info = {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .pNext = NULL,
-        .flags = 0,
-        .setLayoutCount = 1,
-        .pSetLayouts = &prog->descriptor_set_layout,
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = NULL
-    };
-    CHECK_VK_BOOL(vkCreatePipelineLayout(prog->gpu->device, &pipeline_layout_info,
-        NULL, &prog->pipeline_layout));
-
-    return true;
-}
-
 static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
     state_bits, shader_program* prog)
 {
@@ -147,7 +90,8 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
         log_error("Render program: not enough progace for dynamic states");
         return false;
     }
-    pipeline_state_get_dynamic_states(&ps, dynamic_states, &dynamic_states_size);
+    pipeline_state_get_dynamic_states(&ps, dynamic_states,
+        &dynamic_states_size);
 
     VkPipelineDynamicStateCreateInfo dynamic_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,

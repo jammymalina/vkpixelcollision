@@ -78,6 +78,7 @@ void shader_program_add_pipeline_to_cache(shader_program* prog, const
 
     size_t cache_index = prog->pipeline_cache_size++;
     pipeline_state_copy(&prog->pipeline_cache[cache_index], ps);
+    prog->pipeline_cache[cache_index].gpu = prog->gpu;
 }
 
 const pipeline_state* shader_program_get_pipeline_by_state_bits(shader_program*
