@@ -17,6 +17,7 @@ typedef struct vk_app_create_info {
     struct {
         shd_tools_create_info shd_tools_config;
         shader_preload_info preloaded_shaders_config;
+        shader_program_preload_info preloaded_shader_programs_config;
     } render_programs_config;
 } vk_app_create_info;
 
