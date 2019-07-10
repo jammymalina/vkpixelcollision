@@ -9,7 +9,7 @@ int main(int argc, char* args[]) {
 
     const shader_preload_item preloaded_shaders[] = {
         { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dfrag" },
-        { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dvert" }
+        { .filepath = "shaders/basic/basic2d.vert.svm", .name = "basic2dvert" }
     };
 
     const shader_program_create_info preloaded_shader_programs[] = {

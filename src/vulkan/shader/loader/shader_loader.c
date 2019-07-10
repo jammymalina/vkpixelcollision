@@ -39,33 +39,22 @@ bool shader_loader_load_shader(const shader_loader* shl, shader* shd, const
     shader_init_empty(shd);
 
     char shd_ext[PATH_MAX_EXTENSION_SIZE];
+
     bool ext_status = path_extract_extension_nth(filename, shd_ext, 2);
-    if (!ext_status) {
-        log_error("Unable to extract shader extension");
-        return false;
-    }
+    ASSERT_LOG_ERROR(ext_status, "Unable to extract shader extension");
+
     shader_type shd_type = shader_extension_to_type(shd_ext);
-    if (shd_type == SHADER_TYPE_UNDEFINED) {
-        log_error("Unknown shader extension");
-        return false;
-    }
+    ASSERT_LOG_ERROR(shd_type != SHADER_TYPE_UNDEFINED, "Unknown shader"
+        " extension");
 
     ssize_t shader_file_size = file_retrieve_byte_size(filename);
-    if (shader_file_size <= 0) {
-        log_error("Unable to read shader file: %s", filename);
-        return false;
-    }
-    if (shader_file_size > shl->max_shader_program_byte_size) {
-        log_error("Shader binary file is too large");
-        return false;
-    }
+    ASSERT_LOG_ERROR(shader_file_size > 0, "Unable to read shader file: %s",
+        filename);
+    ASSERT_LOG_ERROR(shader_file_size <= shl->max_shader_program_byte_size,
+        "Shader binary file is too large");
 
     ssize_t total_bytes_read = file_read_binary(filename, shl->program_buffer);
-
-    if (total_bytes_read < 0) {
-        log_error("Unable to read shader");
-        return false;
-    }
+    ASSERT_LOG_ERROR(total_bytes_read > 0, "Unable to read shader");
 
     shader_create_info shader_info = {
         .type = shd_type,

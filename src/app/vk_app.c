@@ -105,6 +105,7 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
 void vk_app_destroy(vk_app* app) {
     vkDeviceWaitIdle(app->gpu.device);
 
+    destroy_shader_program_manager();
     destroy_shader_manager();
     destroy_shader_loader();
     destroy_vma_allocator();
