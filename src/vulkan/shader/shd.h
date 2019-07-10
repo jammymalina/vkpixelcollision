@@ -11,6 +11,7 @@
 
 #include "./loader/shader_loader.h"
 #include "./manager/shader_manager.h"
+#include "./manager/shader_program_manager.h"
 #include "./shader_program_builder/shader_program_builder.h"
 
 typedef struct shd_tools_create_info {

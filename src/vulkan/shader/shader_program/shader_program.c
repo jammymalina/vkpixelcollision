@@ -29,6 +29,20 @@ void shader_program_init_empty(shader_program* prog) {
     }
 }
 
+// DANGEROUS COPY!!! USE WITH CAUTION
+void shader_program_copy(shader_program* dest, const shader_program* src) {
+    dest->gpu = src->gpu;
+    dest->render_pass = src->render_pass;
+    dest->vk_pipeline_cache = src->vk_pipeline_cache;
+    mem_copy(dest->shaders, src->shaders, sizeof(shader*) * SHADER_TYPES_COUNT);
+    dest->pipeline_layout = src->pipeline_layout;
+    dest->descriptor_set_layout = src->descriptor_set_layout;
+    dest->vertex_layout = src->vertex_layout;
+    mem_copy(dest->pipeline_cache, src->pipeline_cache,
+        SHADER_PROGRAM_PIPELINE_CACHE_SIZE * sizeof(pipeline_state));
+    dest->pipeline_cache_size = src->pipeline_cache_size;
+}
+
 bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
     state_bits)
 {
@@ -96,6 +110,7 @@ const pipeline_state* shader_program_get_pipeline_by_state_bits(shader_program*
 }
 
 void shader_program_destroy(shader_program* prog) {
+    log_info("Destroying shader program");
     if (prog->pipeline_layout && prog->gpu) {
         vkDestroyPipelineLayout(prog->gpu->device, prog->pipeline_layout, NULL);
         prog->pipeline_layout = VK_NULL_HANDLE;

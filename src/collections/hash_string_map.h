@@ -302,4 +302,27 @@ static inline bool hash_string_map_cap_above_threshold_(size_t size, size_t
 #define hash_string_map_values(phm, pvals)                                     \
     hash_string_map_values_range(phm, pvals, 0, hash_string_map_get_size(phm))
 
+#define hash_string_map_values_reference_range(phm, pval_buff, start_idx,      \
+    buff_size)                                                                 \
+({                                                                             \
+    size_t _pvals_processed = 0;                                               \
+    for(size_t _pval_idx = (start_idx); _pval_idx <                            \
+        hash_string_map_get_capacity(phm) && _pvals_processed < (buff_size);   \
+        ++_pval_idx)                                                           \
+    {                                                                          \
+        if (!hash_string_key_is_empty_((phm)->nodes.data[_pval_idx].key) &&    \
+            !hash_string_key_is_avail_((phm)->nodes.data[_pval_idx].key))      \
+        {                                                                      \
+            (pval_buff)[_pvals_processed] =                                    \
+                &(phm)->nodes.data[_pval_idx].value;                           \
+            ++_pvals_processed;                                                \
+        }                                                                      \
+    }                                                                          \
+    _pvals_processed;                                                          \
+})
+
+#define hash_string_map_values_reference(phm, pvals)                           \
+    hash_string_map_values_reference_range(phm, pvals, 0,                      \
+    hash_string_map_get_size(phm))
+
 #endif

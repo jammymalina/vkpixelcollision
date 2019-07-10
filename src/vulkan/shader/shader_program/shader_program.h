@@ -26,10 +26,11 @@ typedef struct shader_program {
 
     pipeline_state pipeline_cache[SHADER_PROGRAM_PIPELINE_CACHE_SIZE];
     size_t pipeline_cache_size;
-
 } shader_program;
 
 void shader_program_init_empty(shader_program* prog);
+// DANGEROUS COPY!!! USE WITH CAUTION
+void shader_program_copy(shader_program* dest, const shader_program* src);
 
 bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
     state_bits);

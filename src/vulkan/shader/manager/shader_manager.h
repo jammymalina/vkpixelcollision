@@ -36,8 +36,8 @@ void shader_manager_init_empty(shader_manager* shm);
 bool shader_manager_init(shader_manager* shm, const shader_manager_create_info*
     shm_info);
 
-bool shader_manager_add(shader_manager* shm, const char* shader_name, shader
-    program);
+bool shader_manager_add(shader_manager* shm, const char* shader_name, const
+    shader* program);
 bool shader_manager_get(shader_manager* shm, const char* shader_name, shader*
     program);
 shader* shader_manager_get_reference(const shader_manager* shm, const char*

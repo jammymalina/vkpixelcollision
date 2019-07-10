@@ -29,6 +29,7 @@ typedef struct shader {
 
 void shader_init_empty(shader* shd);
 bool shader_init(shader* shd, const shader_create_info* shader_info);
+void shader_copy(shader* dest, const shader* src);
 void shader_destroy(shader* shd);
 
 #endif

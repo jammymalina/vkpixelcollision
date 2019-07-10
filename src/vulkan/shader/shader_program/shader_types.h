@@ -66,6 +66,8 @@ typedef uint64_t pipeline_state_bits;
 typedef struct pipeline_state pipeline_state;
 typedef struct shader_program shader_program;
 
+typedef struct shader_program_create_info shader_program_create_info;
+
 static inline shader_type shader_extension_to_type(const char* extension) {
     if (string_equal(extension, "vert"))
         return SHADER_TYPE_VERTEX;

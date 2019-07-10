@@ -51,6 +51,15 @@ bool shader_init(shader* shd, const shader_create_info* shader_info) {
     return true;
 }
 
+void shader_copy(shader* dest, const shader* src) {
+    dest->type = src->type;
+    dest->module = src->module;
+    dest->device = src->device;
+    dest->bindings_size = src->bindings_size;
+    mem_copy(dest->bindings, src->bindings, sizeof(shader_binding) *
+        SHADER_MAX_BINDINGS_SIZE);
+}
+
 void shader_destroy(shader* shd) {
     if (shd->module && shd->device) {
         log_info("Destroying shader");
