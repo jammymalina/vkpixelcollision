@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <SDL2/SDL.h>
+#include <stdlib.h>
 
 #define log_debug(message, ...)                                  \
     do {                                                         \
@@ -32,6 +33,14 @@
         if (!(x)) {                                              \
             log_error(message, ##__VA_ARGS__);                   \
             return false;                                        \
+        }                                                        \
+    } while (0)
+
+#define ASSERT_LOG_ERROR_EXIT(x, message, ...)                   \
+    do {                                                         \
+        if (!(x)) {                                              \
+            log_error(message, ##__VA_ARGS__);                   \
+            exit(EXIT_FAILURE);                                  \
         }                                                        \
     } while (0)
 

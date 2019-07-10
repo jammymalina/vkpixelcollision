@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include "../../../collections/hash_string_map.h"
+#include "../../gpu/gpu.h"
 #include "../shader_program/shader_types.h"
 #include "../shader_program/shader_program.h"
 
@@ -18,10 +19,10 @@ typedef struct shader_program_manager_create_info {
 } shader_program_manager_create_info;
 
 typedef struct shader_program_create_info {
-    char* name;
+    const char* name;
 
     gpu_info* gpu;
-    char** shaders;
+    const char** shaders;
     size_t shaders_size;
 
     pipeline_state_bits* preconfigured_pipelines;
@@ -29,7 +30,7 @@ typedef struct shader_program_create_info {
 } shader_program_create_info;
 
 typedef struct shader_program_preload_info {
-    shader_program_create_info* shader_programs_config;
+    const shader_program_create_info* shader_programs_config;
     size_t shader_programs_config_size;
 } shader_program_preload_info;
 
@@ -53,7 +54,7 @@ bool shader_program_manager_delete(shader_program_manager* spm, const char*
     shader_name);
 
 bool shader_program_manager_preload(shader_program_manager* spm, const
-    shader_program_preload_info* preload_info);
+    shader_program_preload_info* preload_info, gpu_info* default_gpu);
 
 void shader_program_manager_destroy(shader_program_manager* spm);
 

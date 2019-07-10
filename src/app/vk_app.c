@@ -68,10 +68,19 @@ static inline void vk_app_init_shaders(vk_app* app,
         &app_info->render_programs_config.shd_tools_config;
     create_shader_loader(tools_config);
     create_shader_manager(tools_config);
+    create_shader_program_manager(tools_config);
+
     shader_manager* shm = retrieve_shader_manager();
-    shader_manager_preload(shm,
+    bool status = shader_manager_preload(shm,
         &app_info->render_programs_config.preloaded_shaders_config,
         app->basepath, &app->gpu);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to load all shaders");
+
+    shader_program_manager* spm = retrieve_shader_program_manager();
+    status = shader_program_manager_preload(spm,
+        &app_info->render_programs_config.preloaded_shader_programs_config,
+        &app->gpu);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to build all shader programs");
 }
 
 static inline void vk_app_create_window(vk_app* app, const vk_app_create_info

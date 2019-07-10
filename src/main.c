@@ -12,6 +12,15 @@ int main(int argc, char* args[]) {
         { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dvert" }
     };
 
+    const shader_program_create_info preloaded_shader_programs[] = {
+        {
+            .name = "basic2d", .gpu = NULL, .shaders_size = 2,
+            .shaders = (const char *[]) { "basic2dfrag", "basic2dvert" },
+            .preconfigured_pipelines = (pipeline_state_bits[]) { RST_BASIC_2D },
+            .preconfigured_pipelines_size = 1
+        }
+    };
+
     vk_app_create_info app_info = {
         .name = "pixelcollision",
         .window_config = {
@@ -37,6 +46,11 @@ int main(int argc, char* args[]) {
                 .preloaded_shaders = preloaded_shaders,
                 .preloaded_shaders_size = sizeof(preloaded_shaders) /
                     sizeof(shader_preload_item)
+            },
+            .preloaded_shader_programs_config = {
+                .shader_programs_config = preloaded_shader_programs,
+                .shader_programs_config_size = sizeof(preloaded_shader_programs)
+                    / sizeof(shader_program_create_info)
             }
         }
     };

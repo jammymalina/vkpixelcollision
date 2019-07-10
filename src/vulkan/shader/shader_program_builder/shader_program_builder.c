@@ -6,7 +6,7 @@
 #include "../shd.h"
 
 static inline void shaders_sort_by_type(const shader* dest[SHADER_TYPES_COUNT],
-    char** shaders, size_t shaders_size)
+    const char** shaders, size_t shaders_size)
 {
     shader_manager* shm = retrieve_shader_manager();
 
