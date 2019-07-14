@@ -80,6 +80,8 @@ static inline void vk_app_init_shaders(vk_app* app,
         app_info->render_programs_config.preloaded_shader_programs_config;
     sh_info.default_gpu = sh_info.default_gpu ?
         sh_info.default_gpu : &app->gpu;
+    sh_info.default_render_pass = sh_info.default_render_pass ?
+        sh_info.default_render_pass : app->ctx.render_pass.handle;
     status = shader_program_manager_preload(spm, &sh_info);
     ASSERT_LOG_ERROR_EXIT(status, "Unable to build all shader programs");
 }

@@ -74,12 +74,14 @@ bool shader_program_manager_preload(shader_program_manager* spm, const
 
     for (size_t i = 0; i < preload_info->shader_programs_config_size; ++i) {
         shader_program p;
-        shader_program_create_info prog_info =
+        shader_manager_program_create_info prog_info =
             preload_info->shader_programs_config[i];
-        prog_info.gpu = prog_info.gpu ? prog_info.gpu :
-            preload_info->default_gpu;
+        prog_info.gpu = prog_info.gpu ?
+            prog_info.gpu : preload_info->default_gpu;
+        prog_info.default_render_pass = prog_info.default_render_pass ?
+            prog_info.default_render_pass : preload_info->default_render_pass;
 
-        status &= shader_builder_build_shader_program(&p, &prog_info);
+        status &= shader_builder_preload_programs(&p, &prog_info);
         ASSERT_LOG_ERROR(status, "Unable to build shader program: %s",
             prog_info.name);
 

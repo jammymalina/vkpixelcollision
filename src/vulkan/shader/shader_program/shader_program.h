@@ -13,6 +13,13 @@
 
 #define SHADER_PROGRAM_PIPELINE_CACHE_SIZE 64
 
+typedef struct shader_program_create_info {
+    const gpu_info* gpu;
+    const char** shaders;
+    size_t shaders_size;
+    vertex_layout_type vertex_layout;
+} shader_program_create_info;
+
 typedef struct shader_program {
     const gpu_info* gpu;
     VkPipelineCache vk_pipeline_cache;
@@ -28,6 +35,8 @@ typedef struct shader_program {
 } shader_program;
 
 void shader_program_init_empty(shader_program* prog);
+bool shader_program_init(shader_program* prog, const shader_program_create_info*
+    prog_info);
 // DANGEROUS COPY!!! USE WITH CAUTION
 void shader_program_copy(shader_program* dest, const shader_program* src);
 

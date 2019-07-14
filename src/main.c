@@ -12,11 +12,18 @@ int main(int argc, char* args[]) {
         { .filepath = "shaders/basic/basic2d.vert.svm", .name = "basic2dvert" }
     };
 
-    const shader_program_create_info preloaded_shader_programs[] = {
+    const shader_manager_program_create_info preloaded_shader_programs[] = {
         {
             .name = "basic2d", .gpu = NULL, .shaders_size = 2,
             .shaders = (const char *[]) { "basic2dfrag", "basic2dvert" },
-            .preconfigured_pipelines = (pipeline_state_bits[]) { RST_BASIC_2D },
+            .vertex_layout = VERTEX_LAYOUT_POS_2_COL_4,
+            .preconfigured_pipelines = (pipeline_create_info[]) {
+                {
+                    .state_bits = RST_BASIC_2D,
+                    .render_pass = VK_NULL_HANDLE,
+                    .store_in_program_cache = true
+                }
+            },
             .preconfigured_pipelines_size = 1
         }
     };
@@ -51,7 +58,7 @@ int main(int argc, char* args[]) {
                 .default_gpu = NULL,
                 .shader_programs_config = preloaded_shader_programs,
                 .shader_programs_config_size = sizeof(preloaded_shader_programs)
-                    / sizeof(shader_program_create_info)
+                    / sizeof(shader_manager_program_create_info)
             }
         }
     };

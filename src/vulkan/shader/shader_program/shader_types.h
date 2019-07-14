@@ -64,9 +64,14 @@ typedef struct shader_program_manager shader_program_manager;
 
 typedef uint64_t pipeline_state_bits;
 typedef struct pipeline_state pipeline_state;
+typedef struct pipeline_create_info pipeline_create_info;
+typedef struct shader_program_create_info shader_program_create_info;
 typedef struct shader_program shader_program;
 
-typedef struct shader_program_create_info shader_program_create_info;
+typedef struct shader_manager_program_create_info
+    shader_manager_program_create_info;
+typedef struct shader_builder_program_create_info
+    shader_builder_program_create_info;
 
 static inline shader_type shader_extension_to_type(const char* extension) {
     if (string_equal(extension, "vert"))

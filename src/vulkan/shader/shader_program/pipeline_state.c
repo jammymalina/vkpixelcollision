@@ -357,7 +357,7 @@ VkPipelineDepthStencilStateCreateInfo pipeline_state_get_depth_stencil_info(
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
-        .depthTestEnable = VK_TRUE,
+        .depthTestEnable = VK_FALSE,
         .depthWriteEnable = (ps->state_bits & RST_DEPTHMASK) == 0,
         .depthCompareOp = depth_compare_op,
         .depthBoundsTestEnable = gpu_depth_bounds &&

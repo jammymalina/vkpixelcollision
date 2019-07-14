@@ -18,22 +18,24 @@ typedef struct shader_program_manager_create_info {
     size_t expected_number_of_shader_programs;
 } shader_program_manager_create_info;
 
-typedef struct shader_program_create_info {
+typedef struct shader_manager_program_create_info {
     const char* name;
+    vertex_layout_type vertex_layout;
 
     const gpu_info* gpu;
+
     const char** shaders;
     size_t shaders_size;
 
-    VkRenderPass render_pass;
-
-    pipeline_state_bits* preconfigured_pipelines;
+    VkRenderPass default_render_pass;
+    pipeline_create_info* preconfigured_pipelines;
     size_t preconfigured_pipelines_size;
-} shader_program_create_info;
+} shader_manager_program_create_info;
 
 typedef struct shader_program_preload_info {
     const gpu_info* default_gpu;
-    const shader_program_create_info* shader_programs_config;
+    VkRenderPass default_render_pass;
+    const shader_manager_program_create_info* shader_programs_config;
     size_t shader_programs_config_size;
 } shader_program_preload_info;
 
