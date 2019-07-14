@@ -13,6 +13,7 @@
 
 typedef struct pipeline_create_info {
     pipeline_state_bits state_bits;
+    VkRenderPass render_pass;
     bool store_in_program_cache;
 } pipeline_create_info;
 

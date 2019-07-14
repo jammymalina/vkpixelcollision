@@ -14,8 +14,7 @@
 #define SHADER_PROGRAM_PIPELINE_CACHE_SIZE 64
 
 typedef struct shader_program {
-    gpu_info* gpu;
-    VkRenderPass render_pass;
+    const gpu_info* gpu;
     VkPipelineCache vk_pipeline_cache;
 
     const shader* shaders[SHADER_TYPES_COUNT];
@@ -40,8 +39,8 @@ void shader_program_remove_least_used_pipeline_from_cache(shader_program*
 void shader_program_add_pipeline_to_cache(shader_program* prog, const
     pipeline_state* ps);
 
-const pipeline_state* shader_program_get_pipeline_by_state_bits(shader_program*
-    prog, pipeline_state_bits state_bits);
+const pipeline_state* shader_program_get_pipeline(shader_program*
+    prog, pipeline_state_bits state_bits, VkRenderPass render_pass);
 
 void shader_program_destroy(shader_program* prog);
 

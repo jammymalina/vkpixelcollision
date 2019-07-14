@@ -74,7 +74,7 @@ static bool create_descriptor_layout(shader_program* prog)
     return true;
 }
 
-static bool create_pipeline_layout(shader_program* prog) {
+static inline bool create_pipeline_layout(shader_program* prog) {
     VkPipelineLayoutCreateInfo pipeline_layout_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = NULL,
@@ -86,6 +86,21 @@ static bool create_pipeline_layout(shader_program* prog) {
     };
     CHECK_VK_BOOL(vkCreatePipelineLayout(prog->gpu->device,
         &pipeline_layout_info, NULL, &prog->pipeline_layout));
+
+    return true;
+}
+
+static inline bool create_pipeline_cache(shader_program* prog) {
+    VkPipelineCacheCreateInfo pipeline_cache_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0,
+        .initialDataSize = 0,
+        .pInitialData = NULL
+    };
+
+    CHECK_VK_BOOL(vkCreatePipelineCache(prog->gpu->device, &pipeline_cache_info,
+        NULL, &prog->vk_pipeline_cache));
 
     return true;
 }
@@ -104,6 +119,8 @@ bool shader_builder_build_shader_program(shader_program* prog, const
     ASSERT_LOG_ERROR(success, "Unable to create descriptor layout");
     success = create_pipeline_layout(prog);
     ASSERT_LOG_ERROR(success, "Unable to create pipeline layout");
+    success = create_pipeline_cache(prog);
+    ASSERT_LOG_ERROR(success, "Unable to create pipeline cache");
 
     for (size_t i = 0; i < prog_info->preconfigured_pipelines_size; ++i) {
         pipeline_state tmp;

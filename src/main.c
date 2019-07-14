@@ -30,12 +30,12 @@ int main(int argc, char* args[]) {
             .fullscreen = false
         },
         .vma_allocator_config = {
+            .gpu = NULL,
             .desired_device_local_memory_MB = 32,
             .desired_host_visible_memory_MB = 16,
             .min_blocks_size = 30,
             .min_garbage_size = 20,
-            .number_of_frames = 0,
-            .buffer_image_granularity = 0
+            .number_of_frames = 0
         },
         .render_programs_config = {
             .shd_tools_config = {
@@ -48,6 +48,7 @@ int main(int argc, char* args[]) {
                     sizeof(shader_preload_item)
             },
             .preloaded_shader_programs_config = {
+                .default_gpu = NULL,
                 .shader_programs_config = preloaded_shader_programs,
                 .shader_programs_config_size = sizeof(preloaded_shader_programs)
                     / sizeof(shader_program_create_info)

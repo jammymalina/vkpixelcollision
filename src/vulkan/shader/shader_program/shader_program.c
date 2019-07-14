@@ -10,18 +10,16 @@
 
 void shader_program_init_empty(shader_program* prog) {
     prog->gpu = NULL;
-    prog->render_pass = VK_NULL_HANDLE;
     prog->vk_pipeline_cache = VK_NULL_HANDLE;
 
     prog->pipeline_layout = VK_NULL_HANDLE;
     prog->descriptor_set_layout = VK_NULL_HANDLE;
     prog->vertex_layout = VERTEX_LAYOUT_UNKNOWN;
 
+    prog->pipeline_cache_size = 0;
     for (size_t i = 0; i < SHADER_PROGRAM_PIPELINE_CACHE_SIZE; i++) {
         pipeline_state* p = &prog->pipeline_cache[i];
-        p->state_bits = RST_DEFAULT;
-        p->handle = VK_NULL_HANDLE;
-        p->counter = 0;
+        pipeline_state_init_empty(p);
     }
 
     for (size_t i = 0; i < SHADER_TYPES_COUNT; ++i) {
@@ -32,7 +30,6 @@ void shader_program_init_empty(shader_program* prog) {
 // DANGEROUS COPY!!! USE WITH CAUTION
 void shader_program_copy(shader_program* dest, const shader_program* src) {
     dest->gpu = src->gpu;
-    dest->render_pass = src->render_pass;
     dest->vk_pipeline_cache = src->vk_pipeline_cache;
     mem_copy(dest->shaders, src->shaders, sizeof(shader*) * SHADER_TYPES_COUNT);
     dest->pipeline_layout = src->pipeline_layout;
@@ -92,15 +89,17 @@ void shader_program_add_pipeline_to_cache(shader_program* prog, const
 
     size_t cache_index = prog->pipeline_cache_size++;
     pipeline_state_copy(&prog->pipeline_cache[cache_index], ps);
-    prog->pipeline_cache[cache_index].gpu = prog->gpu;
+    if (prog->pipeline_cache[cache_index].gpu != prog->gpu) {
+        log_warning("Render program's GPU is different than pipeline GPU");
+    }
 }
 
-const pipeline_state* shader_program_get_pipeline_by_state_bits(shader_program*
-    prog, pipeline_state_bits state_bits)
+const pipeline_state* shader_program_get_pipeline(shader_program*
+    prog, pipeline_state_bits state_bits, VkRenderPass render_pass)
 {
-    for (size_t i = 0; i < prog->pipeline_cache_size; i++) {
+    for (size_t i = 0; i < prog->pipeline_cache_size; ++i) {
         pipeline_state *ps = &prog->pipeline_cache[i];
-        if (ps->state_bits == state_bits) {
+        if (ps->state_bits == state_bits && ps->render_pass == render_pass) {
             ps->counter++;
             return ps;
         }

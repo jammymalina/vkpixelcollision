@@ -38,18 +38,23 @@ static inline bool vma_allocator_garbage_init(vma_allocator* allocator,
 bool vma_allocator_init(vma_allocator* allocator,
     const vma_allocator_create_info* allocator_info)
 {
+    ASSERT_LOG_ERROR(allocator_info->gpu, "Allocator init failed - GPU must "
+        "be set");
+    ASSERT_LOG_ERROR(allocator_info->gpu->device != VK_NULL_HANDLE, "Allocator "
+        "init failed - logical device was not created");
+
     allocator->device_local_memory_bytes =
         VMA_MB_TO_BYTES(allocator_info->desired_device_local_memory_MB);
     allocator->host_visible_memory_bytes =
         VMA_MB_TO_BYTES(allocator_info->desired_host_visible_memory_MB);
     allocator->buffer_image_granularity =
-        allocator_info->buffer_image_granularity;
+        allocator_info->gpu->props.limits.bufferImageGranularity;
     allocator->number_of_frames = max(allocator_info->number_of_frames, 1);
 
     allocator->garbage =
         mem_alloc(sizeof(vma_allocation_vector) * allocator->number_of_frames);
-    CHECK_ALLOC_BOOL(allocator->garbage, "Unable to allocate garbage vector"
-     " for vma_allocator");
+    CHECK_ALLOC_BOOL(allocator->garbage, "Unable to allocate garbage vector "
+        "for vma_allocator");
 
     if (!vma_allocator_blocks_init(allocator, allocator_info) ||
         !vma_allocator_garbage_init(allocator, allocator_info))
@@ -120,6 +125,72 @@ void vma_allocator_destroy(vma_allocator* allocator) {
     vma_allocator_garbage_destroy(allocator);
 }
 
+static inline uint32_t vma_count_set_bits(uint32_t n) {
+    uint32_t count = 0;
+    while (n) {
+        count += n & 1;
+        n >>= 1;
+    }
+    return count;
+}
+
+uint32_t vma_allocator_get_memory_type_index(const vma_allocator* allocator,
+    uint32_t memory_type_bits, vma_memory_usage usage)
+{
+    const VkPhysicalDeviceMemoryProperties* mem_props =
+        &allocator->gpu->mem_props;
+
+    VkMemoryPropertyFlags required = 0;
+    VkMemoryPropertyFlags preferred = 0;
+
+    switch (usage) {
+        case VMA_MEMORY_USAGE_GPU_ONLY:
+            preferred |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            break;
+        case VMA_MEMORY_USAGE_CPU_ONLY:
+            required |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            break;
+        case VMA_MEMORY_USAGE_CPU_TO_GPU:
+            required |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+            preferred |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            break;
+        case VMA_MEMORY_USAGE_GPU_TO_CPU:
+            required |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+            preferred |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            break;
+        default:
+            log_error("Unknown memory type");
+            return UINT32_MAX;
+    }
+
+    size_t best_fit = 0;
+    int64_t max_score = -1;
+    for (size_t i = 0; i < mem_props->memoryTypeCount; i++) {
+        if (((memory_type_bits >> i) & 1) == 0) {
+            continue;
+        }
+
+        VkMemoryPropertyFlags props = mem_props->memoryTypes[i].propertyFlags;
+        if ((props & required) != required) {
+            continue;
+        }
+
+        if ((props & preferred) == preferred) {
+            return i;
+        }
+
+        int64_t score = (int64_t) vma_count_set_bits(props & preferred);
+        if (score > max_score) {
+            best_fit = i;
+            max_score = score;
+        }
+    }
+
+    return max_score == -1 ? UINT32_MAX : best_fit;
+}
+
 static inline VkDeviceSize vma_allocator_retrieve_mem_size(const vma_allocator*
     allocator, vma_memory_usage usage)
 {
@@ -137,17 +208,13 @@ static inline bool vma_allocator_allocate_new_block(vma_allocator* allocator,
 
     vma_block* block = mem_alloc(sizeof(vma_block));
     CHECK_ALLOC_BOOL(block, "Unable to allocate vma block");
-    vma_block_init_empty(block, memory_type_index, blocks_size,
-        alloc_info->usage);
-    if (!vma_block_init(block)) {
-        log_error("Unable to create vma memory block");
-        return false;
-    }
+    vma_block_init_empty(block, allocator->gpu->device, memory_type_index,
+        blocks_size, alloc_info->usage);
 
-    if (!vma_vector_push(&allocator->blocks[memory_type_index], block)) {
-        log_error("Unable to add vma memory block to blocks vector");
-        return false;
-    }
+    ASSERT_LOG_ERROR(vma_block_init(block), "Unable to create vma memory "
+        "block");
+    ASSERT_LOG_ERROR(vma_vector_push(&allocator->blocks[memory_type_index],
+        block), "Unable to add vma memory block to blocks vector");
 
     const vma_block_allocation_info block_alloc_info = {
         .allocation_type = alloc_info->type,
@@ -182,12 +249,11 @@ static int vma_allocator_allocate_existing_block(vma_allocator*
 bool vma_allocator_allocate(vma_allocator* allocator, vma_allocation* alloc,
     const vma_allocation_create_info* alloc_info)
 {
-    const uint32_t memory_type_index = 0;
+    const uint32_t memory_type_index = vma_allocator_get_memory_type_index(
+        allocator, alloc_info->memory_type_bits, alloc_info->usage);
 
-    if (memory_type_index == UINT32_MAX) {
-        log_error("Unable to find memory type index");
-        return false;
-    }
+    ASSERT_LOG_ERROR(memory_type_index != UINT32_MAX, "Unable to find memory "
+        "type index");
 
     int existing_block_status = vma_allocator_allocate_existing_block(allocator,
         alloc, alloc_info, memory_type_index);
@@ -205,10 +271,8 @@ bool vma_allocator_free_allocation(vma_allocator* allocator,
     vma_allocation_vector* garbage_alloc_vec =
         &allocator->garbage[allocator->garbage_index];
     bool status = vma_vector_push(garbage_alloc_vec, *allocation);
-    if (!status) {
-        log_error("Unable to add allocation to the garbage vector");
-    }
-    return status;
+    ASSERT_LOG_ERROR(status, "Unable to add allocation to the garbage vector");
+    return true;
 }
 
 void vma_allocator_empty_garbage(vma_allocator* allocator) {

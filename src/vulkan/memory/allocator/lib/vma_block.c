@@ -6,9 +6,10 @@
 #include "../../../tools/tools.h"
 #include "./vma_allocation.h"
 
-void vma_block_init_empty(vma_block* block, uint32_t memory_type_index,
-    VkDeviceSize size, vma_memory_usage usage)
+void vma_block_init_empty(vma_block* block, VkDevice device, uint32_t
+    memory_type_index, VkDeviceSize size, vma_memory_usage usage)
 {
+    block->device = device;
     block->head = NULL;
     block->next_block_id = 0;
     block->size = size;
@@ -19,9 +20,10 @@ void vma_block_init_empty(vma_block* block, uint32_t memory_type_index,
 }
 
 bool vma_block_init(vma_block* block) {
-    if (block->memory_type_index == UINT64_MAX) {
-        return false;
-    }
+    ASSERT_LOG_ERROR(block->device != VK_NULL_HANDLE, "VMA block init error - "
+        "device cannot be null");
+    ASSERT_LOG_ERROR(block->memory_type_index != UINT64_MAX, "VMA block init "
+        "error - invalid memory type index");
 
     const VkMemoryAllocateInfo mem_alloc_info = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -32,10 +34,8 @@ bool vma_block_init(vma_block* block) {
 
     CHECK_VK_BOOL(vkAllocateMemory(block->device, &mem_alloc_info, NULL,
         &block->device_memory));
-
-    if (block->device_memory == VK_NULL_HANDLE) {
-        return false;
-    }
+    ASSERT_LOG_ERROR(block->device_memory != VK_NULL_HANDLE, "Unable allocate "
+        "device memory");
 
     if (vma_block_is_host_visible(block)) {
         CHECK_VK_BOOL(vkMapMemory(block->device, block->device_memory, 0,
@@ -57,11 +57,12 @@ bool vma_block_init(vma_block* block) {
 }
 
 void vma_block_destroy(vma_block* block) {
-    if (vma_block_is_host_visible(block)) {
-        vkUnmapMemory(block->device, block->device_memory);
+    if (block->device && block->device_memory) {
+        if (vma_block_is_host_visible(block)) {
+            vkUnmapMemory(block->device, block->device_memory);
+        }
+        vkFreeMemory(block->device, block->device_memory, NULL);
     }
-
-    vkFreeMemory(block->device, block->device_memory, NULL);
     block->device_memory = VK_NULL_HANDLE;
 
     vma_block_chunk* prev = NULL;

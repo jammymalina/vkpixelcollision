@@ -9,7 +9,7 @@
 typedef struct vk_swapchain_create_info {
     VkSurfaceKHR surface;
     VkExtent2D dimensions;
-    gpu_info* gpu;
+    const gpu_info* gpu;
 } vk_swapchain_create_info;
 
 typedef struct vk_swapchain {

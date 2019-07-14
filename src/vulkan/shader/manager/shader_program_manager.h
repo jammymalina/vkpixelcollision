@@ -21,15 +21,18 @@ typedef struct shader_program_manager_create_info {
 typedef struct shader_program_create_info {
     const char* name;
 
-    gpu_info* gpu;
+    const gpu_info* gpu;
     const char** shaders;
     size_t shaders_size;
+
+    VkRenderPass render_pass;
 
     pipeline_state_bits* preconfigured_pipelines;
     size_t preconfigured_pipelines_size;
 } shader_program_create_info;
 
 typedef struct shader_program_preload_info {
+    const gpu_info* default_gpu;
     const shader_program_create_info* shader_programs_config;
     size_t shader_programs_config_size;
 } shader_program_preload_info;
@@ -54,7 +57,7 @@ bool shader_program_manager_delete(shader_program_manager* spm, const char*
     shader_name);
 
 bool shader_program_manager_preload(shader_program_manager* spm, const
-    shader_program_preload_info* preload_info, gpu_info* default_gpu);
+    shader_program_preload_info* preload_info);
 
 void shader_program_manager_destroy(shader_program_manager* spm);
 

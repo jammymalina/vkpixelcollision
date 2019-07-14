@@ -10,8 +10,9 @@
 
 typedef struct pipeline_state {
     VkPipeline handle;
+    VkRenderPass render_pass;
     pipeline_state_bits state_bits;
-    gpu_info* gpu;
+    const gpu_info* gpu;
     size_t counter;
 } pipeline_state;
 

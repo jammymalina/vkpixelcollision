@@ -6,12 +6,14 @@
 void pipeline_state_init_empty(pipeline_state* ps) {
     ps->state_bits = 0;
     ps->handle = VK_NULL_HANDLE;
+    ps->render_pass = VK_NULL_HANDLE;
     ps->counter = 0;
     ps->gpu = NULL;
 }
 
 void pipeline_state_copy(pipeline_state* dest, const pipeline_state* src) {
     dest->handle = src->handle;
+    dest->render_pass = src->render_pass;
     dest->state_bits = src->state_bits;
     dest->gpu = src->gpu;
     dest->counter = src->counter;
@@ -394,7 +396,7 @@ void pipeline_state_get_dynamic_states(const pipeline_state* ps, VkDynamicState*
 {
     size_t i = 2;
 
-    if (ps->state_bits) {
+    if (dynamic_states) {
         dynamic_states[0] = VK_DYNAMIC_STATE_SCISSOR;
         dynamic_states[1] = VK_DYNAMIC_STATE_VIEWPORT;
     }

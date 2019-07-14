@@ -35,8 +35,8 @@ typedef struct vma_block {
 } vma_block;
 
 
-void vma_block_init_empty(vma_block* block, uint32_t memory_type_index,
-    VkDeviceSize size, vma_memory_usage usage);
+void vma_block_init_empty(vma_block* block, VkDevice device, uint32_t
+    memory_type_index, VkDeviceSize size, vma_memory_usage usage);
 bool vma_block_init(vma_block* block);
 void vma_block_destroy(vma_block* block);
 

@@ -6,9 +6,10 @@
 #include "../../vertex/core/vertex_layout.h"
 
 static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
-    state_bits, shader_program* prog)
+    state_bits, VkRenderPass render_pass, shader_program* prog)
 {
     vertex_layout vertex_layouts[VERTEX_LAYOUTS_TOTAL];
+    retrieve_vertex_layouts(vertex_layouts);
     vertex_layout* layout = &vertex_layouts[prog->vertex_layout];
 
     // vertex input
@@ -129,7 +130,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
         .pColorBlendState = &color_blend,
         .pDynamicState = &dynamic_info,
         .layout = prog->pipeline_layout,
-        .renderPass = prog->render_pass,
+        .renderPass = render_pass,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = 0
@@ -145,23 +146,31 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
 bool pipeline_builder_build_pipeline(pipeline_state* result,
     shader_program* prog, const pipeline_create_info* pipe_info)
 {
-    const pipeline_state* ps = shader_program_get_pipeline_by_state_bits(prog,
-        pipe_info->state_bits);
+    const pipeline_state* ps = shader_program_get_pipeline(prog,
+        pipe_info->state_bits, pipe_info->render_pass);
     if (ps) {
         pipeline_state_copy(result, ps);
         return true;
     }
 
+    pipeline_state_init_empty(result);
+
     VkPipeline pipeline = VK_NULL_HANDLE;
-    bool success = create_pipeline(&pipeline, pipe_info->state_bits, prog);
+    bool success = create_pipeline(&pipeline, pipe_info->state_bits,
+        pipe_info->render_pass, prog);
 
     if (!success) {
         log_error("Unable to create pipeline");
         return false;
     }
 
+    result->gpu = prog->gpu;
+    result->handle = pipeline;
+    result->render_pass = pipe_info->render_pass;
+    result->state_bits = pipe_info->state_bits;
+
     if (pipe_info->store_in_program_cache) {
-        shader_program_add_pipeline_to_cache(prog, ps);
+        shader_program_add_pipeline_to_cache(prog, result);
     }
 
     return true;

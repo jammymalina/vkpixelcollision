@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
+#include "../../../gpu/gpu.h"
 #include "./vma_types.h"
 
 typedef struct vma_allocation_create_info {

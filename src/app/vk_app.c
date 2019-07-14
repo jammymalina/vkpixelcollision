@@ -46,9 +46,8 @@ static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info
     *app_info)
 {
     vma_allocator_create_info allocator_info = app_info->vma_allocator_config;
-    if (allocator_info.buffer_image_granularity == 0) {
-        allocator_info.buffer_image_granularity =
-            app->gpu.props.limits.bufferImageGranularity;
+    if (!allocator_info.gpu) {
+        allocator_info.gpu = &app->gpu;
     }
     if (allocator_info.number_of_frames == 0) {
         allocator_info.number_of_frames = app->ctx.swapchain.image_count;
@@ -77,9 +76,11 @@ static inline void vk_app_init_shaders(vk_app* app,
     ASSERT_LOG_ERROR_EXIT(status, "Unable to load all shaders");
 
     shader_program_manager* spm = retrieve_shader_program_manager();
-    status = shader_program_manager_preload(spm,
-        &app_info->render_programs_config.preloaded_shader_programs_config,
-        &app->gpu);
+    shader_program_preload_info sh_info =
+        app_info->render_programs_config.preloaded_shader_programs_config;
+    sh_info.default_gpu = sh_info.default_gpu ?
+        sh_info.default_gpu : &app->gpu;
+    status = shader_program_manager_preload(spm, &sh_info);
     ASSERT_LOG_ERROR_EXIT(status, "Unable to build all shader programs");
 }
 

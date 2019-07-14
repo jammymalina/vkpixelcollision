@@ -68,23 +68,25 @@ bool shader_program_manager_delete(shader_program_manager* spm, const char*
 }
 
 bool shader_program_manager_preload(shader_program_manager* spm, const
-    shader_program_preload_info* preload_info, gpu_info* default_gpu)
+    shader_program_preload_info* preload_info)
 {
     bool status = true;
 
     for (size_t i = 0; i < preload_info->shader_programs_config_size; ++i) {
         shader_program p;
-        shader_program_create_info* prog_info =
-            &preload_info->shader_programs_config[i];
-        prog_info->gpu = prog_info->gpu == NULL ? default_gpu : prog_info->gpu;
-        status &= shader_builder_build_shader_program(&p, prog_info);
-        ASSERT_LOG_ERROR(status, "Unable to build shader program: %s",
-            prog_info->name);
+        shader_program_create_info prog_info =
+            preload_info->shader_programs_config[i];
+        prog_info.gpu = prog_info.gpu ? prog_info.gpu :
+            preload_info->default_gpu;
 
-        log_info("Built shader program: %s", prog_info->name);
-        status &= shader_program_manager_add(spm, prog_info->name, &p);
+        status &= shader_builder_build_shader_program(&p, &prog_info);
+        ASSERT_LOG_ERROR(status, "Unable to build shader program: %s",
+            prog_info.name);
+
+        log_info("Built shader program: %s", prog_info.name);
+        status &= shader_program_manager_add(spm, prog_info.name, &p);
         ASSERT_LOG_ERROR(status, "Unable to add shader to shader manager: %s",
-            prog_info->name);
+            prog_info.name);
     }
 
     return status;
