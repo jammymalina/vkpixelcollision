@@ -63,7 +63,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
     VkPipelineShaderStageCreateInfo shader_stages[SHADER_TYPES_COUNT];
     size_t shader_stages_size = 0;
 
-    for (size_t i = 0; i < SHADER_TYPES_COUNT; i++) {
+    for (size_t i = 0; i < SHADER_TYPES_COUNT; ++i) {
         if (!prog->shaders[i])
             continue;
 
@@ -78,9 +78,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
             .pName = "main",
             .pSpecializationInfo = NULL
         };
-        shader_stages[shader_stages_size] = shader_stage_info;
-
-        shader_stages_size++;
+        shader_stages[shader_stages_size++] = shader_stage_info;
     }
 
     // dynamic state
