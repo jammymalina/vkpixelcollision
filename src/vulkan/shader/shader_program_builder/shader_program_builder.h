@@ -11,6 +11,8 @@
 #include "../shader_program/shader_program.h"
 
 typedef struct shader_builder_program_create_info {
+    shader_program_type type;
+
     const gpu_info* gpu;
     const char** shaders;
     size_t shaders_size;

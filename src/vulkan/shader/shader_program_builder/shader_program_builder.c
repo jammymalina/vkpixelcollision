@@ -16,6 +16,7 @@ bool shader_builder_preload_programs(shader_program* prog, const
 {
     shader_program_create_info prep_info = {
         .gpu = prog_info->gpu,
+        .type = prog_info->type,
         .shaders = prog_info->shaders,
         .shaders_size = prog_info->shaders_size,
         .vertex_layout = prog_info->vertex_layout

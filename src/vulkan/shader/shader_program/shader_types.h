@@ -22,6 +22,13 @@ typedef enum shader_type {
     SHADER_TYPE_UNDEFINED = 64
 } shader_type;
 
+typedef enum shadere_program_type {
+    SHADER_PROGRAM_TYPE_UNDEFINED = -1,
+    SHADER_PROGRAM_TYPE_GRAPHICS,
+    SHADER_PROGRAM_TYPE_COMPUTE,
+    SHADER_PROGRAM_TYPES_TOTAL
+} shader_program_type;
+
 const static shader_type shader_type_index_map[] = {
     SHADER_TYPE_VERTEX, SHADER_TYPE_FRAGMENT, SHADER_TYPE_GEOMETRY,
     SHADER_TYPE_COMPUTE, SHADER_TYPE_TESS_CTRL, SHADER_TYPE_TESS_EVAL,

@@ -18,9 +18,12 @@ typedef struct shader_program_create_info {
     const char** shaders;
     size_t shaders_size;
     vertex_layout_type vertex_layout;
+    shader_program_type type;
 } shader_program_create_info;
 
 typedef struct shader_program {
+    shader_program_type type;
+
     const gpu_info* gpu;
     VkPipelineCache vk_pipeline_cache;
 
@@ -40,8 +43,12 @@ bool shader_program_init(shader_program* prog, const shader_program_create_info*
 // DANGEROUS COPY!!! USE WITH CAUTION
 void shader_program_copy(shader_program* dest, const shader_program* src);
 
+bool shader_program_bind_pipeline(const shader_program* prog,
+    pipeline_state_bits state_bits, VkRenderPass render_pass, VkCommandBuffer
+    command_buffer);
+
 bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
-    state_bits);
+    state_bits, VkRenderPass render_pass);
 
 void shader_program_remove_least_used_pipeline_from_cache(shader_program*
     prog);

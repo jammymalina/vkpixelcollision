@@ -36,6 +36,14 @@
         }                                                        \
     } while (0)
 
+#define ASSERT_LOG_WARNING(x, message, ...)                      \
+    do {                                                         \
+        if (!(x)) {                                              \
+            log_warning(message, ##__VA_ARGS__);                 \
+            return false;                                        \
+        }                                                        \
+    } while (0)
+
 #define ASSERT_LOG_ERROR_EXIT(x, message, ...)                   \
     do {                                                         \
         if (!(x)) {                                              \

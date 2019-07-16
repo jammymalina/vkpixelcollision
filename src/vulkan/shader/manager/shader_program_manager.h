@@ -20,6 +20,7 @@ typedef struct shader_program_manager_create_info {
 
 typedef struct shader_manager_program_create_info {
     const char* name;
+    shader_program_type type;
     vertex_layout_type vertex_layout;
 
     const gpu_info* gpu;

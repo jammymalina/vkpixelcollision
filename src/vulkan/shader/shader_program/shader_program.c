@@ -109,6 +109,8 @@ static inline bool create_pipeline_cache(shader_program* prog) {
 }
 
 void shader_program_init_empty(shader_program* prog) {
+    prog->type = SHADER_PROGRAM_TYPE_UNDEFINED;
+
     prog->gpu = NULL;
     prog->vk_pipeline_cache = VK_NULL_HANDLE;
 
@@ -131,6 +133,9 @@ bool shader_program_init(shader_program* prog, const shader_program_create_info*
     prog_info)
 {
     shader_program_init_empty(prog);
+    prog->type = prog_info->type;
+    ASSERT_LOG_ERROR(prog->type != SHADER_PROGRAM_TYPE_UNDEFINED, "Shader"
+        " program type cannot be undefined");
 
     prog->gpu = prog_info->gpu;
     ASSERT_LOG_ERROR(prog->gpu, "GPU must be initialized when building shader");
@@ -166,8 +171,25 @@ void shader_program_copy(shader_program* dest, const shader_program* src) {
     dest->pipeline_cache_size = src->pipeline_cache_size;
 }
 
+bool shader_program_bind_pipeline(const shader_program* prog,
+    pipeline_state_bits state_bits, VkRenderPass render_pass, VkCommandBuffer
+    command_buffer)
+{
+    ASSERT_LOG_WARNING(shader_program_has_pipeline(prog, state_bits,
+        render_pass), "Unable to bind the desired pipeline");
+    const pipeline_state* ps = shader_program_get_pipeline(prog, state_bits,
+        render_pass);
+    ASSERT_LOG_ERROR(ps, "Unable to bind pipeline, pipeline state is NULL");
+
+    VkPipelineBindPoint bind_point = prog->type == SHADER_PROGRAM_TYPE_COMPUTE ?
+        VK_PIPELINE_BIND_POINT_COMPUTE : VK_PIPELINE_BIND_POINT_GRAPHICS;
+    vkCmdBindPipeline(command_buffer, bind_point, ps->handle);
+
+    return true;
+}
+
 bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
-    state_bits)
+    state_bits, VkRenderPass render_pass)
 {
     for (size_t i = 0; i < prog->pipeline_cache_size; i++) {
         const pipeline_state *ps = &prog->pipeline_cache[i];
@@ -205,7 +227,7 @@ void shader_program_remove_least_used_pipeline_from_cache(shader_program*
 void shader_program_add_pipeline_to_cache(shader_program* prog, const
     pipeline_state* ps)
 {
-    if (shader_program_has_pipeline(prog, ps->state_bits)) {
+    if (shader_program_has_pipeline(prog, ps->state_bits, ps->render_pass)) {
         return;
     }
 
