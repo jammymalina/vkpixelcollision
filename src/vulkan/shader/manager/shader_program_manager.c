@@ -98,7 +98,6 @@ void shader_program_manager_destroy(shader_program_manager* spm) {
     const size_t shader_buff_size = 32;
     size_t shaders_processed = 0;
     shader_program* shader_buff[shader_buff_size];
-    log_info("Destroying shader manager");
     while (shaders_processed < hash_string_map_get_size(&spm->programs)) {
         const size_t current_processed = hash_string_map_values_reference_range(
             &spm->programs, shader_buff, shaders_processed, shader_buff_size);

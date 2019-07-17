@@ -138,11 +138,13 @@ bool swapchain_init(vk_swapchain* sw, const vk_swapchain_create_info* sw_info) {
 }
 
 static inline void swapchain_destroy_images(vk_swapchain* sw) {
+    if (sw->views) {
+        for (size_t i = 0; i < sw->image_count && sw->views[i]; ++i) {
+            vkDestroyImageView(sw->device, sw->views[i], NULL);
+        }
+    }
     if (sw->images) {
         mem_free(sw->images);
-    }
-    if (sw->views) {
-        mem_free(sw->views);
     }
 }
 

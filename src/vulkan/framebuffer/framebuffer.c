@@ -28,6 +28,8 @@ bool vk_framebuffer_init(vk_framebuffer* fb, const vk_framebuffer_create_info*
         .layers = fb_info->layers
     };
 
+
+
     CHECK_VK_BOOL(vkCreateFramebuffer(fb->device, &framebuffer_info,
         NULL, &fb->handle));
 
@@ -43,13 +45,14 @@ int vk_framebuffer_init_from_swapchain(vk_framebuffer** framebuffers, const
     if (!fbs) {
         return 0;
     }
+
     int success_fb_init_count = 0;
     for (size_t i = 0; i < swapchain->image_count; ++i) {
         const vk_framebuffer_create_info fb_info = {
             .device = swapchain->device,
             .render_pass = render_pass,
-            .attachment_size = swapchain->image_count,
-            .attachments = swapchain->views,
+            .attachment_size = 1,
+            .attachments = &swapchain->views[i],
             .width = swapchain->extent.width,
             .height = swapchain->extent.height,
             .layers = 1

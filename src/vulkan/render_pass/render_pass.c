@@ -15,7 +15,7 @@ bool render_pass_init(vk_render_pass* rp, const vk_render_pass_create_info*
     rp->device = rp_info->device;
 
     VkRenderPassCreateInfo render_pass_info = {
-        .sType = 0,
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
         .attachmentCount = rp_info->attachment_descriptions_size,

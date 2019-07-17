@@ -257,7 +257,6 @@ const pipeline_state* shader_program_get_pipeline(shader_program*
 }
 
 void shader_program_destroy(shader_program* prog) {
-    log_info("Destroying shader program");
     if (prog->pipeline_layout && prog->gpu) {
         vkDestroyPipelineLayout(prog->gpu->device, prog->pipeline_layout, NULL);
         prog->pipeline_layout = VK_NULL_HANDLE;

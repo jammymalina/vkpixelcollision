@@ -50,7 +50,7 @@ static void vertex_layout_init_pos_2_col_4(vertex_layout* vl) {
     vl->attribute_desc[0].format = VK_FORMAT_R32G32_SFLOAT,
     vl->attribute_desc[0].offset = 0;
     // color
-    vl->attribute_desc[1].location = 0;
+    vl->attribute_desc[1].location = 1;
     vl->attribute_desc[1].binding = vl->binding_desc[0].binding,
     vl->attribute_desc[1].format = VK_FORMAT_R32G32B32A32_SFLOAT,
     vl->attribute_desc[1].offset = 2 * sizeof(float);
@@ -69,7 +69,7 @@ static void vertex_layout_init_pos_uv_2(vertex_layout* vl) {
     vl->attribute_desc[0].format = VK_FORMAT_R32G32_SFLOAT,
     vl->attribute_desc[0].offset = 0;
     // color
-    vl->attribute_desc[1].location = 0;
+    vl->attribute_desc[1].location = 1;
     vl->attribute_desc[1].binding = vl->binding_desc[0].binding,
     vl->attribute_desc[1].format = VK_FORMAT_R32G32_SFLOAT,
     vl->attribute_desc[1].offset = 2 * sizeof(float);
