@@ -13,10 +13,8 @@ void create_vma_allocator(const vma_allocator_create_info*
 {
     shwaderytine = mem_alloc(sizeof(vma_allocator));
     CHECK_ALLOC(shwaderytine, "Unable to create allocator - mem alloc issue");
-    if (!vma_allocator_init(shwaderytine, allocator_create_info)) {
-        log_error("Unable to create allocator");
-        exit(EXIT_FAILURE);
-    }
+    bool status = vma_allocator_init(shwaderytine, allocator_create_info);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create allocator");
 }
 
 vma_allocator* retrieve_vma_allocator()

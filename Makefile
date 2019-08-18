@@ -91,7 +91,7 @@ $(TEST_OBJECTS): $(TEST_OBJDIR)/%.o : $(TEST_DIR)/%.c
 
 $(UNITY_OBJECTS): $(TEST_OBJDIR)/%.o : $(UNITYDIR)/%.c
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(DEFINES) $(TEST_INCLUDE_DIRS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(DEFINES) -DUNITY_INCLUDE_SETUP_STUBS $(TEST_INCLUDE_DIRS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
 $(TEST_DEPENDENCIES): $(TEST_DEPDIR)/%.d: $(TEST_DIR)/%.c

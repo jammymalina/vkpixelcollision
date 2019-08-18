@@ -35,10 +35,12 @@ bool enumerate_graphical_physical_devices(gpu_info* gpus, uint32_t* gpus_size,
         physical_devices));
     CHECK_VK_VAL_BOOL(num_physical_devices > 0, "No physical devices");
 
-    for (size_t i = 0; i < num_physical_devices; ++i) {
-        init_gpu_info(&gpus[i]);
-        gpu_info_props_init(&gpus[i], physical_devices[i], surface);
+    bool status = true;
+    for (size_t i = 0; i < num_physical_devices && status; ++i) {
+        gpu_info_init_empty(&gpus[i]);
+        status &= gpu_info_props_init(&gpus[i], physical_devices[i], surface);
     }
+    ASSERT_LOG_ERROR(status, "Unable to initialize one of the gpus");
 
     mem_free(physical_devices);
 

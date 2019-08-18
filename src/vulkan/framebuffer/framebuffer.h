@@ -27,8 +27,8 @@ typedef struct vk_framebuffer {
 void vk_framebuffer_init_empty(vk_framebuffer* fb);
 bool vk_framebuffer_init(vk_framebuffer* fb, const vk_framebuffer_create_info*
     fb_info);
-int vk_framebuffer_init_from_swapchain(vk_framebuffer** framebuffers, const
-    vk_swapchain* swapchain, VkRenderPass render_pass);
+bool vk_framebuffer_init_from_swapchain(vk_framebuffer* fb, const vk_swapchain*
+    swapchain, VkRenderPass render_pass, size_t swapchain_view_idx);
 void vk_framebuffer_destroy(vk_framebuffer* fb);
 
 #endif

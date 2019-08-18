@@ -43,9 +43,8 @@ bool shader_program_init(shader_program* prog, const shader_program_create_info*
 // DANGEROUS COPY!!! USE WITH CAUTION
 void shader_program_copy(shader_program* dest, const shader_program* src);
 
-bool shader_program_bind_pipeline(const shader_program* prog,
-    pipeline_state_bits state_bits, VkRenderPass render_pass, VkCommandBuffer
-    command_buffer);
+bool shader_program_bind_pipeline(shader_program* prog, pipeline_state_bits 
+    state_bits, VkRenderPass render_pass, VkCommandBuffer command_buffer);
 
 bool shader_program_has_pipeline(const shader_program* prog, pipeline_state_bits
     state_bits, VkRenderPass render_pass);

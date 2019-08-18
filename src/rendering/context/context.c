@@ -20,14 +20,14 @@ static inline VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window* w)
 
 void rendering_context_init(rendering_context* ctx) {
     ctx->gpu = NULL;
-    ctx->graphics_queue = VK_NULL_HANDLE;
+    vk_queue_init_empty(&ctx->graphics_queue);
     ctx->width = 0;
     ctx->height = 0;
     ctx->instance = VK_NULL_HANDLE;
     ctx->surface = VK_NULL_HANDLE;
     vk_swapchain empty_swapchain = { 0 };
     ctx->swapchain = empty_swapchain;
-    ctx->framebuffers = NULL;
+    ctx->rendering_resources = NULL;
     render_pass_init_empty(&ctx->render_pass);
 }
 
@@ -49,67 +49,50 @@ void rendering_context_set_gpu(rendering_context* ctx, gpu_info *gpu) {
 }
 
 void rendering_context_init_device_queue(rendering_context* ctx) {
-    if (!ctx->gpu) {
-        log_error("Rendering context gpu pointer doesn't point to valid gpu");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_LOG_ERROR_EXIT(ctx->gpu, "Rendering context gpu pointer doesn't"
+        " point to valid gpu");
     vkGetDeviceQueue(ctx->gpu->device, retrieve_graphics_queue_index(ctx->gpu,
         ctx->surface), 0,
         &ctx->graphics_queue);
 }
 
 void rendering_context_init_swapchain(rendering_context* ctx) {
-    if (!ctx->gpu) {
-        log_info("Rendering context gpu pointer doesn't point to valid gpu");
-        exit(EXIT_FAILURE);
-    }
-    VkExtent2D dimensions = { .width = ctx->width, .height = ctx->height };
-    vk_swapchain_create_info sw_info = {
+    ASSERT_LOG_ERROR_EXIT(ctx->gpu, "Rendering context gpu pointer doesn't"
+        " point to valid gpu");
+    const VkExtent2D dimensions = { .width = ctx->width, .height = ctx->height };
+    const vk_swapchain_create_info sw_info = {
         .gpu = ctx->gpu,
         .dimensions = dimensions,
         .surface = ctx->surface
     };
-    if (!swapchain_init(&ctx->swapchain, &sw_info)) {
-        log_error("Unable to create swapchain");
-        exit(EXIT_FAILURE);
-    }
+    const bool status = swapchain_init(&ctx->swapchain, &sw_info);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create swapchain");
 }
 
 void rendering_context_init_render_pass(rendering_context *ctx) {
-    if (!ctx->gpu) {
-        log_info("Rendering context gpu pointer doesn't point to valid gpu");
-        exit(EXIT_FAILURE);
-    }
-
-    if (!render_pass_init_swapchain_default_2d(&ctx->render_pass,
-        ctx->gpu->device, ctx->swapchain.surface_format.format))
-    {
-        log_error("Unable to create render pass");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_LOG_ERROR_EXIT(ctx->gpu, "Rendering context gpu pointer doesn't"
+        " point to valid gpu");
+    const bool status = render_pass_init_swapchain_default_2d(&ctx->render_pass,
+        ctx->gpu->device, ctx->swapchain.surface_format.format);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create render pass");
 }
 
-void rendering_context_init_framebuffers(rendering_context* ctx) {
-    if (!ctx->render_pass.handle || !ctx->gpu->device) {
-        log_info("Unable to create framebuffers - render pass might not be "
-            "initialized yet");
-        exit(EXIT_FAILURE);
-    }
-    if (vk_framebuffer_init_from_swapchain(&ctx->framebuffers, &ctx->swapchain,
-        ctx->render_pass.handle) != ctx->swapchain.image_count)
-    {
-        log_error("Unable to create framebuffers from swapchain");
-        exit(EXIT_FAILURE);
-    }
+void rendering_context_init_rendering_resources(rendering_context* ctx) {
+    ASSERT_LOG_ERROR_EXIT(ctx->render_pass.handle && ctx->gpu->device &&
+        ctx->swapchain.handle, "Unable to create framebuffers - render pass"
+        " might not be initialized yet");
+    const bool status = rendering_resources_init_from_swapchain(
+        &ctx->rendering_resources, &ctx->swapchain, ctx->render_pass.handle);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create rendering resources");
 }
 
 void rendering_context_destroy(rendering_context* ctx) {
-    if (ctx->framebuffers) {
+    if (ctx->rendering_resources) {
         for (size_t i = 0; i < ctx->swapchain.image_count; ++i) {
-            vk_framebuffer_destroy(&ctx->framebuffers[i]);
+            rendering_resource_destroy(&ctx->rendering_resources[i]);
         }
-        mem_free(ctx->framebuffers);
-        ctx->framebuffers = NULL;
+        mem_free(ctx->rendering_resources);
+        ctx->rendering_resources = NULL;
     }
     render_pass_destroy(&ctx->render_pass);
     swapchain_destroy(&ctx->swapchain);

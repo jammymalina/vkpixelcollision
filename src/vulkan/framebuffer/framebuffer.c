@@ -13,10 +13,9 @@ bool vk_framebuffer_init(vk_framebuffer* fb, const vk_framebuffer_create_info*
     fb_info)
 {
     vk_framebuffer_init_empty(fb);
-
     fb->device = fb_info->device;
 
-    VkFramebufferCreateInfo framebuffer_info = {
+    const VkFramebufferCreateInfo framebuffer_info = {
         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
@@ -27,44 +26,26 @@ bool vk_framebuffer_init(vk_framebuffer* fb, const vk_framebuffer_create_info*
         .height = fb_info->height,
         .layers = fb_info->layers
     };
-
-
-
     CHECK_VK_BOOL(vkCreateFramebuffer(fb->device, &framebuffer_info,
         NULL, &fb->handle));
 
     return true;
 }
 
-int vk_framebuffer_init_from_swapchain(vk_framebuffer** framebuffers, const
-    vk_swapchain* swapchain, VkRenderPass render_pass)
+bool vk_framebuffer_init_from_swapchain(vk_framebuffer* fb, const vk_swapchain*
+    swapchain, VkRenderPass render_pass, size_t swapchain_view_idx)
 {
-    *framebuffers = NULL;
-    vk_framebuffer* fbs = mem_alloc(sizeof(vk_framebuffer) *
-        swapchain->image_count);
-    if (!fbs) {
-        return 0;
-    }
-
-    int success_fb_init_count = 0;
-    for (size_t i = 0; i < swapchain->image_count; ++i) {
-        const vk_framebuffer_create_info fb_info = {
-            .device = swapchain->device,
-            .render_pass = render_pass,
-            .attachment_size = 1,
-            .attachments = &swapchain->views[i],
-            .width = swapchain->extent.width,
-            .height = swapchain->extent.height,
-            .layers = 1
-        };
-        if (!vk_framebuffer_init(&fbs[i], &fb_info)) {
-            break;
-        }
-        ++success_fb_init_count;
-    }
-    *framebuffers = fbs;
-
-    return success_fb_init_count;
+    vk_framebuffer_init_empty(fb);
+    const vk_framebuffer_create_info fb_info = {
+        .device = swapchain->device,
+        .render_pass = render_pass,
+        .attachment_size = 1,
+        .attachments = &swapchain->views[swapchain_view_idx],
+        .width = swapchain->extent.width,
+        .height = swapchain->extent.height,
+        .layers = 1
+    };
+    return vk_framebuffer_init(fb, &fb_info);
 }
 
 void vk_framebuffer_destroy(vk_framebuffer* fb) {

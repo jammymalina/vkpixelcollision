@@ -33,16 +33,15 @@ typedef struct gpu_info {
     uint32_t present_modes_size;
 } gpu_info;
 
-void init_gpu_info(gpu_info* gpu);
-void gpu_info_props_init(gpu_info* gpu, VkPhysicalDevice device,
+void gpu_info_init_empty(gpu_info* gpu);
+bool gpu_info_props_init(gpu_info* gpu, VkPhysicalDevice device,
     VkSurfaceKHR surface);
-void gpu_device_init(gpu_info* gpu, VkSurfaceKHR surface);
+bool gpu_info_sort_queue_families(gpu_info* gpu);
+bool gpu_device_init(gpu_info* gpu, VkSurfaceKHR surface);
 
 bool check_desired_extensions(const gpu_info* gpu,
     const char* const desired_extensions[], size_t desired_extensions_size);
 bool is_gpu_suitable_for_graphics(const gpu_info* gpu, VkSurfaceKHR surface);
-uint32_t retrieve_graphics_queue_index(const gpu_info* gpu,
-    VkSurfaceKHR surface);
 
 VkSurfaceFormatKHR retrieve_surface_format(const gpu_info* gpu);
 VkPresentModeKHR retrieve_present_mode(const gpu_info* gpu);

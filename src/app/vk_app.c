@@ -6,6 +6,7 @@
 #include "../vulkan/debug/debug.h"
 #include "../vulkan/functions/function_loader.h"
 #include "../vulkan/functions/functions.h"
+#include "../vulkan/gpu/gpu_queue_selector.h"
 #include "../vulkan/gpu/gpu_selector.h"
 #include "../vulkan/instance/instance.h"
 #include "../vulkan/tools/tools.h"
@@ -27,8 +28,13 @@ static inline void vk_app_init_vulkan(vk_app* app) {
 
 static inline void vk_app_init_gpu(vk_app* app) {
     app->gpu = select_gpu(app->instance, app->ctx.surface);
-    gpu_device_init(&app->gpu, app->ctx.surface);
+    bool status = gpu_device_init(&app->gpu, app->ctx.surface);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create logical device");
     load_device_level_functions(app->gpu.device);
+    const gpu_queue_selector_create_info selector_info = {
+        .gpu = &app->gpu
+    };
+    create_gpu_queue_selector(&selector_info);
     rendering_context_set_gpu(&app->ctx, &app->gpu);
 }
 
@@ -57,7 +63,7 @@ static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info
 
 static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
     rendering_context_init_render_pass(&app->ctx);
-    rendering_context_init_framebuffers(&app->ctx);
+    rendering_context_init_rendering_resources(&app->ctx);
 }
 
 static inline void vk_app_init_shaders(vk_app* app,
@@ -115,6 +121,7 @@ void vk_app_destroy(vk_app* app) {
 
     rendering_context_destroy(&app->ctx);
 
+    destroy_gpu_queue_selector();
     gpu_info_destroy(&app->gpu);
     destroy_vk_debugger();
     destroy_instance(app->instance);

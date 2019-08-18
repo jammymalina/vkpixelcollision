@@ -171,9 +171,8 @@ void shader_program_copy(shader_program* dest, const shader_program* src) {
     dest->pipeline_cache_size = src->pipeline_cache_size;
 }
 
-bool shader_program_bind_pipeline(const shader_program* prog,
-    pipeline_state_bits state_bits, VkRenderPass render_pass, VkCommandBuffer
-    command_buffer)
+bool shader_program_bind_pipeline(shader_program* prog, pipeline_state_bits 
+    state_bits, VkRenderPass render_pass, VkCommandBuffer command_buffer)
 {
     ASSERT_LOG_WARNING(shader_program_has_pipeline(prog, state_bits,
         render_pass), "Unable to bind the desired pipeline");
