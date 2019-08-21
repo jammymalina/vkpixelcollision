@@ -8,6 +8,7 @@
 #include "../../string/string.h"
 #include "../functions/functions.h"
 #include "../tools/tools.h"
+#include "./gpu_queue_selector.h"
 
 void gpu_info_init_empty(gpu_info* gpu) {
     gpu->physical_device = VK_NULL_HANDLE;
@@ -286,28 +287,6 @@ bool is_gpu_suitable_for_graphics(const gpu_info *gpu, VkSurfaceKHR surface)
     return sharing_mode_exclusive;
 }
 
-uint32_t retrieve_graphics_queue_index(const gpu_info *gpu,
-    VkSurfaceKHR surface)
-{
-    for (uint32_t i = 0; i < gpu->queue_family_props_size; ++i) {
-        VkQueueFamilyProperties* props = &gpu->queue_family_props[i];
-        if (props->queueCount == 0) {
-            continue;
-        }
-
-        bool graphics_supported = props->queueFlags & VK_QUEUE_GRAPHICS_BIT;
-
-        VkBool32 support_present = VK_FALSE;
-        CHECK_VK(vkGetPhysicalDeviceSurfaceSupportKHR(gpu->physical_device, i,
-            surface, &support_present));
-        if (support_present && graphics_supported) {
-            return i;
-        }
-    }
-
-    return UINT32_MAX;
-}
-
 int default_rate_gpu(const gpu_info *gpu) {
     int score = 0;
 
@@ -346,17 +325,17 @@ void gpu_info_destroy(gpu_info *gpu) {
 }
 
 bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
-    uint32_t graphics_index = retrieve_graphics_queue_index(gpu, surface);
+    const gpu_queue_selector* selector = retrieve_gpu_queue_selector();
+    ASSERT_LOG_ERROR(selector, "GPU selector must be initialized");
 
-    uint32_t queue_count = 1;
-    const float priority = 1.0f;
-    VkDeviceQueueCreateInfo qinfo = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        .pNext = NULL,
-        .queueFamilyIndex = graphics_index,
-        .queueCount = 1,
-        .pQueuePriorities = &priority
-    };
+    const uint32_t queue_family_count =
+        gpu_selector_get_used_queue_family_count(selector);
+    ASSERT_LOG_ERROR(queue_family_count > 0, "No queues to select");
+    const VkDeviceQueueCreateInfo* queues_infos =
+        mem_alloc(sizeof(VkDeviceCreateInfo) * queue_family_count);
+    CHECK_ALLOC_BOOL(queues_infos, "Unable to allocate device queues create"
+        " config");
+    gpu_selector_get_device_queue_create_info(selector, queues_infos);
 
     VkPhysicalDeviceFeatures device_features = {};
     device_features.textureCompressionBC = VK_TRUE;
@@ -370,8 +349,8 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
-        .queueCreateInfoCount = queue_count,
-        .pQueueCreateInfos = &qinfo,
+        .queueCreateInfoCount = queue_family_count,
+        .pQueueCreateInfos = &queues_infos,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = NULL,
         .enabledExtensionCount = DEFAULT_GRAPHICS_DEVICE_EXTENSIONS_SIZE,
@@ -381,6 +360,8 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
 
     VkDevice device;
     CHECK_VK_BOOL(vkCreateDevice(gpu->physical_device, &info, NULL, &device));
+
+    mem_free(queues_infos);
 
     gpu->device = device;
 

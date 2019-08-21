@@ -23,6 +23,7 @@ typedef struct gpu_queue_selector_create_info {
 typedef struct gpu_queue_family_record {
     size_t queues_used;
     size_t next_available_queue;
+    float* priorities;
 } gpu_queue_family_record;
 
 typedef struct gpu_queue_select_query {
@@ -30,7 +31,14 @@ typedef struct gpu_queue_select_query {
     bool support_present;
     VkSurfaceKHR surface;
     uint32_t queue_count;
+    float priority;
 } gpu_queue_select_query;
+
+typedef struct gpu_queue_select_response {
+    uint32_t queue_family;
+    uint32_t queue_count;
+    float priority;
+} gpu_queue_select_response;
 
 typedef struct gpu_queue_selector {
     const gpu_info* gpu;
@@ -42,8 +50,13 @@ void gpu_queue_selector_init_empty(gpu_queue_selector* selector);
 bool gpu_queue_selector_init(gpu_queue_selector* selector, const
     gpu_queue_selector_create_info* selector_info);
 
+uint32_t gpu_selector_get_used_queue_family_count(const gpu_queue_selector*
+    selector);
+void gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
+    selector, VkDeviceQueueCreateInfo* queues_infos);
+
 gpu_queue_select_query_status gpu_selector_select(gpu_queue_selector* selector,
-    const gpu_queue_select_query* query, vk_queue* queues);
+    const gpu_queue_select_query* query, gpu_queue_select_response* response);
 
 void gpu_queue_selector_destroy(gpu_queue_selector* selector);
 
