@@ -8,26 +8,35 @@
 #include "../queue/vk_queue.h"
 #include "./gpu.h"
 
+#define GPU_QUEUE_MAX_GROUP_NAME_LENGTGH 32
+
 typedef enum gpu_queue_select_query_status {
     GPU_SELECTOR_OK,
     GPU_SELECTOR_NOT_INIT_ERROR,
     GPU_SELECTOR_NOT_ENOUGH_QUEUES_ERROR,
     GPU_SELECTOR_SUITABLE_QUEUE_NOT_FOUND_ERROR,
     GPU_SELECTOR_UNABLE_TO_RETRIEVE_QUEUE_ERROR
-}  gpu_queue_select_query_status;
+} gpu_queue_select_query_status;
 
 typedef struct gpu_queue_selector_create_info {
     const gpu_info* gpu;
 } gpu_queue_selector_create_info;
 
+typedef struct gpu_queue_record {
+    char group_name[GPU_QUEUE_MAX_GROUP_NAME_LENGTGH];
+    float priority;
+} gpu_queue_record;
+
 typedef struct gpu_queue_family_record {
+    const char** queue_names;
     size_t queues_used;
     size_t next_available_queue;
-    float* priorities;
+    gpu_queue_record* queue_records;
 } gpu_queue_family_record;
 
 typedef struct gpu_queue_select_query {
     VkQueueFlags usage;
+    const char queue_group_name[GPU_QUEUE_MAX_GROUP_NAME_LENGTGH];
     bool support_present;
     VkSurfaceKHR surface;
     uint32_t queue_count;
@@ -52,7 +61,7 @@ bool gpu_queue_selector_init(gpu_queue_selector* selector, const
 
 uint32_t gpu_selector_get_used_queue_family_count(const gpu_queue_selector*
     selector);
-void gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
+bool gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
     selector, VkDeviceQueueCreateInfo* queues_infos);
 
 gpu_queue_select_query_status gpu_selector_select(gpu_queue_selector* selector,

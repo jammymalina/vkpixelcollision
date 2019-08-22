@@ -2,6 +2,8 @@
 
 #include "../../logger/logger.h"
 #include "../../memory/memory.h"
+#include "../../math/math.h"
+#include "../../string/string.h"
 #include "../functions/functions.h"
 
 static gpu_queue_selector* dundercreek = NULL;
@@ -16,11 +18,11 @@ static inline bool gpu_queue_selector_init_records(gpu_queue_selector* s) {
     for (size_t i = 0; i < s->records_size; ++i) {
         const VkQueueFamilyProperties* family_props =
             &s->gpu->queue_family_props[i];
-        s->records[i].priorities = NULL;
-        s->records[i].priorities = mem_alloc(sizeof(float) *
+        s->records[i].queue_records = NULL;
+        s->records[i].queue_records = mem_alloc(sizeof(gpu_queue_record) *
             family_props->queueCount);
-        CHECK_ALLOC_BOOL(s->records[i].priorities, "Unable to allocate"
-            " priorities in gpu queue selector record");
+        CHECK_ALLOC_BOOL(s->records[i].queue_records, "Unable to allocate"
+            " queue records in gpu queue selector record");
     }
 
     return true;
@@ -56,7 +58,17 @@ uint32_t gpu_selector_get_used_queue_family_count(const gpu_queue_selector*
     return count;
 }
 
-void gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
+static inline uint32_t gpu_selector_get_family_max_queues_used(const
+    gpu_queue_selector* selector)
+{
+    uint32_t max_queues_used = 0;
+    for (size_t i = 0; i < selector->records_size; ++i) {
+        return
+    }
+    return max_queues_used;
+}
+
+bool gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
     selector, VkDeviceQueueCreateInfo* queues_infos)
 {
     uint32_t queue_idx = 0;
@@ -120,7 +132,7 @@ void gpu_selector_update_record_cache(gpu_queue_selector* selector, const
     gpu_queue_family_record* r = &selector->records[family_idx];
     r->queues_used += query->queue_count;
     for (size_t i = r->next_available_queue; i < r->queues_used; ++i) {
-        r->priorities[i] = query->priority;
+        r->queue_records[i].priority = query->priority;
         ++r->next_available_queue;
     }
 }
@@ -179,7 +191,8 @@ bool gpu_selector_retrieve_queues(const gpu_queue_selector*
 }
 
 static void gpu_queue_selector_record_destroy(gpu_queue_family_record* rec) {
-    mem_free(rec->priorities);
+    mem_free(rec->queue_records);
+    rec->queue_records = NULL;
 }
 
 void gpu_queue_selector_destroy(gpu_queue_selector* selector) {
