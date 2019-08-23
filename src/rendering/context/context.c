@@ -5,8 +5,9 @@
 
 #include "../../logger/logger.h"
 #include "../../memory/memory.h"
-#include "../../vulkan/tools/tools.h"
 #include "../../vulkan/functions/functions.h"
+#include "../../vulkan/gpu/gpu_queue_selector.h"
+#include "../../vulkan/tools/tools.h"
 
 static inline VkSurfaceKHR retrieve_surface(VkInstance instance, SDL_Window* w)
 {
@@ -48,11 +49,16 @@ void rendering_context_set_gpu(rendering_context* ctx, gpu_info *gpu) {
     ctx->gpu = gpu;
 }
 
-void rendering_context_init_device_queue(rendering_context* ctx) {
+void rendering_context_retrieve_graphics_queue(rendering_context* ctx) {
     ASSERT_LOG_ERROR_EXIT(ctx->gpu, "Rendering context gpu pointer doesn't"
         " point to valid gpu");
-    vkGetDeviceQueue(ctx->gpu->device, retrieve_graphics_queue_index(ctx->gpu,
-        ctx->surface), 0,
+    const gpu_queue_selector* queue_selector = retrieve_gpu_queue_selector();
+    ASSERT_LOG_ERROR_EXIT(queue_selector, "GPU queue selector should be"
+        " initialized");
+    size_t qc = gpu_selector_retrieve_queue_group(queue_selector, "present",
+        NULL);
+    ASSERT_LOG_ERROR_EXIT(qc == 1, "Number of main present queues must be 1");
+    gpu_selector_retrieve_queue_group(queue_selector, "present",
         &ctx->graphics_queue);
 }
 

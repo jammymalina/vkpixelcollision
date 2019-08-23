@@ -27,7 +27,7 @@ typedef struct rendering_context {
 
 void rendering_context_init(rendering_context* ctx);
 void rendering_context_init_surface(rendering_context* ctx, SDL_Window* w);
-void rendering_context_init_device_queue(rendering_context* ctx);
+void rendering_context_retrieve_graphics_queue(rendering_context* ctx);
 void rendering_context_init_swapchain(rendering_context* ctx);
 void rendering_context_init_render_pass(rendering_context *ctx);
 void rendering_context_init_rendering_resources(rendering_context *ctx);

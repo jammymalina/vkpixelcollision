@@ -26,15 +26,40 @@ static inline void vk_app_init_vulkan(vk_app* app) {
     init_vk_debugger(app->instance);
 }
 
-static inline void vk_app_init_gpu(vk_app* app) {
+static inline void vk_app_init_gpu_queues(vk_app* app, const vk_app_create_info
+    *app_info)
+{
+    gpu_queue_selector* queue_selector = retrieve_gpu_queue_selector();
+    gpu_queue_select_response response;
+    gpu_queue_select_query_status status;
+    // we always have 1 present queue by default
+    const gpu_queue_select_query query = {
+        .usage = VK_QUEUE_GRAPHICS_BIT,
+        .queue_group_name = "present",
+        .support_present = true,
+        .surface = app->ctx.surface,
+        .queue_count = 1,
+        .priority = 1.0
+    };
+    status = gpu_selector_select(queue_selector, &query, &response);
+    ASSERT_LOG_ERROR_EXIT(status != GPU_SELECTOR_OK, "Unable to select present"
+        " queue");
+}
+
+static inline void vk_app_init_gpu(vk_app* app, const vk_app_create_info
+    *app_info)
+{
     app->gpu = select_gpu(app->instance, app->ctx.surface);
-    bool status = gpu_device_init(&app->gpu, app->ctx.surface);
-    ASSERT_LOG_ERROR_EXIT(status, "Unable to create logical device");
-    load_device_level_functions(app->gpu.device);
+
     const gpu_queue_selector_create_info selector_info = {
         .gpu = &app->gpu
     };
     create_gpu_queue_selector(&selector_info);
+    vk_app_init_gpu_queues(app, app_info);
+
+    bool status = gpu_device_init(&app->gpu, app->ctx.surface);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to create logical device");
+    load_device_level_functions(app->gpu.device);
     rendering_context_set_gpu(&app->ctx, &app->gpu);
 }
 
@@ -42,6 +67,10 @@ static inline void vk_app_init_rendering_context(vk_app* app) {
     rendering_context_init(&app->ctx);
     rendering_context_set_instance(&app->ctx, app->instance);
     rendering_context_init_surface(&app->ctx, app->window.handle);
+}
+
+static inline void vk_app_init_rendering_context_graphics_queue(vk_app* app) {
+    rendering_context_retrieve_graphics_queue(&app->ctx);
 }
 
 static inline void vk_app_init_rendering_context_swapchain(vk_app* app) {
@@ -103,8 +132,9 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_set_basepath(app);
     vk_app_create_window(app, app_info);
     vk_app_init_vulkan(app);
+    vk_app_init_rendering_context_graphics_queue(app);
     vk_app_init_rendering_context(app);
-    vk_app_init_gpu(app);
+    vk_app_init_gpu(app, app_info);
     vk_app_init_rendering_context_swapchain(app);
     vk_app_init_allocator(app, app_info);
     vk_app_init_rendering_context_render_pass(app);

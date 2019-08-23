@@ -23,6 +23,11 @@ static inline bool gpu_queue_selector_init_records(gpu_queue_selector* s) {
             family_props->queueCount);
         CHECK_ALLOC_BOOL(s->records[i].queue_records, "Unable to allocate"
             " queue records in gpu queue selector record");
+        for (size_t j = 0; j < family_props->queueCount; ++j) {
+            string_copy(s->records[i].queue_records[j].group_name,
+                GPU_QUEUE_MAX_GROUP_NAME_LENGTH, "");
+            s->records[i].queue_records[j].priority = 1.0;
+        }
     }
 
     return true;
@@ -58,32 +63,41 @@ uint32_t gpu_selector_get_used_queue_family_count(const gpu_queue_selector*
     return count;
 }
 
-static inline uint32_t gpu_selector_get_family_max_queues_used(const
-    gpu_queue_selector* selector)
-{
-    uint32_t max_queues_used = 0;
-    for (size_t i = 0; i < selector->records_size; ++i) {
-        return
-    }
-    return max_queues_used;
-}
-
 bool gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
-    selector, VkDeviceQueueCreateInfo* queues_infos)
+    selector, VkDeviceQueueCreateInfo* queues_info)
 {
     uint32_t queue_idx = 0;
     for (size_t i = 0; i < selector->records_size; ++i) {
         if (selector->records[i].queues_used == 0) {
             continue;
         }
-        queues_infos[queue_idx].sType =
+
+        float* priorities = mem_alloc(sizeof(float) *
+            selector->records[i].queues_used);
+        CHECK_ALLOC_BOOL(priorities, "Unable to allocate queue priorities");
+
+        for (size_t j = 0; j < selector->records[i].queues_used; ++j) {
+            priorities[j] = selector->records[i].queue_records[j].priority;
+        }
+
+        queues_info[queue_idx].sType =
             VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queues_infos[queue_idx].sType = NULL;
-        queues_infos[queue_idx].queueFamilyIndex = i;
-        queues_infos[queue_idx].queueCount = selector->records[i].queues_used;
-        queues_infos[queue_idx].pQueuePriorities =
-            selector->records[i].priorities;
+        queues_info[queue_idx].sType = NULL;
+        queues_info[queue_idx].queueFamilyIndex = i;
+        queues_info[queue_idx].queueCount = selector->records[i].queues_used;
+        queues_info[queue_idx].pQueuePriorities = priorities;
         ++queue_idx;
+    }
+
+    return true;
+}
+
+void gpu_selector_destroy_device_queue_create_info(VkDeviceQueueCreateInfo*
+    queues_info, size_t queues_info_size)
+{
+    for (size_t i = 0; i < queues_info_size; ++i) {
+        mem_free(queues_info[i].pQueuePriorities);
+        queues_info[0].pQueuePriorities = NULL;
     }
 }
 
@@ -126,13 +140,15 @@ static inline uint32_t gpu_selector_rate_queue_family(const gpu_queue_selector*
     return 100 * overlap_score + queue_count_score;
 }
 
-void gpu_selector_update_record_cache(gpu_queue_selector* selector, const
+static void gpu_selector_update_record_cache(gpu_queue_selector* selector, const
     gpu_queue_select_query* query, uint32_t family_idx)
 {
     gpu_queue_family_record* r = &selector->records[family_idx];
     r->queues_used += query->queue_count;
     for (size_t i = r->next_available_queue; i < r->queues_used; ++i) {
         r->queue_records[i].priority = query->priority;
+        string_copy(r->queue_records[i].group_name,
+            GPU_QUEUE_MAX_GROUP_NAME_LENGTH, query->queue_group_name);
         ++r->next_available_queue;
     }
 }
@@ -183,11 +199,38 @@ gpu_queue_select_query_status gpu_selector_select(gpu_queue_selector* selector,
     return GPU_SELECTOR_OK;
 }
 
-bool gpu_selector_retrieve_queues(const gpu_queue_selector*
-    selector, const gpu_queue_select_query* query, vk_queue* queues, uint32_t
-    queue_family_index)
+static void gpu_selector_retrive_queue(const gpu_queue_selector* selector,
+    vk_queue* queue, uint32_t family_index, uint32_t queue_index)
 {
-    return true;
+    vk_queue_init(queue, selector->gpu, family_index, queue_index);
+}
+
+size_t gpu_selector_retrieve_queue_group(const gpu_queue_selector* selector,
+    const char group_name[GPU_QUEUE_MAX_GROUP_NAME_LENGTH], vk_queue* queues)
+{
+    if (!selector->gpu->device) {
+        log_warning("Unable to retrieve queues - device is not initialized");
+        return 0;
+    }
+
+    size_t queue_count = 0;
+    vk_queue* queue_iter = queues;
+    for (size_t i = 0; i < selector->records_size; ++i) {
+        const gpu_queue_family_record* r = &selector->records[i];
+        for (size_t j = 0; j < r->queues_used; ++j) {
+            const gpu_queue_record* qr = r->queue_records[j].group_name;
+            if (!string_equal(qr->group_name, group_name)) {
+                continue;
+            }
+            ++queue_count;
+            if (queue_iter) {
+                gpu_selector_retrive_queue(selector, queue_iter, i, j);
+                ++queue_iter;
+            }
+        }
+    }
+
+    return queue_count;
 }
 
 static void gpu_queue_selector_record_destroy(gpu_queue_family_record* rec) {

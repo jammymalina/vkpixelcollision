@@ -335,7 +335,9 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
         mem_alloc(sizeof(VkDeviceCreateInfo) * queue_family_count);
     CHECK_ALLOC_BOOL(queues_infos, "Unable to allocate device queues create"
         " config");
-    gpu_selector_get_device_queue_create_info(selector, queues_infos);
+    bool status = gpu_selector_get_device_queue_create_info(selector,
+        queues_infos);
+    ASSERT_LOG_ERROR(status, "Unable to retrieve device queues create info");
 
     VkPhysicalDeviceFeatures device_features = {};
     device_features.textureCompressionBC = VK_TRUE;
@@ -361,6 +363,8 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
     VkDevice device;
     CHECK_VK_BOOL(vkCreateDevice(gpu->physical_device, &info, NULL, &device));
 
+    gpu_selector_destroy_device_queue_create_info(queues_infos,
+        queue_family_count);
     mem_free(queues_infos);
 
     gpu->device = device;
