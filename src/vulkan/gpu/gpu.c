@@ -331,8 +331,8 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
     const uint32_t queue_family_count =
         gpu_selector_get_used_queue_family_count(selector);
     ASSERT_LOG_ERROR(queue_family_count > 0, "No queues to select");
-    const VkDeviceQueueCreateInfo* queues_infos =
-        mem_alloc(sizeof(VkDeviceCreateInfo) * queue_family_count);
+    VkDeviceQueueCreateInfo* queues_infos = mem_alloc(sizeof(VkDeviceCreateInfo)
+        * queue_family_count);
     CHECK_ALLOC_BOOL(queues_infos, "Unable to allocate device queues create"
         " config");
     bool status = gpu_selector_get_device_queue_create_info(selector,
@@ -352,7 +352,7 @@ bool gpu_device_init(gpu_info *gpu, VkSurfaceKHR surface) {
         .pNext = NULL,
         .flags = 0,
         .queueCreateInfoCount = queue_family_count,
-        .pQueueCreateInfos = &queues_infos,
+        .pQueueCreateInfos = queues_infos,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = NULL,
         .enabledExtensionCount = DEFAULT_GRAPHICS_DEVICE_EXTENSIONS_SIZE,

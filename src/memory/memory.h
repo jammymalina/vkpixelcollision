@@ -52,6 +52,7 @@ static inline size_t count_bits_uint32_t(uint32_t n) {
     c += (((n & 0xfff000) >> 12) * 0x1001001001001ULL & 0x84210842108421ULL) %
         0x1f;
     c += ((n >> 24) * 0x1001001001001ULL & 0x84210842108421ULL) % 0x1f;
+    return c;
 }
 
 void* mem_alloc(size_t size);

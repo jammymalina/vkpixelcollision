@@ -85,10 +85,12 @@ void rendering_context_init_render_pass(rendering_context *ctx) {
 
 void rendering_context_init_rendering_resources(rendering_context* ctx) {
     ASSERT_LOG_ERROR_EXIT(ctx->render_pass.handle && ctx->gpu->device &&
-        ctx->swapchain.handle, "Unable to create framebuffers - render pass"
-        " might not be initialized yet");
+        ctx->swapchain.handle && ctx->graphics_queue.handle, "Unable to create"
+        " framebuffers - render pass might not be initialized yet");
+
     const bool status = rendering_resources_init_from_swapchain(
-        &ctx->rendering_resources, &ctx->swapchain, ctx->render_pass.handle);
+        &ctx->rendering_resources, ctx->gpu, &ctx->swapchain,
+        ctx->render_pass.handle, ctx->graphics_queue.family_index);
     ASSERT_LOG_ERROR_EXIT(status, "Unable to create rendering resources");
 }
 

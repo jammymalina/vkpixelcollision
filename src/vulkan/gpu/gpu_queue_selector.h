@@ -29,7 +29,6 @@ typedef struct gpu_queue_record {
 
 typedef struct gpu_queue_family_record {
     size_t queues_used;
-    size_t next_available_queue;
     gpu_queue_record* queue_records;
 } gpu_queue_family_record;
 

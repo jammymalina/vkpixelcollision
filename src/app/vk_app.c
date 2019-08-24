@@ -42,7 +42,7 @@ static inline void vk_app_init_gpu_queues(vk_app* app, const vk_app_create_info
         .priority = 1.0
     };
     status = gpu_selector_select(queue_selector, &query, &response);
-    ASSERT_LOG_ERROR_EXIT(status != GPU_SELECTOR_OK, "Unable to select present"
+    ASSERT_LOG_ERROR_EXIT(status == GPU_SELECTOR_OK, "Unable to select present"
         " queue");
 }
 
@@ -132,9 +132,9 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_set_basepath(app);
     vk_app_create_window(app, app_info);
     vk_app_init_vulkan(app);
-    vk_app_init_rendering_context_graphics_queue(app);
     vk_app_init_rendering_context(app);
     vk_app_init_gpu(app, app_info);
+    vk_app_init_rendering_context_graphics_queue(app);
     vk_app_init_rendering_context_swapchain(app);
     vk_app_init_allocator(app, app_info);
     vk_app_init_rendering_context_render_pass(app);

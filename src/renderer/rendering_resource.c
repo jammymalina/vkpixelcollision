@@ -46,6 +46,16 @@ static bool rendering_resource_init_command_resources(rendering_resource* res,
     CHECK_VK_BOOL(vkCreateCommandPool(res->device, &cmd_pool_create_info, NULL,
         &res->command_pool));
 
+    VkCommandBufferAllocateInfo command_buffer_allocate_info = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = NULL,
+        .commandPool = res->command_pool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1
+    };
+    CHECK_VK_BOOL(vkAllocateCommandBuffers(res->device,
+        &command_buffer_allocate_info, &res->command_buffer));
+
     return true;
 }
 
@@ -63,11 +73,13 @@ bool rendering_resources_init_from_swapchain(rendering_resource** resources,
     for (size_t i = 0; i < swp->image_count && status; ++i) {
         rendering_resource* res = &ress[i];
         rendering_resource_init_empty(res);
+
+        res->device = gpu->device;
         status &= rendering_resource_init_framebuffer_from_swp(res, swp,
             render_pass, i) &&
             rendering_resource_init_semaphores(res) &&
             rendering_resource_init_fence(res) &&
-            rendering_resource_init_command_resources(res);
+            rendering_resource_init_command_resources(res, queue_family_index);
     }
 
     *resources = ress;
@@ -75,7 +87,21 @@ bool rendering_resources_init_from_swapchain(rendering_resource** resources,
     return true;
 }
 
-void rendering_resource_destroy(rendering_resource* res) {
+static inline void rendering_resource_destroy_command_res(rendering_resource*
+    res)
+{
+    if (res->command_pool) {
+        vkDestroyCommandPool(res->device, res->command_pool, NULL);
+        res->command_pool = VK_NULL_HANDLE;
+    }
+}
+
+static inline void rendering_resource_destroy_fbs(rendering_resource* res) {
     vk_framebuffer_destroy(&res->framebuffer);
     vk_framebuffer_init_empty(&res->framebuffer);
+}
+
+void rendering_resource_destroy(rendering_resource* res) {
+    rendering_resource_destroy_command_res(res);
+    rendering_resource_destroy_fbs(res);
 }

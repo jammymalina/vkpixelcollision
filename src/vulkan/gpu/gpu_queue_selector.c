@@ -5,6 +5,7 @@
 #include "../../math/math.h"
 #include "../../string/string.h"
 #include "../functions/functions.h"
+#include "../tools/tools.h"
 
 static gpu_queue_selector* dundercreek = NULL;
 
@@ -18,6 +19,9 @@ static inline bool gpu_queue_selector_init_records(gpu_queue_selector* s) {
     for (size_t i = 0; i < s->records_size; ++i) {
         const VkQueueFamilyProperties* family_props =
             &s->gpu->queue_family_props[i];
+
+        s->records[i].queues_used = 0;
+
         s->records[i].queue_records = NULL;
         s->records[i].queue_records = mem_alloc(sizeof(gpu_queue_record) *
             family_props->queueCount);
@@ -82,7 +86,8 @@ bool gpu_selector_get_device_queue_create_info(const gpu_queue_selector*
 
         queues_info[queue_idx].sType =
             VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queues_info[queue_idx].sType = NULL;
+        queues_info[queue_idx].pNext = NULL;
+        queues_info[queue_idx].flags = 0;
         queues_info[queue_idx].queueFamilyIndex = i;
         queues_info[queue_idx].queueCount = selector->records[i].queues_used;
         queues_info[queue_idx].pQueuePriorities = priorities;
@@ -96,8 +101,9 @@ void gpu_selector_destroy_device_queue_create_info(VkDeviceQueueCreateInfo*
     queues_info, size_t queues_info_size)
 {
     for (size_t i = 0; i < queues_info_size; ++i) {
-        mem_free(queues_info[i].pQueuePriorities);
-        queues_info[0].pQueuePriorities = NULL;
+        float* p = (float*) queues_info[i].pQueuePriorities;
+        queues_info[i].pQueuePriorities = NULL;
+        mem_free(p);
     }
 }
 
@@ -111,13 +117,13 @@ static inline bool gpu_selector_is_present_supported(const gpu_queue_selector*
     return (bool) support_present;
 }
 
-static inline gpu_selector_is_queue_family_valid(const gpu_queue_selector*
+static inline bool gpu_selector_is_queue_family_valid(const gpu_queue_selector*
     selector, const gpu_queue_select_query* query, uint32_t queue_family_index)
 {
     const VkQueueFamilyProperties* family_props =
         &selector->gpu->queue_family_props[queue_family_index];
 
-    bool status = (family_props->queueFlags & query->usage == query->usage) &&
+    bool status = ((family_props->queueFlags & query->usage) == query->usage) &&
         (!query->support_present || gpu_selector_is_present_supported(selector,
             query, queue_family_index));
 
@@ -129,7 +135,6 @@ static inline uint32_t gpu_selector_rate_queue_family(const gpu_queue_selector*
 {
     const VkQueueFamilyProperties* family_props =
         &selector->gpu->queue_family_props[queue_family_index];
-    uint32_t score = 0;
     // we try to select queue family with the least overlap
     uint32_t overlap_score = 32 - count_bits_uint32_t(family_props->queueFlags &
         ~query->usage);
@@ -144,13 +149,13 @@ static void gpu_selector_update_record_cache(gpu_queue_selector* selector, const
     gpu_queue_select_query* query, uint32_t family_idx)
 {
     gpu_queue_family_record* r = &selector->records[family_idx];
-    r->queues_used += query->queue_count;
-    for (size_t i = r->next_available_queue; i < r->queues_used; ++i) {
+    uint32_t new_queues_used = r->queues_used + query->queue_count;
+    for (size_t i = r->queues_used; i < new_queues_used; ++i) {
         r->queue_records[i].priority = query->priority;
         string_copy(r->queue_records[i].group_name,
             GPU_QUEUE_MAX_GROUP_NAME_LENGTH, query->queue_group_name);
-        ++r->next_available_queue;
     }
+    r->queues_used = new_queues_used;
 }
 
 gpu_queue_select_query_status gpu_selector_select(gpu_queue_selector* selector,
@@ -218,7 +223,7 @@ size_t gpu_selector_retrieve_queue_group(const gpu_queue_selector* selector,
     for (size_t i = 0; i < selector->records_size; ++i) {
         const gpu_queue_family_record* r = &selector->records[i];
         for (size_t j = 0; j < r->queues_used; ++j) {
-            const gpu_queue_record* qr = r->queue_records[j].group_name;
+            const gpu_queue_record* qr = &r->queue_records[j];
             if (!string_equal(qr->group_name, group_name)) {
                 continue;
             }

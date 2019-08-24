@@ -17,7 +17,8 @@ typedef struct rendering_resource {
 
 void rendering_resource_init_empty(rendering_resource* res);
 bool rendering_resources_init_from_swapchain(rendering_resource** resources,
-    const gpu_info* gpu, const vk_swapchain* swp, VkRenderPass render_pass);
+    const gpu_info* gpu, const vk_swapchain* swp, VkRenderPass render_pass,
+    uint32_t queue_family_index);
 
 void rendering_resource_destroy(rendering_resource* res);
 
