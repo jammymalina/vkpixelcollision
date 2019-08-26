@@ -1,9 +1,9 @@
 #include "./rendering_resource.h"
 
-#include "../logger/logger.h"
-#include "../memory/memory.h"
-#include "../vulkan/functions/functions.h"
-#include "../vulkan/tools/tools.h"
+#include "../../logger/logger.h"
+#include "../../memory/memory.h"
+#include "../../vulkan/functions/functions.h"
+#include "../../vulkan/tools/tools.h"
 
 void rendering_resource_init_empty(rendering_resource* res) {
     res->device = VK_NULL_HANDLE;

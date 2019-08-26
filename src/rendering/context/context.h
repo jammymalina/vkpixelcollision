@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <vulkan/vulkan.h>
 
-#include "../../renderer/rendering_resource.h"
+#include "../renderer/rendering_resource.h"
 #include "../../vulkan/framebuffer/framebuffer.h"
 #include "../../vulkan/gpu/gpu.h"
 #include "../../vulkan/queue/vk_queue.h"

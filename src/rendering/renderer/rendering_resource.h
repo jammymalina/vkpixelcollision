@@ -2,8 +2,8 @@
 #define RENDERING_RESOURCE
 
 #include <vulkan/vulkan.h>
-#include "../vulkan/framebuffer/framebuffer.h"
-#include "../vulkan/swapchain/swapchain.h"
+#include "../../vulkan/framebuffer/framebuffer.h"
+#include "../../vulkan/swapchain/swapchain.h"
 
 typedef struct rendering_resource {
     VkDevice device;
