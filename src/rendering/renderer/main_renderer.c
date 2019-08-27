@@ -23,6 +23,34 @@ const rendering_resource* main_renderer_active_render_res(const main_renderer*
     return &renderer->ctx->rendering_resources[active_idx];
 }
 
+static inline void main_renderer_set_viewport(const main_renderer* renderer) {
+    const rendering_resource* render_res =
+        main_renderer_active_render_res(renderer);
+
+    VkViewport viewport = {
+        x: 0,
+        y: 0,
+        width: renderer->ctx->width,
+        height: renderer->ctx->height,
+        minDepth: 0.0f,
+        maxDepth: 1.0f
+    };
+    vkCmdSetViewport(render_res->command_buffer, 0, 1, &viewport);
+
+    VkRect2D scissor = {
+        offset: {
+            x: 0,
+            y: 0,
+        },
+        extent: {
+            width: viewport.width,
+            height: viewport.height
+        }
+    };
+    vkCmdSetScissor(render_res->command_buffer, 0, 1, &scissor);
+
+}
+
 static bool main_renderer_prepare_frame(main_renderer* renderer) {
     const rendering_resource* render_res =
         main_renderer_active_render_res(renderer);
@@ -36,6 +64,27 @@ static bool main_renderer_prepare_frame(main_renderer* renderer) {
     CHECK_VK_BOOL(vkBeginCommandBuffer(render_res->command_buffer,
         &command_buff_begin_info));
 
+    main_renderer_set_viewport(renderer);
+
+    VkClearValue clear_values[2];
+    uint32_t clear_values_size = 0;
+    if (renderer->clear_bits & CLEAR_COLOR_BUFFER) {
+        float float_clear_color[4];
+        color_rgb_uint32_to_float(float_clear_color, renderer->clear_color);
+        VkClearColorValue color;
+        color.float32[0] = float_clear_color[0];
+        color.float32[1] = float_clear_color[1];
+        color.float32[2] = float_clear_color[2];
+        color.float32[3] = float_clear_color[3];
+        clear_values[clear_values_size++].color = color;
+    }
+    if (renderer->clear_bits & (CLEAR_DEPTH_BUFFER | CLEAR_STENCIL_BUFFER)) {
+        VkClearDepthStencilValue depth_clear_value;
+        depth_clear_value.depth = 1.0;
+        depth_clear_value.stencil = 0;
+        clear_values[clear_values_size++].depthStencil = depth_clear_value;
+    }
+
     VkRenderPassBeginInfo render_pass_begin_info = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .pNext = NULL,
@@ -48,14 +97,11 @@ static bool main_renderer_prepare_frame(main_renderer* renderer) {
             },
             .extent = renderer->ctx->swapchain.extent
         },
-        .clearValueCount = 0,
-        .pClearValues    = NULL
+        .clearValueCount = clear_values_size,
+        .pClearValues = clear_values
     };
     vkCmdBeginRenderPass(render_res->command_buffer, &render_pass_begin_info,
         VK_SUBPASS_CONTENTS_INLINE);
-
-    main_renderer_clear_screen(renderer, renderer->clear_color,
-        renderer->clear_bits);
 
     return true;
 }
@@ -93,7 +139,7 @@ static inline bool main_renderer_acquire_image(const main_renderer* renderer,
         return false;
     }
 
-    return false;
+    return true;
 }
 
 static bool main_renderer_finish_frame(main_renderer* renderer) {
@@ -102,6 +148,29 @@ static bool main_renderer_finish_frame(main_renderer* renderer) {
 
     vkCmdEndRenderPass(render_res->command_buffer);
     CHECK_VK_BOOL(vkEndCommandBuffer(render_res->command_buffer));
+
+    return true;
+}
+
+static inline bool main_renderer_present_sync(const main_renderer* renderer) {
+    const rendering_resource* render_res =
+        main_renderer_active_render_res(renderer);
+
+    VkPipelineStageFlags wait_dst_stage_mask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkSubmitInfo submit_info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = NULL,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &render_res->image_available_semaphore,
+        .pWaitDstStageMask = &wait_dst_stage_mask,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &render_res->command_buffer,
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = &render_res->finished_render_semaphore
+    };
+    CHECK_VK_BOOL(vkQueueSubmit(renderer->ctx->graphics_queue.handle, 1, &submit_info,
+        render_res->fence));
 
     return true;
 }
@@ -161,66 +230,15 @@ bool main_renderer_render(main_renderer* renderer) {
     status &= main_renderer_finish_frame(renderer);
     ASSERT_LOG_ERROR(status, "Unable to finish frame");
 
+    status &= main_renderer_present_sync(renderer);
+    ASSERT_LOG_ERROR(status, "Unable to present sync");
+
     status &= main_renderer_present_frame(renderer, &image_index);
     ASSERT_LOG_ERROR(status, "Unable to present an image");
 
     main_renderer_next_rendering_res(renderer);
 
     return true;
-}
-
-void main_renderer_clear_screen(main_renderer* renderer, uint32_t color,
-    uint32_t clear_bits)
-{
-    uint32_t num_attachments = 0;
-    VkClearAttachment attachments[2] = {
-        { 0 },
-        { 0 }
-    };
-
-    float rgba[4] = { 0, 0, 0, 0 };
-    color_rgb_uint32_to_float(rgba, renderer->clear_color);
-    uint32_t stencil_value = 0;
-
-    if (clear_bits & CLEAR_COLOR_BUFFER) {
-        VkClearAttachment *attachment = &attachments[num_attachments++];
-        attachment->aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        attachment->colorAttachment = 0;
-        VkClearColorValue *color = &attachment->clearValue.color;
-        color->float32[0] = rgba[0];
-        color->float32[1] = rgba[1];
-        color->float32[2] = rgba[2];
-        color->float32[3] = rgba[3];
-    }
-
-    if (clear_bits & (CLEAR_DEPTH_BUFFER | CLEAR_STENCIL_BUFFER)) {
-        VkClearAttachment *attachment = &attachments[num_attachments++];
-        if (clear_bits & CLEAR_DEPTH_BUFFER) {
-            attachment->aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
-        }
-        if (clear_bits & CLEAR_STENCIL_BUFFER) {
-            attachment->aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-        }
-        attachment->clearValue.depthStencil.depth = 1.0;
-        attachment->clearValue.depthStencil.stencil = stencil_value;
-    }
-
-    VkClearRect clear_rect = {
-        .rect = {
-            .offset = {
-                .x = 0,
-                .y = 0
-            },
-            .extent = renderer->ctx->swapchain.extent
-        },
-        .baseArrayLayer = 0,
-        .layerCount = 1
-    };
-
-    const rendering_resource* render_res =
-        main_renderer_active_render_res(renderer);
-    vkCmdClearAttachments(render_res->command_buffer, num_attachments,
-        attachments, 1, &clear_rect);
 }
 
 void create_main_renderer(const main_renderer_create_info* renderer_info) {

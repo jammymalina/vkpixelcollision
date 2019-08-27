@@ -31,9 +31,6 @@ void main_renderer_init(main_renderer* renderer, const
 
 bool main_renderer_render(main_renderer* renderer);
 
-void main_renderer_clear_screen(main_renderer* renderer, uint32_t color,
-    uint32_t clear_bits);
-
 void create_main_renderer(const main_renderer_create_info* renderer_info);
 main_renderer* retrieve_main_renderer();
 void destroy_main_renderer();

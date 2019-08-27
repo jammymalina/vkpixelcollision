@@ -26,10 +26,27 @@ static bool rendering_resource_init_framebuffer_from_swp(rendering_resource*
 }
 
 static bool rendering_resource_init_semaphores(rendering_resource* res) {
+    const VkSemaphoreCreateInfo sempahore_info = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0
+    };
+    CHECK_VK_BOOL(vkCreateSemaphore(res->device, &sempahore_info, NULL,
+        &res->image_available_semaphore));
+    CHECK_VK_BOOL(vkCreateSemaphore(res->device, &sempahore_info, NULL,
+        &res->finished_render_semaphore));
+
     return true;
 }
 
 static bool rendering_resource_init_fence(rendering_resource* res) {
+    const VkFenceCreateInfo fence_info = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT
+    };
+    CHECK_VK_BOOL(vkCreateFence(res->device, &fence_info, NULL, &res->fence));
+
     return true;
 }
 
@@ -96,6 +113,21 @@ static inline void rendering_resource_destroy_command_res(rendering_resource*
     }
 }
 
+static inline void rendering_resource_destroy_fence(rendering_resource* res) {
+    if (res->fence) {
+        vkDestroyFence(res->device, res->fence, NULL);
+    }
+}
+
+static inline void rendering_resource_destroy_sems(rendering_resource* res) {
+    if (res->image_available_semaphore) {
+        vkDestroySemaphore(res->device, res->image_available_semaphore, NULL);
+    }
+    if (res->finished_render_semaphore) {
+        vkDestroySemaphore(res->device, res->finished_render_semaphore, NULL);
+    }
+}
+
 static inline void rendering_resource_destroy_fbs(rendering_resource* res) {
     vk_framebuffer_destroy(&res->framebuffer);
     vk_framebuffer_init_empty(&res->framebuffer);
@@ -104,4 +136,7 @@ static inline void rendering_resource_destroy_fbs(rendering_resource* res) {
 void rendering_resource_destroy(rendering_resource* res) {
     rendering_resource_destroy_command_res(res);
     rendering_resource_destroy_fbs(res);
+    rendering_resource_destroy_sems(res);
+    rendering_resource_destroy_fence(res);
+    rendering_resource_init_empty(res);
 }

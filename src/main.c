@@ -46,7 +46,7 @@ int main(int argc, char* args[]) {
         },
         .renderer_config = {
             .ctx = NULL,
-            .clear_color = 0xF5F5F5FF,
+            .clear_color = 0xDFDFDFFF,
             .clear_bits = CLEAR_COLOR_BUFFER
         },
         .render_programs_config = {
@@ -113,6 +113,5 @@ int main(int argc, char* args[]) {
         is_running &= render_status;
     }
 
-    destroy_main_renderer();
     vk_app_destroy(&app);
 }
