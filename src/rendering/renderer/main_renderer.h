@@ -19,7 +19,7 @@ typedef struct main_renderer_create_info {
 } main_renderer_create_info;
 
 typedef struct main_renderer {
-    uint32_t active_recording_frame;
+    uint32_t active_render_res_idx;
     const rendering_context* ctx;
 
     uint32_t clear_color;

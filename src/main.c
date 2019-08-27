@@ -44,6 +44,11 @@ int main(int argc, char* args[]) {
             .min_garbage_size = 20,
             .number_of_frames = 0
         },
+        .renderer_config = {
+            .ctx = NULL,
+            .clear_color = 0xF5F5F5FF,
+            .clear_bits = CLEAR_COLOR_BUFFER
+        },
         .render_programs_config = {
             .shd_tools_config = {
                 .max_shader_program_byte_size = 32 * 1024, // 32 KB
@@ -75,7 +80,9 @@ int main(int argc, char* args[]) {
 
     uint32_t previous_time = SDL_GetTicks();
     double lag = 0.0;
+    main_renderer* renderer = retrieve_main_renderer();
     while (is_running) {
+
         uint32_t current_time = SDL_GetTicks();
         uint32_t elapsed_time = current_time - previous_time;
 
@@ -101,7 +108,11 @@ int main(int argc, char* args[]) {
             // double delta = lag / MS_PER_UPDATE;
             lag -= MS_PER_UPDATE;
         }
+
+        bool render_status = main_renderer_render(renderer);
+        is_running &= render_status;
     }
 
+    destroy_main_renderer();
     vk_app_destroy(&app);
 }

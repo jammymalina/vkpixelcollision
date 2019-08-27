@@ -19,7 +19,7 @@ void main_renderer_init(main_renderer* renderer, const
 const rendering_resource* main_renderer_active_render_res(const main_renderer*
     renderer)
 {
-    uint32_t active_idx = renderer->active_recording_frame;
+    uint32_t active_idx = renderer->active_render_res_idx;
     return &renderer->ctx->rendering_resources[active_idx];
 }
 
@@ -106,6 +106,46 @@ static bool main_renderer_finish_frame(main_renderer* renderer) {
     return true;
 }
 
+static inline bool main_renderer_present_frame(const main_renderer* renderer,
+    const uint32_t* image_index)
+{
+    const rendering_resource* render_res =
+        main_renderer_active_render_res(renderer);
+
+    VkPresentInfoKHR present_info = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = NULL,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &render_res->finished_render_semaphore,
+        .swapchainCount = 1,
+        .pSwapchains = &renderer->ctx->swapchain.handle,
+        .pImageIndices = image_index,
+        .pResults = NULL
+    };
+    VkResult result = vkQueuePresentKHR(renderer->ctx->graphics_queue.handle,
+        &present_info);
+
+    switch(result) {
+      case VK_SUCCESS:
+        break;
+      case VK_ERROR_OUT_OF_DATE_KHR:
+      case VK_SUBOPTIMAL_KHR:
+        log_error("Problem occured during vkQueuePresentKHR - out of date or"
+            " suboptimal");
+        return false;
+      default:
+        log_error("Problem occured during vkQueuePresentKHR");
+        return false;
+    }
+
+    return true;
+}
+
+static inline void main_renderer_next_rendering_res(main_renderer* renderer) {
+    renderer->active_render_res_idx = (renderer->active_render_res_idx + 1) %
+        renderer->ctx->swapchain.image_count;
+}
+
 bool main_renderer_render(main_renderer* renderer) {
     uint32_t image_index = 0;
 
@@ -120,6 +160,11 @@ bool main_renderer_render(main_renderer* renderer) {
 
     status &= main_renderer_finish_frame(renderer);
     ASSERT_LOG_ERROR(status, "Unable to finish frame");
+
+    status &= main_renderer_present_frame(renderer, &image_index);
+    ASSERT_LOG_ERROR(status, "Unable to present an image");
+
+    main_renderer_next_rendering_res(renderer);
 
     return true;
 }

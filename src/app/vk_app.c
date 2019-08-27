@@ -26,8 +26,8 @@ static inline void vk_app_init_vulkan(vk_app* app) {
     init_vk_debugger(app->instance);
 }
 
-static inline void vk_app_init_gpu_queues(vk_app* app, const vk_app_create_info
-    *app_info)
+static inline void vk_app_init_gpu_queues(vk_app* app, const vk_app_create_info*
+    app_info)
 {
     gpu_queue_selector* queue_selector = retrieve_gpu_queue_selector();
     gpu_queue_select_response response;
@@ -77,8 +77,8 @@ static inline void vk_app_init_rendering_context_swapchain(vk_app* app) {
     rendering_context_init_swapchain(&app->ctx);
 }
 
-static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info
-    *app_info)
+static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info*
+    app_info)
 {
     vma_allocator_create_info allocator_info = app_info->vma_allocator_config;
     if (!allocator_info.gpu) {
@@ -93,6 +93,18 @@ static inline void vk_app_init_allocator(vk_app* app, const vk_app_create_info
 static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
     rendering_context_init_render_pass(&app->ctx);
     rendering_context_init_rendering_resources(&app->ctx);
+}
+
+static inline void vk_app_init_renderer(vk_app* app, const vk_app_create_info*
+    app_info)
+{
+    const main_renderer_create_info renderer_config = {
+        .ctx = app_info->renderer_config.ctx == NULL ? &app->ctx :
+            app_info->renderer_config.ctx,
+        .clear_color = app_info->renderer_config.clear_color,
+        .clear_bits = app_info->renderer_config.clear_bits
+    };
+    create_main_renderer(&renderer_config);
 }
 
 static inline void vk_app_init_shaders(vk_app* app,
@@ -138,6 +150,7 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_init_rendering_context_swapchain(app);
     vk_app_init_allocator(app, app_info);
     vk_app_init_rendering_context_render_pass(app);
+    vk_app_init_renderer(app, app_info);
     vk_app_init_shaders(app, app_info);
 }
 
@@ -149,6 +162,7 @@ void vk_app_destroy(vk_app* app) {
     destroy_shader_loader();
     destroy_vma_allocator();
 
+    destroy_main_renderer();
     rendering_context_destroy(&app->ctx);
 
     destroy_gpu_queue_selector();
