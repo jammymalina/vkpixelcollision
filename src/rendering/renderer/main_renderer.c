@@ -1,5 +1,6 @@
 #include "./main_renderer.h"
 
+#include "../../logger/logger.h"
 #include "../../material/color.h"
 #include "../../memory/memory.h"
 #include "../../vulkan/functions/functions.h"
@@ -24,7 +25,7 @@ const rendering_resource* main_renderer_active_render_res(const main_renderer*
 
 static bool main_renderer_prepare_frame(main_renderer* renderer) {
     const rendering_resource* render_res =
-        main_renderer_get_active_command_buffer(renderer);
+        main_renderer_active_render_res(renderer);
 
     VkCommandBufferBeginInfo command_buff_begin_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -61,12 +62,12 @@ static bool main_renderer_prepare_frame(main_renderer* renderer) {
 
 static inline bool main_renderer_sync(const main_renderer* renderer) {
     const rendering_resource* render_res =
-        main_renderer_get_active_command_buffer(renderer);
+        main_renderer_active_render_res(renderer);
 
-    CHECK_VK_BOOL((renderer->ctx->gpu->device, 1, render_res->fence, VK_TRUE,
-        UINT64_MAX));
+    CHECK_VK_BOOL(vkWaitForFences(renderer->ctx->gpu->device, 1,
+        &render_res->fence, VK_TRUE, UINT64_MAX));
     CHECK_VK_BOOL(vkResetFences(renderer->ctx->gpu->device, 1,
-        render_res->fence));
+        &render_res->fence));
 
     return true;
 }
@@ -75,12 +76,12 @@ static inline bool main_renderer_acquire_image(const main_renderer* renderer,
     uint32_t* image_index)
 {
     const rendering_resource* render_res =
-        main_renderer_get_active_command_buffer(renderer);
+        main_renderer_active_render_res(renderer);
 
     VkResult result = vkAcquireNextImageKHR(renderer->ctx->gpu->device,
         renderer->ctx->swapchain.handle, UINT64_MAX,
         render_res->image_available_semaphore, VK_NULL_HANDLE, image_index);
-    switch( result ) {
+    switch(result) {
       case VK_SUCCESS:
       case VK_SUBOPTIMAL_KHR:
         break;
@@ -91,11 +92,13 @@ static inline bool main_renderer_acquire_image(const main_renderer* renderer,
         log_error("Problem occurred during swap chain image acquisition!");
         return false;
     }
+
+    return false;
 }
 
 static bool main_renderer_finish_frame(main_renderer* renderer) {
     const rendering_resource* render_res =
-        main_renderer_get_active_command_buffer(renderer);
+        main_renderer_active_render_res(renderer);
 
     vkCmdEndRenderPass(render_res->command_buffer);
     CHECK_VK_BOOL(vkEndCommandBuffer(render_res->command_buffer));
@@ -107,7 +110,7 @@ bool main_renderer_render(main_renderer* renderer) {
     uint32_t image_index = 0;
 
     bool status = main_renderer_sync(renderer);
-    ASSERT_LOG_ERROR("Unable to reset fence");
+    ASSERT_LOG_ERROR(status, "Unable to reset fence");
 
     status &= main_renderer_acquire_image(renderer, &image_index);
     ASSERT_LOG_ERROR(status, "Unable to acquire image");
@@ -170,7 +173,7 @@ void main_renderer_clear_screen(main_renderer* renderer, uint32_t color,
     };
 
     const rendering_resource* render_res =
-        main_renderer_get_active_command_buffer(renderer);
+        main_renderer_active_render_res(renderer);
     vkCmdClearAttachments(render_res->command_buffer, num_attachments,
         attachments, 1, &clear_rect);
 }
