@@ -9,8 +9,8 @@ static inline bool vma_allocator_blocks_init(vma_allocator* allocator,
     for (size_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
         uint32_t min_blocks_size = max(allocator_info->min_blocks_size,
             VMA_MINIMUM_BLOCKS_SIZE);
-        vma_vector_init(&allocator->blocks[i]);
-        if (!vma_vector_reserve(&allocator->blocks[i], min_blocks_size)) {
+        vector_init(&allocator->blocks[i]);
+        if (!vector_reserve(&allocator->blocks[i], min_blocks_size)) {
             log_error("Unable to reserve space for allocator block vector");
             return false;
         }
@@ -25,8 +25,8 @@ static inline bool vma_allocator_garbage_init(vma_allocator* allocator,
     for (size_t i = 0; i < allocator->number_of_frames; ++i) {
         uint32_t min_blocks_size = max(allocator_info->min_garbage_size,
             VMA_MINIMUM_GARBAGE_SIZE);
-        vma_vector_init(&allocator->garbage[i]);
-        if (!vma_vector_reserve(&allocator->garbage[i], min_blocks_size)) {
+        vector_init(&allocator->garbage[i]);
+        if (!vector_reserve(&allocator->garbage[i], min_blocks_size)) {
             log_error("Unable to reserve space for garbage vector");
             return false;
         }
@@ -69,11 +69,11 @@ static inline void vma_allocator_blocks_destroy(vma_allocator* allocator) {
     for (size_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
         vma_block_vector* pv = &allocator->blocks[i];
         vma_block* block;
-        vma_vector_foreach(block, pv) {
+        vector_foreach(block, pv) {
             if (!block) { continue; }
             vma_block_destroy(block);
         }
-        vma_vector_clear(pv);
+        vector_clear(pv);
     }
 }
 
@@ -81,15 +81,15 @@ static void vma_allocator_remove_empty_blocks(vma_allocator *allocator,
     const vma_allocation_vector* garbage_alloc_vec)
 {
     vma_allocation allocation;
-    vma_vector_foreach(allocation, garbage_alloc_vec) {
+    vector_foreach(allocation, garbage_alloc_vec) {
         vma_block_free_allocation(allocation.block, &allocation);
 
         if (allocation.block->allocated == 0) {
             vma_block_vector* blocks =
                 &allocator->blocks[allocation.block->memory_type_index];
             ssize_t block_remove_idx = -1;
-            vma_vector_index_of(blocks, allocation.block, &block_remove_idx);
-            vma_vector_remove_noshrink(blocks, block_remove_idx);
+            vector_index_of(blocks, allocation.block, &block_remove_idx);
+            vector_remove_noshrink(blocks, block_remove_idx);
         }
         vma_block_destroy(allocation.block);
         allocation.block = NULL;
@@ -112,7 +112,7 @@ static inline void vma_allocator_garbage_destroy(vma_allocator* allocator) {
     vma_allocator_empty_all_garbage(allocator);
     if (allocator->garbage) {
         for (size_t i = 0; i < allocator->number_of_frames; ++i) {
-            vma_vector_clear(&allocator->garbage[i]);
+            vector_clear(&allocator->garbage[i]);
         }
         mem_free(allocator->garbage);
     }
@@ -213,7 +213,7 @@ static inline bool vma_allocator_allocate_new_block(vma_allocator* allocator,
 
     ASSERT_LOG_ERROR(vma_block_init(block), "Unable to create vma memory "
         "block");
-    ASSERT_LOG_ERROR(vma_vector_push(&allocator->blocks[memory_type_index],
+    ASSERT_LOG_ERROR(vector_push(&allocator->blocks[memory_type_index],
         block), "Unable to add vma memory block to blocks vector");
 
     const vma_block_allocation_info block_alloc_info = {
@@ -231,7 +231,7 @@ static int vma_allocator_allocate_existing_block(vma_allocator*
 {
     const vma_block_vector* blocks = &allocator->blocks[memory_type_index];
     vma_block* block;
-    vma_vector_foreach(block, blocks) {
+    vector_foreach(block, blocks) {
         if (block->memory_type_index == memory_type_index) {
             const vma_block_allocation_info block_alloc_info = {
                 .allocation_type = alloc_info->type,
@@ -270,7 +270,7 @@ bool vma_allocator_free_allocation(vma_allocator* allocator,
 {
     vma_allocation_vector* garbage_alloc_vec =
         &allocator->garbage[allocator->garbage_index];
-    bool status = vma_vector_push(garbage_alloc_vec, *allocation);
+    bool status = vector_push(garbage_alloc_vec, *allocation);
     ASSERT_LOG_ERROR(status, "Unable to add allocation to the garbage vector");
     return true;
 }

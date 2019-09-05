@@ -7,6 +7,8 @@
 
 #include "../logger/logger.h"
 
+typedef unsigned char byte;
+
 #define CHECK_ALLOC(x, s)                          \
     do {                                           \
         if ((x) == NULL) {                         \
