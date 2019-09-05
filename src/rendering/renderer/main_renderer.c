@@ -69,13 +69,13 @@ static bool main_renderer_prepare_frame(main_renderer* renderer) {
     VkClearValue clear_values[2];
     uint32_t clear_values_size = 0;
     if (renderer->clear_bits & CLEAR_COLOR_BUFFER) {
-        float float_clear_color[4];
-        color_rgb_uint32_to_float(float_clear_color, renderer->clear_color);
+        float clear_color[4];
+        color_rgba_uint32_to_float(clear_color, renderer->clear_color);
         VkClearColorValue color;
-        color.float32[0] = float_clear_color[0];
-        color.float32[1] = float_clear_color[1];
-        color.float32[2] = float_clear_color[2];
-        color.float32[3] = float_clear_color[3];
+        color.float32[0] = clear_color[0];
+        color.float32[1] = clear_color[1];
+        color.float32[2] = clear_color[2];
+        color.float32[3] = clear_color[3];
         clear_values[clear_values_size++].color = color;
     }
     if (renderer->clear_bits & (CLEAR_DEPTH_BUFFER | CLEAR_STENCIL_BUFFER)) {

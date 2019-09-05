@@ -46,7 +46,7 @@ int main(int argc, char* args[]) {
         },
         .renderer_config = {
             .ctx = NULL,
-            .clear_color = 0xDFDFDFFF,
+            .clear_color = 0xf2eecbff,
             .clear_bits = CLEAR_COLOR_BUFFER
         },
         .render_programs_config = {
