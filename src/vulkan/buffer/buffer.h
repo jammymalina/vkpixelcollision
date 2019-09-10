@@ -53,13 +53,14 @@ static inline bool vk_buffer_is_mapped(const vk_buffer* buff) {
     return (buff->size & VULKAN_BUFFER_MAPPED_FLAG) != 0;
 }
 
-bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize num_bytes);
-
 void vk_buffer_init_empty(vk_buffer* buff);
 bool vk_buffer_init(vk_buffer* buff, const vk_buffer_create_info* buff_conf);
 
 bool vk_buffer_allocate(vk_buffer* buff, void* data, VkDeviceSize alloc_size);
-bool vk_buffer_update_data(vk_buffer* buff, void* data, VkDeviceSize size,
+
+bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
+    offset);
+bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
     VkDeviceSize offset);
 
 bool vk_buffer_reference(vk_buffer* dest, const vk_buffer* src);

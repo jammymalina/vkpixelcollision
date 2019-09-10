@@ -111,7 +111,9 @@ bool vk_buffer_allocate(vk_buffer* buff, void* data, VkDeviceSize alloc_size)
     return true;
 }
 
-bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize num_bytes) {
+static inline bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize
+    num_bytes)
+{
     ASSERT_LOG_ERROR(is_16_byte_aligned(src), "Vk_buffer src data incorrect"
         " alignment");
     ASSERT_LOG_ERROR(is_16_byte_aligned(dest), "Vk_buffer dest data incorrect"
@@ -122,13 +124,31 @@ bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize num_bytes) {
     return true;
 }
 
-bool vk_buffer_update_data(vk_buffer* buff, void* data, VkDeviceSize size,
+bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
+    offset)
+{
+    ASSERT_LOG_ERROR(buff->handle, "Vk_buffer must be allocated before data"
+        " purge");
+    ASSERT_LOG_ERROR((vk_buffer_get_offset(buff) & 15) == 0, "Vk_buffer data"
+        " clear failed: invalid offset");
+
+    if (buff->data_usage == VULKAN_BUFFER_DYNAMIC_DATA_USAGE) {
+        mem_set(buff->allocation.data + vk_buffer_get_offset(buff) + offset, 0,
+            size);
+        return true;
+    }
+
+    log_error("Vk_buffer data usage not supported");
+    return false;
+}
+
+bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
     VkDeviceSize offset)
 {
     ASSERT_LOG_ERROR(buff->handle, "Vk_buffer must be allocated before data"
         " update");
-    ASSERT_LOG_ERROR((vk_buffer_get_offset(buff) & 15) == 0, "Vk_buffer failed:"
-        " invalid offset");
+    ASSERT_LOG_ERROR((vk_buffer_get_offset(buff) & 15) == 0, "Vk_buffer data"
+        " update failed: invalid offset");
 
     if (buff->data_usage == VULKAN_BUFFER_DYNAMIC_DATA_USAGE) {
         ASSERT_LOG_ERROR(vk_buffer_copy_data(data, buff->allocation.data +
