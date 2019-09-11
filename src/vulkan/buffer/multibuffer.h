@@ -13,30 +13,30 @@
 typedef struct vk_multibuffer_segment_create_info {
     char name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH];
     VkBufferUsageFlags usage;
-    size_t size;
+    VkDeviceSize size;
     const void* data;
-    size_t data_size;
+    VkDeviceSize data_size;
 } vk_multibuffer_segment_create_info;
 
 typedef struct vk_multibuffer_segment {
     char name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH];
     VkBufferUsageFlags usage;
-    size_t offset;
-    size_t size;
-    size_t pointer;
+    VkDeviceSize offset;
+    VkDeviceSize size;
+    VkDeviceSize pointer;
 } vk_multibuffer_segment;
 
 typedef struct vk_multibuffer_create_info {
     const gpu_info* gpu;
     const vk_multibuffer_segment_create_info* segments;
-    size_t segments_size;
+    VkDeviceSize segments_size;
     vk_buffer_data_usage data_usage;
 } vk_multibuffer_create_info;
 
 typedef struct vk_multibuffer {
     vk_buffer buffer;
-        vk_multibuffer_segment* segments;
-    size_t segments_size;
+    vk_multibuffer_segment* segments;
+    VkDeviceSize segments_size;
 } vk_multibuffer;
 
 void vk_multibuffer_init_empty(vk_multibuffer* mbuff);
@@ -44,7 +44,10 @@ bool vk_multibuffer_init(vk_multibuffer* mbuff, const
     vk_multibuffer_create_info* mbuff_config);
 
 VkBufferUsageFlags vk_multibuffer_get_usage(const vk_multibuffer* mbuff);
-size_t vk_multibuffer_get_total_size(const vk_multibuffer* mbuff);
+VkDeviceSize vk_multibuffer_get_total_size(const vk_multibuffer* mbuff);
+VkDeviceSize vk_multibuffer_get_buffer_size(const vk_multibuffer* mbuff);
+
+bool vk_multibuffer_clear(vk_multibuffer* mbuff);
 
 bool vk_multibuffer_segment_clear(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH]);

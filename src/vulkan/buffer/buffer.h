@@ -37,6 +37,10 @@ typedef struct vk_buffer {
     vma_allocation allocation;
 } vk_buffer;
 
+static inline VkDeviceSize vk_buffer_get_size(const vk_buffer* buff) {
+    return buff->size & ~VULKAN_BUFFER_MAPPED_FLAG;
+}
+
 static inline VkDeviceSize vk_buffer_get_allocated_size(const vk_buffer* buff) {
     return ((buff->size & ~VULKAN_BUFFER_MAPPED_FLAG) + 15) & ~15;
 }
@@ -58,6 +62,7 @@ bool vk_buffer_init(vk_buffer* buff, const vk_buffer_create_info* buff_conf);
 
 bool vk_buffer_allocate(vk_buffer* buff, void* data, VkDeviceSize alloc_size);
 
+bool vk_buffer_clear_all_data(vk_buffer* buff);
 bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
     offset);
 bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,

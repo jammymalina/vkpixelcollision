@@ -124,6 +124,10 @@ static inline bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize
     return true;
 }
 
+bool vk_buffer_clear_all_data(vk_buffer* buff) {
+    return vk_buffer_clear_data(buff, 0, vk_buffer_get_size(buff));
+}
+
 bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
     offset)
 {
@@ -131,6 +135,8 @@ bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
         " purge");
     ASSERT_LOG_ERROR((vk_buffer_get_offset(buff) & 15) == 0, "Vk_buffer data"
         " clear failed: invalid offset");
+    ASSERT_LOG_ERROR(size <= vk_buffer_get_size(buff), "Vk_buffer not enough"
+        " space to clear the data");
 
     if (buff->data_usage == VULKAN_BUFFER_DYNAMIC_DATA_USAGE) {
         mem_set(buff->allocation.data + vk_buffer_get_offset(buff) + offset, 0,
@@ -149,6 +155,8 @@ bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
         " update");
     ASSERT_LOG_ERROR((vk_buffer_get_offset(buff) & 15) == 0, "Vk_buffer data"
         " update failed: invalid offset");
+    ASSERT_LOG_ERROR(size <= vk_buffer_get_size(buff), "Vk_buffer not enough"
+        " space to update the data");
 
     if (buff->data_usage == VULKAN_BUFFER_DYNAMIC_DATA_USAGE) {
         ASSERT_LOG_ERROR(vk_buffer_copy_data(data, buff->allocation.data +

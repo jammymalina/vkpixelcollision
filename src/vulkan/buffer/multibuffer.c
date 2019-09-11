@@ -20,18 +20,18 @@ void vk_multibuffer_init_empty(vk_multibuffer* mbuff) {
 }
 
 static inline void vk_multibuffer_segment_init(vk_multibuffer_segment* segment,
-    const vk_multibuffer_segment_create_info* segment_config, size_t offset)
+    const vk_multibuffer_segment_create_info* seg_config, VkDeviceSize offset)
 {
     string_copy(segment->name, VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH,
-        segment_config->name);
+        seg_config->name);
     segment->pointer = 0;
-    segment->size = segment_config->size;
-    segment->usage = segment_config->usage;
+    segment->size = seg_config->size;
+    segment->usage = seg_config->usage;
     segment->offset = offset;
 }
 
 static inline bool vk_multibuffer_init_segments(vk_multibuffer* mbuff, const
-    vk_multibuffer_segment_create_info* segments, size_t segments_size)
+    vk_multibuffer_segment_create_info* segments, VkDeviceSize segments_size)
 {
     ASSERT_LOG_ERROR(segments_size > 0, "Unable to initialize vk_multibuffer"
         " segments - invalid segments count");
@@ -40,7 +40,7 @@ static inline bool vk_multibuffer_init_segments(vk_multibuffer* mbuff, const
         " segments");
     mbuff->segments_size = segments_size;
 
-    size_t offset = 0;
+    VkDeviceSize offset = 0;
     for (size_t i = 0; i < mbuff->segments_size; ++i) {
         vk_multibuffer_segment_init(&mbuff->segments[i], &segments[i], offset);
         offset += segments[i].size;
@@ -98,23 +98,45 @@ VkBufferUsageFlags vk_multibuffer_get_usage(const vk_multibuffer* mbuff) {
     return usage;
 }
 
-size_t vk_multibuffer_get_total_size(const vk_multibuffer* mbuff) {
-    size_t total_size = 0;
+VkDeviceSize vk_multibuffer_get_total_size(const vk_multibuffer* mbuff) {
+    VkDeviceSize total_size = 0;
     for (size_t i = 0; i < mbuff->segments_size; ++i) {
         total_size += mbuff->segments[i].size;
     }
     return total_size;
 }
 
+VkDeviceSize vk_multibuffer_get_buffer_size(const vk_multibuffer* mbuff) {
+    return vk_buffer_get_size(&mbuff->buffer);
+}
+
+bool vk_multibuffer_clear(vk_multibuffer* mbuff) {
+    return vk_buffer_clear_all_data(&mbuff->buffer);
+}
+
 bool vk_multibuffer_segment_clear(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
 {
-    return true;
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    return vk_buffer_clear_data(&mbuff->buffer, seg->size, seg->offset);
 }
 
 bool vk_multibuffer_segment_reset(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH], bool clear_buffer)
 {
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    bool status = clear_buffer || vk_multibuffer_segment_clear(mbuff,
+        segment_name);
+    ASSERT_LOG_ERROR(status, "Unable to clear segment (%s) in vk_multibuffer",
+        segment_name);
+    seg->pointer = 0;
+
     return true;
 }
 
