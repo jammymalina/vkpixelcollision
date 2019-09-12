@@ -60,4 +60,6 @@ bool vk_multibuffer_segment_update_data(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH], const void* data,
     size_t data_size);
 
+void vk_multibuffer_destroy(vk_multibuffer* mbuff);
+
 #endif

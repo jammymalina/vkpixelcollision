@@ -3,7 +3,7 @@
 #include "../../string/string.h"
 
 static inline vk_multibuffer_segment* vk_multibuffer_find_seg(vk_multibuffer*
-    mbuff, char name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
+    mbuff, const char name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
 {
     for (size_t i = 0; i < mbuff->segments_size; ++i) {
         if (string_equal(mbuff->segments[i].name, name)) {
@@ -80,6 +80,8 @@ static inline bool vk_multibuffer_segment_ptr_update_data(vk_multibuffer* mbuff,
 bool vk_multibuffer_init(vk_multibuffer* mbuff, const
     vk_multibuffer_create_info* mbuff_config)
 {
+    ASSERT_LOG_ERROR(mbuff_config->gpu, "Vk_multibuffer init - gpu cannot be"
+        " NULL");
     vk_multibuffer_init_empty(mbuff);
 
     ASSERT_LOG_ERROR(vk_multibuffer_init_segments(mbuff, mbuff_config->segments,
@@ -131,7 +133,7 @@ bool vk_multibuffer_segment_reset(vk_multibuffer* mbuff, const char
     ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
         " vk_multibuffer", segment_name);
 
-    bool status = clear_buffer || vk_multibuffer_segment_clear(mbuff,
+    bool status = !clear_buffer || vk_multibuffer_segment_clear(mbuff,
         segment_name);
     ASSERT_LOG_ERROR(status, "Unable to clear segment (%s) in vk_multibuffer",
         segment_name);
@@ -144,6 +146,20 @@ bool vk_multibuffer_segment_append(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH], const void* data,
     size_t data_size)
 {
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    ASSERT_LOG_ERROR(seg->pointer + data_size <= seg->size, "Unable to append"
+        " data to vk_multibuffer, segment (%s) is full", segment_name);
+
+    bool status = vk_buffer_update_data(&mbuff->buffer, data, data_size,
+        seg->offset + seg->pointer);
+    ASSERT_LOG_ERROR(status, "Unable to append data to desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    seg->pointer += data_size;
+
     return true;
 }
 
@@ -151,5 +167,25 @@ bool vk_multibuffer_segment_update_data(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH], const void* data,
     size_t data_size)
 {
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    ASSERT_LOG_ERROR(data_size <= seg->size, "Unable to update data in segment"
+        " (%s) in vk_multibuffer, not enough space", segment_name);
+
+    bool status = vk_multibuffer_segment_clear(mbuff, segment_name)
+        && vk_buffer_update_data(&mbuff->buffer, data, data_size, seg->offset);
+    ASSERT_LOG_ERROR(status, "Unable to update segment (%s) data in"
+        " vk_multibuffer", segment_name);
+
     return true;
+}
+
+void vk_multibuffer_destroy(vk_multibuffer* mbuff) {
+    vk_buffer_destroy(&mbuff->buffer);
+    if (mbuff->segments) {
+        mem_free(mbuff->segments);
+    }
+    vk_multibuffer_init_empty(mbuff);
 }
