@@ -35,10 +35,8 @@ void vk_multibuffer_manager_init_empty(vk_multibuffer_manager* mbm);
 bool vk_multibuffer_manager_init(vk_multibuffer_manager* mbm, const
     vk_multibuffer_manager_create_info* mbm_info);
 
-bool vk_multibuffer_manager_add(vk_multibuffer_manager* mbm, const char*
-    mbuff_name, const vk_multibuffer* mbuff);
-bool vk_multibuffer_manager_get(vk_multibuffer_manager* mbm, const char*
-    mbuff_name, vk_multibuffer* mbuff);
+bool vk_multibuffer_manager_add_new(vk_multibuffer_manager* mbm, const char*
+    mbuff_name, const vk_multibuffer_create_info* mbuff_info);
 vk_multibuffer* vk_multibuffer_manager_get_reference(vk_multibuffer_manager*
     mbm, const char* mbuff_name);
 

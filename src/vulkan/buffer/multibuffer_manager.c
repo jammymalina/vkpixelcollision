@@ -21,8 +21,8 @@ bool vk_multibuffer_manager_init(vk_multibuffer_manager* mbm, const
     return true;
 }
 
-bool vk_multibuffer_manager_add(vk_multibuffer_manager* mbm, const char*
-    mbuff_name, const vk_multibuffer* mbuff)
+bool vk_multibuffer_manager_add_new(vk_multibuffer_manager* mbm, const char*
+    mbuff_name, const vk_multibuffer_create_info* mbuff_info)
 {
     if (vk_multibuffer_manager_has(mbm, mbuff_name)) {
         log_warning("Overwriting vk_multibuffer in the vk_multibuffer manager,"
@@ -37,32 +37,32 @@ bool vk_multibuffer_manager_add(vk_multibuffer_manager* mbm, const char*
     vk_multibuffer* m = vk_multibuffer_manager_get_reference(mbm, mbuff_name);
     ASSERT_LOG_ERROR(m, "Unable to retrieve recently added vk_multibuffer: %s",
         mbuff_name);
+    ASSERT_LOG_ERROR(vk_multibuffer_init(m, mbuff_info), "Unable to add new"
+        " vk_multibuffer, init failed");
 
-    return true;
-}
-
-bool vk_multibuffer_manager_get(vk_multibuffer_manager* mbm, const char*
-    mbuff_name, vk_multibuffer* mbuff)
-{
     return true;
 }
 
 vk_multibuffer* vk_multibuffer_manager_get_reference(vk_multibuffer_manager*
     mbm, const char* mbuff_name)
 {
-    return NULL;
+    return hash_string_map_get_reference(&mbm->multibuffers, mbuff_name);
 }
 
 bool vk_multibuffer_manager_has(vk_multibuffer_manager* mbm, const char*
     mbuff_name)
 {
-    return true;
+    return hash_string_map_has(&mbm->multibuffers, mbuff_name);
 }
 
 bool vk_multibuffer_manager_delete(vk_multibuffer_manager* mbm, const char*
     mbuff_name)
 {
-    return true;
+    vk_multibuffer* m = vk_multibuffer_manager_get_reference(mbm, mbuff_name);
+    if (m) {
+        vk_multibuffer_destroy(m);
+    }
+    return hash_string_map_delete(&mbm->multibuffers, mbuff_name);
 }
 
 bool vk_multibuffer_manager_preload(vk_multibuffer_manager* mbm, const
