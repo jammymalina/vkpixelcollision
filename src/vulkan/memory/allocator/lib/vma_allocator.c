@@ -22,6 +22,7 @@ static inline bool vma_allocator_blocks_init(vma_allocator* allocator,
 static inline bool vma_allocator_garbage_init(vma_allocator* allocator,
     const vma_allocator_create_info* allocator_info)
 {
+    allocator->garbage_index = 0;
     for (size_t i = 0; i < allocator->number_of_frames; ++i) {
         uint32_t min_blocks_size = max(allocator_info->min_garbage_size,
             VMA_MINIMUM_GARBAGE_SIZE);
@@ -43,6 +44,7 @@ bool vma_allocator_init(vma_allocator* allocator,
     ASSERT_LOG_ERROR(allocator_info->gpu->device != VK_NULL_HANDLE, "Allocator "
         "init failed - logical device was not created");
 
+    allocator->gpu = allocator_info->gpu;
     allocator->device_local_memory_bytes =
         VMA_MB_TO_BYTES(allocator_info->desired_device_local_memory_MB);
     allocator->host_visible_memory_bytes =
@@ -80,19 +82,19 @@ static inline void vma_allocator_blocks_destroy(vma_allocator* allocator) {
 static void vma_allocator_remove_empty_blocks(vma_allocator *allocator,
     const vma_allocation_vector* garbage_alloc_vec)
 {
-    vma_allocation allocation;
-    vector_foreach(allocation, garbage_alloc_vec) {
-        vma_block_free_allocation(allocation.block, &allocation);
+    for (size_t i = 0; i < garbage_alloc_vec->size; ++i) {
+        vma_allocation* allocation = &garbage_alloc_vec->data[i];
+        vma_block_free_allocation(allocation->block, allocation);
 
-        if (allocation.block->allocated == 0) {
+        if (allocation->block->allocated == 0) {
             vma_block_vector* blocks =
-                &allocator->blocks[allocation.block->memory_type_index];
+                &allocator->blocks[allocation->block->memory_type_index];
             ssize_t block_remove_idx = -1;
-            vector_index_of(blocks, allocation.block, &block_remove_idx);
+            vector_index_of(blocks, allocation->block, &block_remove_idx);
             vector_remove_noshrink(blocks, block_remove_idx);
         }
-        vma_block_destroy(allocation.block);
-        allocation.block = NULL;
+        vma_block_destroy(allocation->block);
+        allocation->block = NULL;
     }
 }
 
@@ -121,8 +123,8 @@ static inline void vma_allocator_garbage_destroy(vma_allocator* allocator) {
 
 
 void vma_allocator_destroy(vma_allocator* allocator) {
-    vma_allocator_blocks_destroy(allocator);
     vma_allocator_garbage_destroy(allocator);
+    vma_allocator_blocks_destroy(allocator);
 }
 
 static inline uint32_t vma_count_set_bits(uint32_t n) {
@@ -167,7 +169,7 @@ uint32_t vma_allocator_get_memory_type_index(const vma_allocator* allocator,
 
     size_t best_fit = 0;
     int64_t max_score = -1;
-    for (size_t i = 0; i < mem_props->memoryTypeCount; i++) {
+    for (size_t i = 0; i < mem_props->memoryTypeCount; ++i) {
         if (((memory_type_bits >> i) & 1) == 0) {
             continue;
         }
@@ -270,7 +272,8 @@ bool vma_allocator_free_allocation(vma_allocator* allocator,
 {
     vma_allocation_vector* garbage_alloc_vec =
         &allocator->garbage[allocator->garbage_index];
-    bool status = vector_push(garbage_alloc_vec, *allocation);
+    vma_allocation allocation_to_remove = *allocation;
+    bool status = vector_push(garbage_alloc_vec, allocation_to_remove);
     ASSERT_LOG_ERROR(status, "Unable to add allocation to the garbage vector");
     return true;
 }

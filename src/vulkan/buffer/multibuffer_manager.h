@@ -50,4 +50,9 @@ bool vk_multibuffer_manager_preload(vk_multibuffer_manager* mbm, const
 
 void vk_multibuffer_manager_destroy(vk_multibuffer_manager* mbm);
 
+void create_vk_multibuffer_manager(const vk_multibuffer_manager_create_info*
+    mbm_info);
+vk_multibuffer_manager* retrieve_vk_multibuffer_manager();
+void destroy_vk_multibuffer_manager();
+
 #endif

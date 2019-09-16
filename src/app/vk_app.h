@@ -3,6 +3,7 @@
 
 #include "../file/path.h"
 #include "../rendering/renderer/main_renderer.h"
+#include "../vulkan/buffer/multibuffer_manager.h"
 #include "../vulkan/gpu/gpu.h"
 #include "../vulkan/memory/allocator/vma.h"
 #include "../vulkan/shader/shd.h"
@@ -21,6 +22,10 @@ typedef struct vk_app_create_info {
         shader_preload_info preloaded_shaders_config;
         shader_program_preload_info preloaded_shader_programs_config;
     } render_programs_config;
+    struct {
+        vk_multibuffer_manager_preload_info preloaded_multibuffers;
+        vk_multibuffer_manager_create_info config;
+    } multibuffer_manager_config;
 } vk_app_create_info;
 
 typedef struct vk_app {

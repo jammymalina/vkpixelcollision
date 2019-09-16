@@ -221,6 +221,9 @@ bool vma_block_allocate(vma_block* block, vma_allocation* allocation,
 static inline vma_block_chunk* vma_block_chunk_find_by_alloc_id(
     const vma_block *block, uint32_t alloc_id)
 {
+    if (!block) {
+        return NULL;
+    }
     vma_block_chunk* current = NULL;
     for (current = block->head; current != NULL &&
         current->allocation_id != alloc_id; current = current->next);

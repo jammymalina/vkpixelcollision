@@ -15,7 +15,7 @@ int main(int argc, char* args[]) {
     const shader_manager_program_create_info preloaded_shader_programs[] = {
         {
             .name = "basic2d", .gpu = NULL, .shaders_size = 2,
-            .shaders = (const char *[]) { "basic2dfrag", "basic2dvert" },
+            .shaders = (const char*[]) { "basic2dfrag", "basic2dvert" },
             .vertex_layout = VERTEX_LAYOUT_POS_2_COL_4,
             .preconfigured_pipelines = (pipeline_create_info[]) {
                 {
@@ -25,6 +25,33 @@ int main(int argc, char* args[]) {
                 }
             },
             .preconfigured_pipelines_size = 1
+        }
+    };
+
+    const vk_multibuffer_manager_record_info preloaded_multibuffers[] = {
+        {
+            .name = "basic",
+            .config = {
+                .gpu = NULL,
+                .segments = (vk_multibuffer_segment_create_info[]) {
+                    {
+                        .name = "vertex_segment",
+                        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                        .size = MB_TO_BYTES(8),
+                        .data = NULL,
+                        .data_size = 0
+                    },
+                    {
+                        .name = "uniform_segment",
+                        .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                        .size = MB_TO_BYTES(1),
+                        .data = NULL,
+                        .data_size = 0
+                    }
+                },
+                .segments_size = 2,
+                .data_usage = VULKAN_BUFFER_DYNAMIC_DATA_USAGE
+            }
         }
     };
 
@@ -64,6 +91,16 @@ int main(int argc, char* args[]) {
                 .shader_programs_config = preloaded_shader_programs,
                 .shader_programs_config_size = sizeof(preloaded_shader_programs)
                     / sizeof(shader_manager_program_create_info)
+            }
+        },
+        .multibuffer_manager_config = {
+            .config = {
+                .expected_number_of_multibuffers = 1
+            },
+            .preloaded_multibuffers = {
+                .default_gpu = NULL,
+                .multibuffers = preloaded_multibuffers,
+                .multibuffers_size = 1
             }
         }
     };

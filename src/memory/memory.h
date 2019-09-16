@@ -9,6 +9,12 @@
 
 typedef unsigned char byte;
 
+#define KB_TO_BYTES(KB_SIZE) ((KB_SIZE) << 10)
+#define BYTES_TO_KB(BYTE_SIZE) ((BYTE_SIZE) >> 10)
+
+#define MB_TO_BYTES(MB_SIZE) ((MB_SIZE) << 20)
+#define BYTES_TO_MB(BYTE_SIZE) ((BYTE_SIZE) >> 20)
+
 #define CHECK_ALLOC(x, s)                          \
     do {                                           \
         if ((x) == NULL) {                         \

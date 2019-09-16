@@ -133,6 +133,21 @@ static inline void vk_app_init_shaders(vk_app* app,
     ASSERT_LOG_ERROR_EXIT(status, "Unable to build all shader programs");
 }
 
+static inline void vk_app_init_multibuffer_manager(vk_app* app, const
+    vk_app_create_info* app_info)
+{
+    create_vk_multibuffer_manager(&app_info->multibuffer_manager_config.config);
+
+    vk_multibuffer_manager* mbm = retrieve_vk_multibuffer_manager();
+    vk_multibuffer_manager_preload_info mbuff_info =
+        app_info->multibuffer_manager_config.preloaded_multibuffers;
+    mbuff_info.default_gpu = mbuff_info.default_gpu ?
+        mbuff_info.default_gpu : &app->gpu;
+
+    bool status = vk_multibuffer_manager_preload(mbm, &mbuff_info);
+    ASSERT_LOG_ERROR_EXIT(status, "Unable to preload multibuffers");
+}
+
 static inline void vk_app_create_window(vk_app* app, const vk_app_create_info
     *app_info)
 {
@@ -152,11 +167,13 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_init_rendering_context_render_pass(app);
     vk_app_init_renderer(app, app_info);
     vk_app_init_shaders(app, app_info);
+    vk_app_init_multibuffer_manager(app, app_info);
 }
 
 void vk_app_destroy(vk_app* app) {
     vkDeviceWaitIdle(app->gpu.device);
 
+    destroy_vk_multibuffer_manager();
     destroy_shader_program_manager();
     destroy_shader_manager();
     destroy_shader_loader();

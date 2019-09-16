@@ -28,6 +28,7 @@ bool vk_buffer_init(vk_buffer* buff, const vk_buffer_create_info* buff_conf) {
 
     buff->usage = buff_conf->usage;
     buff->data_usage = buff_conf->data_usage;
+    buff->gpu = buff_conf->gpu;
 
     if (buff_conf->allocate_on_init) {
         return vk_buffer_allocate(buff, buff_conf->data,

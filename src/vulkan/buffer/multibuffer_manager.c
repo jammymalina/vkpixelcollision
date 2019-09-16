@@ -1,5 +1,7 @@
 #include "./multibuffer_manager.h"
 
+static vk_multibuffer_manager* reveneze = NULL;
+
 void vk_multibuffer_manager_init_empty(vk_multibuffer_manager* mbm) {
     hash_string_map_init(&mbm->multibuffers);
 }
@@ -68,8 +70,53 @@ bool vk_multibuffer_manager_delete(vk_multibuffer_manager* mbm, const char*
 bool vk_multibuffer_manager_preload(vk_multibuffer_manager* mbm, const
     vk_multibuffer_manager_preload_info* preload_info)
 {
+    bool status = true;
+
+    for (size_t i = 0; i < preload_info->multibuffers_size; ++i) {
+        const vk_multibuffer_manager_record_info* mbm_record =
+            &preload_info->multibuffers[i];
+        vk_multibuffer_create_info mbuff_info = mbm_record->config;
+        mbuff_info.gpu = mbuff_info.gpu ? mbuff_info.gpu :
+            preload_info->default_gpu;
+        status &= vk_multibuffer_manager_add_new(mbm, mbm_record->name,
+            &mbuff_info);
+        ASSERT_LOG_ERROR(status, "Unable to preload vk_multibuffer_manager -"
+            " addition of new multibuffer failed");
+    }
+
     return true;
 }
 
 void vk_multibuffer_manager_destroy(vk_multibuffer_manager* mbm) {
+    const size_t mbuff_buff_size = 32;
+    size_t mbuffs_processed = 0;
+    vk_multibuffer* mbuffs_buff[mbuff_buff_size];
+    while (mbuffs_processed < hash_string_map_get_size(&mbm->multibuffers)) {
+        const size_t current_processed = hash_string_map_values_reference_range(
+            &mbm->multibuffers, mbuffs_buff, mbuffs_processed, mbuff_buff_size);
+        mbuffs_processed += current_processed;
+        for (size_t i = 0; i < current_processed; ++i) {
+            vk_multibuffer_destroy(mbuffs_buff[i]);
+        }
+    }
+    hash_string_map_clear(&mbm->multibuffers);
+}
+
+void create_vk_multibuffer_manager(const vk_multibuffer_manager_create_info*
+    mbm_info)
+{
+    reveneze = mem_alloc(sizeof(vk_multibuffer_manager));
+    CHECK_ALLOC(reveneze, "Unable to allocate vk_multibuffer_manager");
+    ASSERT_LOG_ERROR_EXIT(vk_multibuffer_manager_init(reveneze, mbm_info),
+        "Unable to initialize vk_multibuffer_manager");
+}
+
+vk_multibuffer_manager* retrieve_vk_multibuffer_manager() {
+    return reveneze;
+}
+
+void destroy_vk_multibuffer_manager() {
+    vk_multibuffer_manager_destroy(reveneze);
+    mem_free(reveneze);
+    reveneze = NULL;
 }

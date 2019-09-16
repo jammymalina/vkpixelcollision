@@ -14,6 +14,7 @@ void main_renderer_init(main_renderer* renderer, const
     renderer->ctx = renderer_info->ctx;
     renderer->clear_color = renderer_info->clear_color;
     renderer->clear_bits = renderer_info->clear_bits;
+    renderer->active_render_res_idx = 0;
 }
 
 const rendering_resource* main_renderer_active_render_res(const main_renderer*
