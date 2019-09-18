@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include "../input/input.h"
 #include "../string/string.h"
 #include "../vulkan/debug/debug.h"
 #include "../vulkan/functions/function_loader.h"
@@ -168,9 +169,13 @@ void vk_app_init(vk_app* app, const vk_app_create_info* app_info) {
     vk_app_init_renderer(app, app_info);
     vk_app_init_shaders(app, app_info);
     vk_app_init_multibuffer_manager(app, app_info);
+
+    create_input_handler();
 }
 
 void vk_app_destroy(vk_app* app) {
+    destroy_input_handler();
+
     vkDeviceWaitIdle(app->gpu.device);
 
     destroy_vk_multibuffer_manager();
@@ -186,8 +191,10 @@ void vk_app_destroy(vk_app* app) {
     gpu_info_destroy(&app->gpu);
     destroy_vk_debugger();
     destroy_instance(app->instance);
+
     app->instance = VK_NULL_HANDLE;
     vk_app_window_destroy(&app->window);
 
     unload_vulkan_library();
+
 }

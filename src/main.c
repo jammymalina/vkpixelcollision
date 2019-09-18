@@ -1,4 +1,6 @@
 #include "./app/vk_app.h"
+#include "./domain/update.h"
+#include "./input/input.h"
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
 
@@ -107,6 +109,8 @@ int main(int argc, char* args[]) {
 
     vk_app_init(&app, &app_info);
 
+    domain_init();
+
     log_info("Executable file path: %s", app.basepath);
     log_info("Window size: %d %d", app.window.width, app.window.height);
     log_info("Rendering context size: %d %d", app.ctx.width, app.ctx.height);
@@ -118,6 +122,8 @@ int main(int argc, char* args[]) {
     uint32_t previous_time = SDL_GetTicks();
     double lag = 0.0;
     main_renderer* renderer = retrieve_main_renderer();
+    input_handler* input = retrieve_input_handler();
+
     while (is_running) {
 
         uint32_t current_time = SDL_GetTicks();
@@ -138,11 +144,12 @@ int main(int argc, char* args[]) {
                     }
                     break;
             }
-            // update_input(&event);
+            input_handler_update(input, &event);
         }
 
         while (lag >= MS_PER_UPDATE) {
-            // double delta = lag / MS_PER_UPDATE;
+            double delta = lag / MS_PER_UPDATE;
+            domain_update(delta);
             lag -= MS_PER_UPDATE;
         }
 

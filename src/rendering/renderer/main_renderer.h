@@ -29,6 +29,9 @@ typedef struct main_renderer {
 void main_renderer_init(main_renderer* renderer, const
     main_renderer_create_info* renderer_info);
 
+const rendering_resource* main_renderer_active_render_res(const main_renderer*
+    renderer);
+
 bool main_renderer_render(main_renderer* renderer);
 
 void create_main_renderer(const main_renderer_create_info* renderer_info);
