@@ -109,7 +109,7 @@ int main(int argc, char* args[]) {
 
     vk_app_init(&app, &app_info);
 
-    domain_init();
+    bool domain_init_status = domain_init();
 
     log_info("Executable file path: %s", app.basepath);
     log_info("Window size: %d %d", app.window.width, app.window.height);
@@ -117,7 +117,7 @@ int main(int argc, char* args[]) {
     log_info("Screen BPP: %d", SDL_BITSPERPIXEL(app.window.mode.format));
     log_info("Number of frames: %u", app.ctx.swapchain.image_count);
 
-    bool is_running = true;
+    bool is_running = domain_init_status;
 
     uint32_t previous_time = SDL_GetTicks();
     double lag = 0.0;
