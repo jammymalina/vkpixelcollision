@@ -1,6 +1,19 @@
 #ifndef BASIC_MATH_H
 #define BASIC_MATH_H
 
+#include <math.h>
+
+static const double PI = 3.14159265359;
+#define PI_2 (2.0 * PI)
+#define PI_HALF (0.5 * PI)
+
+static const float PI_F = 3.14159265359;
+#define PI_F_2 (2.0 * PI_F)
+#define PI_F_HALF (0.5 * PI_F)
+
+static const double BIAS = 0.00005;
+static const float BIAS_F = 0.00005;
+
 #define max(a, b)                                            \
     ({                                                       \
         __typeof__(a) _a = (a);                              \

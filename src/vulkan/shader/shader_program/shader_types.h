@@ -9,7 +9,6 @@
 #include "../../../collections/hash_string_map.h"
 
 #define SHADER_MAX_NAME_SIZE HASH_KEY_MAX_SIZE
-
 #define SHADER_TYPES_COUNT 7
 
 typedef enum shader_type {
@@ -29,7 +28,7 @@ typedef enum shadere_program_type {
     SHADER_PROGRAM_TYPES_TOTAL
 } shader_program_type;
 
-const static shader_type shader_type_index_map[] = {
+static const shader_type shader_type_index_map[] = {
     SHADER_TYPE_VERTEX, SHADER_TYPE_FRAGMENT, SHADER_TYPE_GEOMETRY,
     SHADER_TYPE_COMPUTE, SHADER_TYPE_TESS_CTRL, SHADER_TYPE_TESS_EVAL,
     SHADER_TYPE_UNDEFINED

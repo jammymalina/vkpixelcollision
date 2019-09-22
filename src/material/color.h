@@ -11,7 +11,7 @@ static inline void color_rgba_uint32_to_uint(uint32_t dest[4], uint32_t color) {
 }
 
 static inline void color_rgba_uint32_to_float(float dest[4], uint32_t color) {
-    const static float divisor = 0.00392156862; // 1 / 255
+    static const float divisor = 0.00392156862; // 1 / 255
     uint32_t rgba[4] = { 0, 0, 0, 0 };
     color_rgba_uint32_to_uint(rgba, color);
     dest[0] = rgba[0] * divisor; dest[1] = rgba[1] * divisor;
