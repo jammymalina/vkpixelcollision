@@ -65,7 +65,10 @@ void rendering_context_retrieve_graphics_queue(rendering_context* ctx) {
 void rendering_context_init_swapchain(rendering_context* ctx) {
     ASSERT_LOG_ERROR_EXIT(ctx->gpu, "Rendering context gpu pointer doesn't"
         " point to valid gpu");
-    const VkExtent2D dimensions = { .width = ctx->width, .height = ctx->height };
+    const VkExtent2D dimensions = {
+        .width = ctx->width,
+        .height = ctx->height
+    };
     const vk_swapchain_create_info sw_info = {
         .gpu = ctx->gpu,
         .dimensions = dimensions,

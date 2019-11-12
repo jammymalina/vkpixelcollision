@@ -18,8 +18,12 @@ void vk_app_window_init(vk_app_window* window, const vk_app_window_create_info*
     window->handle = NULL;
 
     init_SDL();
+
+    SDL_DisplayMode display_mode;
+    SDL_GetCurrentDisplayMode(0, &display_mode);
+
     window->handle= config->fullscreen ?
-        SDL_CreateWindow(config->title, 0, 0, 0, 0,
+        SDL_CreateWindow(config->title, 0, 0, display_mode.w, display_mode.h,
             SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_VULKAN) :
         SDL_CreateWindow(config->title, SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, config->width, config->height,
