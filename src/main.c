@@ -1,4 +1,5 @@
 #include "./app/vk_app.h"
+#include "./domain/init.h"
 #include "./domain/render.h"
 #include "./domain/update.h"
 #include "./input/input.h"

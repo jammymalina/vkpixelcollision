@@ -163,6 +163,7 @@ bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
         ASSERT_LOG_ERROR(vk_buffer_copy_data(data, buff->allocation.data +
             vk_buffer_get_offset(buff) + offset, size), "Vk_buffer unable to"
             " copy data");
+        return true;
     }
 
     log_error("Vk_buffer data usage not supported");
