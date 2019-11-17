@@ -1,9 +1,10 @@
 #include "./app/vk_app.h"
+#include "./domain/render.h"
 #include "./domain/update.h"
 #include "./input/input.h"
 #include "./logger/logger.h"
-#include "./vulkan/memory/allocator/vma.h"
 #include "./time/time.h"
+#include "./vulkan/memory/allocator/vma.h"
 
 #define MS_PER_UPDATE 16
 
@@ -106,7 +107,9 @@ int main(int argc, char* args[]) {
         .renderer_config = {
             .ctx = NULL,
             .clear_color = 0xf2eecbff,
-            .clear_bits = CLEAR_COLOR_BUFFER
+            .clear_bits = CLEAR_COLOR_BUFFER,
+            .render_functions = { domain_render },
+            .render_functions_size = 1
         },
         .render_programs_config = {
             .shd_tools_config = {

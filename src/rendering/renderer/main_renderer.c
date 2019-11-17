@@ -16,6 +16,17 @@ void main_renderer_init(main_renderer* renderer, const
     renderer->clear_color = renderer_info->clear_color;
     renderer->clear_bits = renderer_info->clear_bits;
     renderer->active_render_res_idx = 0;
+    main_renderer_set_render_functions(renderer,
+        renderer_info->render_functions, renderer_info->render_functions_size);
+}
+
+void main_renderer_set_render_functions(main_renderer* renderer, const
+    render_function render_functions[MAIN_RENDERING_MAX_RENDER_FUNCTIONS_SIZE],
+    size_t render_functions_size)
+{
+    mem_copy(renderer->render_functions, render_functions,
+        render_functions_size * sizeof(render_function));
+    renderer->render_functions_size = render_functions_size;
 }
 
 const rendering_resource* main_renderer_active_render_res(const main_renderer*
@@ -50,7 +61,6 @@ static inline void main_renderer_set_viewport(const main_renderer* renderer) {
         }
     };
     vkCmdSetScissor(render_res->command_buffer, 0, 1, &scissor);
-
 }
 
 static bool main_renderer_prepare_frame(main_renderer* renderer) {
@@ -106,6 +116,19 @@ static bool main_renderer_prepare_frame(main_renderer* renderer) {
         VK_SUBPASS_CONTENTS_INLINE);
 
     return true;
+}
+
+static bool main_renderer_render_functions_exec(const main_renderer* renderer) {
+    const rendering_resource* render_res =
+        main_renderer_active_render_res(renderer);
+    bool status = true;
+
+    for (size_t i = 0; i < renderer->render_functions_size && status; ++i) {
+        render_function f = renderer->render_functions[i];
+        status = f(render_res);
+    }
+
+    return status;
 }
 
 static inline bool main_renderer_sync(const main_renderer* renderer) {
@@ -171,8 +194,8 @@ static inline bool main_renderer_present_sync(const main_renderer* renderer) {
         .signalSemaphoreCount = 1,
         .pSignalSemaphores = &render_res->finished_render_semaphore
     };
-    CHECK_VK_BOOL(vkQueueSubmit(renderer->ctx->graphics_queue.handle, 1, &submit_info,
-        render_res->fence));
+    CHECK_VK_BOOL(vkQueueSubmit(renderer->ctx->graphics_queue.handle, 1,
+        &submit_info, render_res->fence));
 
     return true;
 }
@@ -237,6 +260,9 @@ bool main_renderer_render(main_renderer* renderer) {
 
     status &= main_renderer_prepare_frame(renderer);
     ASSERT_LOG_ERROR(status, "Unable to prepare frame");
+
+    status &= main_renderer_render_functions_exec(renderer);
+    ASSERT_LOG_ERROR(status, "Unable to run all the render functions");
 
     status &= main_renderer_finish_frame(renderer);
     ASSERT_LOG_ERROR(status, "Unable to finish frame");

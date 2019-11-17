@@ -99,12 +99,18 @@ static inline void vk_app_init_rendering_context_render_pass(vk_app* app) {
 static inline void vk_app_init_renderer(vk_app* app, const vk_app_create_info*
     app_info)
 {
-    const main_renderer_create_info renderer_config = {
+    const size_t rf_size = app_info->renderer_config.render_functions_size;
+
+    main_renderer_create_info renderer_config = {
         .ctx = app_info->renderer_config.ctx == NULL ? &app->ctx :
             app_info->renderer_config.ctx,
         .clear_color = app_info->renderer_config.clear_color,
-        .clear_bits = app_info->renderer_config.clear_bits
+        .clear_bits = app_info->renderer_config.clear_bits,
+        .render_functions_size = rf_size
     };
+    mem_copy(renderer_config.render_functions,
+        app_info->renderer_config.render_functions, rf_size *
+        sizeof(render_function));
     create_main_renderer(&renderer_config);
 }
 
