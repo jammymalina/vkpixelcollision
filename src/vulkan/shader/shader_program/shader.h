@@ -13,6 +13,8 @@ typedef struct shader_create_info {
     shader_type type;
     uint32_t* program;
     size_t program_size;
+    shader_binding bindings[SHADER_MAX_BINDINGS_SIZE];
+    size_t bindings_size;
 
     VkDevice device;
 } shader_create_info;
@@ -30,6 +32,8 @@ typedef struct shader {
 void shader_init_empty(shader* shd);
 bool shader_init(shader* shd, const shader_create_info* shader_info);
 void shader_copy(shader* dest, const shader* src);
+void shader_set_bindings(shader* shd, const shader_binding* bindings, size_t
+    bindings_size);
 void shader_destroy(shader* shd);
 
 #endif

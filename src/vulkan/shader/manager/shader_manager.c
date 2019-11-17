@@ -71,6 +71,10 @@ bool shader_manager_preload(shader_manager* shm, const shader_preload_info*
         char shd_path[PATH_MAX_SIZE];
         const char* shd_rel_path = preload_info->preloaded_shaders[i].filepath;
         const char* shd_name = preload_info->preloaded_shaders[i].name;
+        const shader_binding* shd_bindings =
+            preload_info->preloaded_shaders[i].bindings;
+        const size_t shd_bindings_size =
+            preload_info->preloaded_shaders[i].bindings_size;
 
         const shader_loader* shl = retrieve_shader_loader();
 
@@ -78,8 +82,11 @@ bool shader_manager_preload(shader_manager* shm, const shader_preload_info*
             shader_loader_load_shader(shl, &s, shd_path, shd_name, gpu);
         ASSERT_LOG_ERROR(status, "Unable to create shader %s: %s",
             shd_name, shd_path);
+        shader_set_bindings(&s, shd_bindings, shd_bindings_size);
 
-        log_info("Loaded shader %s: %s", shd_name, shd_path);
+        log_info("Loaded shader %s: %s, bindings: %zu", shd_name, shd_path,
+            s.bindings_size);
+
         status &= shader_manager_add(shm, shd_name, &s);
         ASSERT_LOG_ERROR(status, "Unable to add shader to shader manager: %s",
             shd_name);

@@ -39,6 +39,7 @@ bool shader_init(shader* shd, const shader_create_info* shader_info) {
 
     shd->type = shader_info->type;
     shd->device = shader_info->device;
+    shader_set_bindings(shd, shader_info->bindings, shader_info->bindings_size);
 
     const VkShaderModule module = shader_create_vk_module(shader_info);
     if (!module) {
@@ -58,6 +59,13 @@ void shader_copy(shader* dest, const shader* src) {
     dest->bindings_size = src->bindings_size;
     mem_copy(dest->bindings, src->bindings, sizeof(shader_binding) *
         SHADER_MAX_BINDINGS_SIZE);
+}
+
+void shader_set_bindings(shader* shd, const shader_binding* bindings, size_t
+    bindings_size)
+{
+    mem_copy(&shd->bindings, bindings, bindings_size * sizeof(shader_binding));
+    shd->bindings_size = bindings_size;
 }
 
 void shader_destroy(shader* shd) {

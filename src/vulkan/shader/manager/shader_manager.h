@@ -21,6 +21,8 @@ typedef struct shader_manager_create_info {
 typedef struct shader_preload_item {
     const char* filepath;
     const char* name;
+    shader_binding bindings[SHADER_MAX_BINDINGS_SIZE];
+    size_t bindings_size;
 } shader_preload_item;
 
 typedef struct shader_preload_info {

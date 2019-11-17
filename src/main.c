@@ -3,6 +3,7 @@
 #include "./input/input.h"
 #include "./logger/logger.h"
 #include "./vulkan/memory/allocator/vma.h"
+#include "./time/time.h"
 
 #define MS_PER_UPDATE 16
 
@@ -10,14 +11,43 @@ int main(int argc, char* args[]) {
     vk_app app;
 
     const shader_preload_item preloaded_shaders[] = {
-        { .filepath = "shaders/basic/basic2d.frag.svm", .name = "basic2dfrag" },
-        { .filepath = "shaders/basic/basic2d.vert.svm", .name = "basic2dvert" }
+        {
+            .name = "basic2dfrag",
+            .filepath = "shaders/basic/basic2d.frag.svm",
+            .bindings_size = 0
+        },
+        {
+            .name = "basic2dvert",
+            .filepath = "shaders/basic/basic2d.vert.svm",
+            .bindings_size = 0
+        },
+        {
+            .name = "line2dvert",
+            .filepath = "shaders/line/line2d.vert.svm",
+            .bindings = {
+                { .binding = 0, .type = SHADER_BINDING_TYPE_UNIFORM }
+            },
+            .bindings_size = 1
+        },
     };
 
     const shader_manager_program_create_info preloaded_shader_programs[] = {
         {
             .name = "basic2d", .gpu = NULL, .shaders_size = 2,
             .shaders = (const char*[]) { "basic2dfrag", "basic2dvert" },
+            .vertex_layout = VERTEX_LAYOUT_POS_2_COL_4,
+            .preconfigured_pipelines = (pipeline_create_info[]) {
+                {
+                    .state_bits = RST_BASIC_2D,
+                    .render_pass = VK_NULL_HANDLE,
+                    .store_in_program_cache = true
+                }
+            },
+            .preconfigured_pipelines_size = 1
+        },
+        {
+            .name = "line2d", .gpu = NULL, .shaders_size = 2,
+            .shaders = (const char*[]) { "basic2dfrag", "line2dvert" },
             .vertex_layout = VERTEX_LAYOUT_POS_2_COL_4,
             .preconfigured_pipelines = (pipeline_create_info[]) {
                 {
@@ -61,9 +91,9 @@ int main(int argc, char* args[]) {
         .name = "pixelcollision",
         .window_config = {
             .title = "Pixel collision",
-            .width = 2560,
-            .height = 1440,
-            .fullscreen = true
+            .width = 1200,
+            .height = 800,
+            .fullscreen = false
         },
         .vma_allocator_config = {
             .gpu = NULL,
@@ -119,14 +149,14 @@ int main(int argc, char* args[]) {
 
     bool is_running = domain_init_status;
 
-    uint32_t previous_time = SDL_GetTicks();
-    double lag = 0.0;
     main_renderer* renderer = retrieve_main_renderer();
     input_handler* input = retrieve_input_handler();
 
-    while (is_running) {
+    double lag = 0.0;
+    uint32_t previous_time = time_relative_timestamp_ms();
 
-        uint32_t current_time = SDL_GetTicks();
+    while (is_running) {
+        uint32_t current_time = time_relative_timestamp_ms();
         uint32_t elapsed_time = current_time - previous_time;
 
         previous_time = current_time;

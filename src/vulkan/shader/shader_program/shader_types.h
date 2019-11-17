@@ -57,10 +57,15 @@ static inline size_t shader_type_to_index(shader_type st) {
 
 #define SHADER_TYPE_GROUP_GRAPHICS (SHADER_TYPE_VERTEX | SHADER_TYPE_FRAGMENT)
 
-typedef enum shader_binding {
+typedef enum shader_binding_type {
     SHADER_BINDING_TYPE_UNIFORM,
     SHADER_BINDING_TYPE_SAMPLER,
     SHADER_BINDINGS_COUNT
+} shader_binding_type;
+
+typedef struct shader_binding {
+    shader_binding_type type;
+    uint32_t binding;
 } shader_binding;
 
 typedef struct shader shader;
@@ -134,8 +139,8 @@ static inline VkShaderStageFlagBits shader_type_to_stage(shader_type type) {
     }
 }
 
-static inline VkDescriptorType shader_binding_to_descriptor_type(shader_binding
-    type)
+static inline VkDescriptorType shader_binding_type_to_descriptor_type(
+    shader_binding_type type)
 {
     switch (type) {
         case SHADER_BINDING_TYPE_UNIFORM:

@@ -6,6 +6,9 @@
 
 #include "../context/context.h"
 
+#define FPS_60_DURATION_MS 16
+#define FPS_30_DURATION_MS 33
+
 enum clear_screen_bits {
     CLEAR_COLOR_BUFFER = 1,
     CLEAR_DEPTH_BUFFER = 2,

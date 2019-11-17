@@ -40,8 +40,7 @@ static bool create_descriptor_layout(shader_program* prog)
 {
     VkDescriptorSetLayoutBinding
         layout_bindings[SHADER_TYPES_COUNT * SHADER_MAX_BINDINGS_SIZE];
-
-    uint32_t bindings_count = 0;
+    size_t layout_bindings_count = 0;
 
     for (size_t i = 0; i < SHADER_TYPES_COUNT; ++i) {
         const shader* s = prog->shaders[i];
@@ -52,14 +51,14 @@ static bool create_descriptor_layout(shader_program* prog)
 
         for (size_t bind_iter = 0; bind_iter < s->bindings_size; ++bind_iter) {
             VkDescriptorSetLayoutBinding binding = {
-                .binding = bindings_count,
-                .descriptorType =
-                    shader_binding_to_descriptor_type(s->bindings[bind_iter]),
+                .binding = s->bindings[bind_iter].binding,
+                .descriptorType = shader_binding_type_to_descriptor_type(
+                    s->bindings[bind_iter].type),
                 .descriptorCount = 1,
                 .stageFlags = shader_type_to_stage(s->type),
                 .pImmutableSamplers = NULL
             };
-            layout_bindings[bindings_count++] = binding;
+            layout_bindings[layout_bindings_count++] = binding;
         }
     }
 
@@ -67,8 +66,8 @@ static bool create_descriptor_layout(shader_program* prog)
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
-        .bindingCount = bindings_count,
-        .pBindings = bindings_count == 0 ? NULL : layout_bindings
+        .bindingCount = layout_bindings_count,
+        .pBindings = layout_bindings_count == 0 ? NULL : layout_bindings
     };
 
     CHECK_VK_BOOL(vkCreateDescriptorSetLayout(prog->gpu->device,
@@ -171,7 +170,7 @@ void shader_program_copy(shader_program* dest, const shader_program* src) {
     dest->pipeline_cache_size = src->pipeline_cache_size;
 }
 
-bool shader_program_bind_pipeline(shader_program* prog, pipeline_state_bits 
+bool shader_program_bind_pipeline(shader_program* prog, pipeline_state_bits
     state_bits, VkRenderPass render_pass, VkCommandBuffer command_buffer)
 {
     ASSERT_LOG_WARNING(shader_program_has_pipeline(prog, state_bits,

@@ -4,6 +4,7 @@
 #include "../../material/color.h"
 #include "../../memory/memory.h"
 #include "../../vulkan/functions/functions.h"
+#include "../../time/time.h"
 #include "../../vulkan/tools/tools.h"
 
 static main_renderer* comeraano = NULL;
@@ -216,7 +217,16 @@ static inline void main_renderer_next_rendering_res(main_renderer* renderer) {
         renderer->ctx->swapchain.image_count;
 }
 
+static inline void main_renderer_duration_check(uint32_t duration) {
+    if (duration > FPS_30_DURATION_MS) {
+        log_warning("Framerate is dropping below 30 frames per second");
+    } else if (duration > FPS_60_DURATION_MS) {
+        log_warning("Framerate is dropping below 60 frames per second");
+    }
+}
+
 bool main_renderer_render(main_renderer* renderer) {
+    const uint32_t start_time_ms = time_relative_timestamp_ms();
     uint32_t image_index = 0;
 
     bool status = main_renderer_sync(renderer);
@@ -239,6 +249,8 @@ bool main_renderer_render(main_renderer* renderer) {
 
     main_renderer_next_rendering_res(renderer);
 
+    const uint32_t duration = time_relative_timestamp_ms() - start_time_ms;
+    main_renderer_duration_check(duration);
     return true;
 }
 

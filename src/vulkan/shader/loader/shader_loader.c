@@ -61,6 +61,7 @@ bool shader_loader_load_shader(const shader_loader* shl, shader* shd, const
         .device = gpu->device,
         .program = (uint32_t*) shl->program_buffer,
         .program_size = shader_file_size,
+        .bindings_size = 0
     };
     bool shader_status = shader_init(shd, &shader_info);
 
