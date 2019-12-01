@@ -55,6 +55,8 @@ typedef unsigned char byte;
 #define is_64_byte_aligned(ptr)  ((((uintptr_t) (ptr)) &  63) == 0)
 #define is_128_byte_aligned(ptr) ((((uintptr_t) (ptr)) & 127) == 0)
 
+#define GET_NEAREST_MULTIPLE_16(n)  ((((n) - 1) | 15) + 1)
+
 static inline size_t count_bits_uint32_t(uint32_t n) {
     size_t c =  ((n & 0xfff) * 0x1001001001001ULL & 0x84210842108421ULL) % 0x1f;
     c += (((n & 0xfff000) >> 12) * 0x1001001001001ULL & 0x84210842108421ULL) %

@@ -67,6 +67,8 @@ bool vk_buffer_clear_data(vk_buffer* buff, VkDeviceSize size, VkDeviceSize
     offset);
 bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
     VkDeviceSize offset);
+bool vk_buffer_update_data_unsafe(vk_buffer* buff, const void* data,
+    VkDeviceSize size, VkDeviceSize offset);
 
 bool vk_buffer_reference(vk_buffer* dest, const vk_buffer* src);
 bool vk_buffer_reference_part(vk_buffer* dest, const vk_buffer* src,

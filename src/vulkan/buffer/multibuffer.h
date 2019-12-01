@@ -24,6 +24,7 @@ typedef struct vk_multibuffer_segment {
     VkDeviceSize offset;
     VkDeviceSize size;
     VkDeviceSize pointer;
+    bool in_transaction;
 } vk_multibuffer_segment;
 
 typedef struct vk_multibuffer_create_info {
@@ -48,6 +49,11 @@ VkDeviceSize vk_multibuffer_get_total_size(const vk_multibuffer* mbuff);
 VkDeviceSize vk_multibuffer_get_buffer_size(const vk_multibuffer* mbuff);
 
 bool vk_multibuffer_clear(vk_multibuffer* mbuff);
+
+bool vk_multibuffer_segment_start_transaction(vk_multibuffer* mbuff, const char
+    segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH]);
+bool vk_multibuffer_segment_end_transaction(vk_multibuffer* mbuff, const char
+    segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH]);
 
 bool vk_multibuffer_segment_clear(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH]);

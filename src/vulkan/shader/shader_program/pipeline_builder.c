@@ -5,9 +5,11 @@
 #include "../../tools/tools.h"
 #include "../../vertex/core/vertex_layout.h"
 
-static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
-    state_bits, VkRenderPass render_pass, shader_program* prog)
+static bool create_pipeline(VkPipeline *pipeline, const pipeline_create_info*
+    pipe_info, shader_program* prog)
 {
+    pipeline_state_bits state_bits = pipe_info->state_bits;
+
     vertex_layout vertex_layouts[VERTEX_LAYOUTS_TOTAL];
     retrieve_vertex_layouts(vertex_layouts);
     vertex_layout* layout = &vertex_layouts[prog->vertex_layout];
@@ -27,7 +29,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = NULL,
         .flags = 0,
-        .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        .topology = pipe_info->topology,
         .primitiveRestartEnable = VK_FALSE
     };
 
@@ -86,7 +88,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
     size_t dynamic_states_size = 0;
     pipeline_state_get_dynamic_states(&ps, NULL, &dynamic_states_size);
     if (dynamic_states_size > 8) {
-        log_error("Render program: not enough progace for dynamic states");
+        log_error("Render program: not enough space for dynamic states");
         return false;
     }
     pipeline_state_get_dynamic_states(&ps, dynamic_states,
@@ -128,7 +130,7 @@ static bool create_pipeline(VkPipeline *pipeline, pipeline_state_bits
         .pColorBlendState = &color_blend,
         .pDynamicState = &dynamic_info,
         .layout = prog->pipeline_layout,
-        .renderPass = render_pass,
+        .renderPass = pipe_info->render_pass,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = 0
@@ -154,8 +156,7 @@ bool pipeline_builder_build_pipeline(pipeline_state* result,
     pipeline_state_init_empty(result);
 
     VkPipeline pipeline = VK_NULL_HANDLE;
-    bool success = create_pipeline(&pipeline, pipe_info->state_bits,
-        pipe_info->render_pass, prog);
+    bool success = create_pipeline(&pipeline, pipe_info, prog);
 
     if (!success) {
         log_error("Unable to create pipeline");

@@ -30,12 +30,17 @@ static bool domain_init() {
 
     mat4 ortho_mat;
     ortho4(ortho_mat, 0, 1200.0, 800.0, 0);
+
+    vk_multibuffer_segment_start_transaction(buff, "uniform_segment");
     vk_multibuffer_segment_append(buff, "uniform_segment", ortho_mat,
         sizeof(mat4));
+    vk_multibuffer_segment_end_transaction(buff, "uniform_segment");
 
     float x = 0.0, y = 0.0;
     float line_color[4] = { 0.0, 0.0, 0.0, 0.0 };
     color_rgba_uint32_to_float(line_color, 0x008897);
+
+    vk_multibuffer_segment_start_transaction(buff, "vertex_segment");
     for (x = 40.0; x < 1200.0; x += 40.0) {
         y = 0.0;
         vk_multibuffer_segment_append(buff, "vertex_segment", &x,
@@ -52,6 +57,7 @@ static bool domain_init() {
         vk_multibuffer_segment_append(buff, "vertex_segment", line_color,
             sizeof(line_color));
     }
+    vk_multibuffer_segment_end_transaction(buff, "vertex_segment");
 
     return true;
 }

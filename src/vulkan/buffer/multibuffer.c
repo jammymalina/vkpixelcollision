@@ -28,6 +28,7 @@ static inline void vk_multibuffer_segment_init(vk_multibuffer_segment* segment,
     segment->size = seg_config->size;
     segment->usage = seg_config->usage;
     segment->offset = offset;
+    segment->in_transaction = false;
 }
 
 static inline bool vk_multibuffer_init_segments(vk_multibuffer* mbuff, const
@@ -116,6 +117,31 @@ bool vk_multibuffer_clear(vk_multibuffer* mbuff) {
     return vk_buffer_clear_all_data(&mbuff->buffer);
 }
 
+bool vk_multibuffer_segment_start_transaction(vk_multibuffer* mbuff, const char
+    segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
+{
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    seg->in_transaction = true;
+
+    return true;
+}
+
+bool vk_multibuffer_segment_end_transaction(vk_multibuffer* mbuff, const char
+    segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
+{
+    vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
+    ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
+        " vk_multibuffer", segment_name);
+
+    seg->in_transaction = false;
+    seg->pointer = GET_NEAREST_MULTIPLE_16(seg->offset);
+
+    return true;
+}
+
 bool vk_multibuffer_segment_clear(vk_multibuffer* mbuff, const char
     segment_name[VULKAN_MULTIBUFFER_SEGMENT_MAX_LENGTH])
 {
@@ -149,14 +175,16 @@ bool vk_multibuffer_segment_append(vk_multibuffer* mbuff, const char
     vk_multibuffer_segment* seg = vk_multibuffer_find_seg(mbuff, segment_name);
     ASSERT_LOG_ERROR(seg, "Unable to find the desired segment (%s) in"
         " vk_multibuffer", segment_name);
+    ASSERT_LOG_ERROR(seg->in_transaction, "Unable to append data to"
+        " vk_multibuffer, segment (%s) is not in transaction mode", seg->name);
 
     ASSERT_LOG_ERROR(seg->pointer + data_size <= seg->size, "Unable to append"
-        " data to vk_multibuffer, segment (%s) is full", segment_name);
+        " data to vk_multibuffer, segment (%s) is full", seg->name);
 
-    bool status = vk_buffer_update_data(&mbuff->buffer, data, data_size,
+    bool status = vk_buffer_update_data_unsafe(&mbuff->buffer, data, data_size,
         seg->offset + seg->pointer);
     ASSERT_LOG_ERROR(status, "Unable to append data to desired segment (%s) in"
-        " vk_multibuffer", segment_name);
+        " vk_multibuffer", seg->name);
 
     seg->pointer += data_size;
 

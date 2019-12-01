@@ -125,6 +125,12 @@ static inline bool vk_buffer_copy_data(const byte* src, byte* dest, VkDeviceSize
     return true;
 }
 
+static inline void vk_buffer_copy_data_unsafe(const byte* src, byte* dest,
+    VkDeviceSize num_bytes)
+{
+    mem_copy(dest, src, num_bytes);
+}
+
 bool vk_buffer_clear_all_data(vk_buffer* buff) {
     return vk_buffer_clear_data(buff, 0, vk_buffer_get_size(buff));
 }
@@ -163,6 +169,24 @@ bool vk_buffer_update_data(vk_buffer* buff, const void* data, VkDeviceSize size,
         ASSERT_LOG_ERROR(vk_buffer_copy_data(data, buff->allocation.data +
             vk_buffer_get_offset(buff) + offset, size), "Vk_buffer unable to"
             " copy data");
+        return true;
+    }
+
+    log_error("Vk_buffer data usage not supported");
+    return false;
+}
+
+bool vk_buffer_update_data_unsafe(vk_buffer* buff, const void* data,
+    VkDeviceSize size, VkDeviceSize offset)
+{
+    ASSERT_LOG_ERROR(buff->handle, "Vk_buffer must be allocated before data"
+        " update");
+    ASSERT_LOG_ERROR(size <= vk_buffer_get_size(buff), "Vk_buffer not enough"
+        " space to update the data");
+
+    if (buff->data_usage == VULKAN_BUFFER_DYNAMIC_DATA_USAGE) {
+        vk_buffer_copy_data_unsafe(data, buff->allocation.data +
+            vk_buffer_get_offset(buff) + offset, size);
         return true;
     }
 

@@ -42,6 +42,7 @@ int main(int argc, char* args[]) {
                 {
                     .state_bits = RST_BASIC_2D,
                     .render_pass = VK_NULL_HANDLE,
+                    .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
                     .store_in_program_cache = true
                 }
             },
@@ -55,6 +56,7 @@ int main(int argc, char* args[]) {
                 {
                     .state_bits = RST_BASIC_2D,
                     .render_pass = VK_NULL_HANDLE,
+                    .topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
                     .store_in_program_cache = true
                 }
             },
