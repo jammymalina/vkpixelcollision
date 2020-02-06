@@ -62,7 +62,7 @@ VkInstance create_instance(SDL_Window* w) {
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "jammyengine",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion = VK_API_VERSION_1_1
+        .apiVersion = VK_API_VERSION_1_2
     };
 
     VkInstanceCreateInfo vk_instance_create_info = {
