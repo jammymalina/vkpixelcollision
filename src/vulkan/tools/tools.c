@@ -59,7 +59,6 @@ const char* vulkan_result_to_string(VkResult result) {
 		case VK_ERROR_NOT_PERMITTED_EXT:
 			return "VK_ERROR_NOT_PERMITTED_EXT";
         case VK_RESULT_MAX_ENUM:
-        case VK_RESULT_RANGE_SIZE:
             break;
         default:
             break;

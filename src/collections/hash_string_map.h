@@ -63,9 +63,7 @@ static inline void hash_string_key_set_(char key[HASH_KEY_MAX_SIZE], const char*
     }
 }
 
-static inline bool hash_string_key_equal_(const char key1[HASH_KEY_MAX_SIZE],
-    const char key2[HASH_KEY_MAX_SIZE])
-{
+static inline bool hash_string_key_equal_(const char *key1, const char *key2) {
     size_t i;
     for (i = 0; i < HASH_KEY_MAX_SIZE && key1[i] == key2[i] &&
         key1[i] != '\0' && key2[i] != '\0'; ++i);

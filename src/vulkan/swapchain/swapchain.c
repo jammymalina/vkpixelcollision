@@ -120,7 +120,7 @@ bool swapchain_init(vk_swapchain* sw, const vk_swapchain_create_info* sw_info) {
     sw->present_mode = retrieve_present_mode(sw_info->gpu);
     sw->extent = retrieve_extent(sw_info->gpu, &sw_info->dimensions);
 
-    if (sw->present_mode == VK_PRESENT_MODE_END_RANGE_KHR) {
+    if (sw->present_mode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
         log_error("Unable to create swapchain, present mode not supported");
         return false;
     }

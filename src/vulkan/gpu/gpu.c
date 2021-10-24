@@ -181,7 +181,7 @@ VkSurfaceFormatKHR retrieve_surface_format(const gpu_info* gpu) {
 
 VkPresentModeKHR retrieve_present_mode(const gpu_info *gpu) {
     if (gpu->present_modes_size == 0) {
-        return VK_PRESENT_MODE_END_RANGE_KHR;
+        return VK_PRESENT_MODE_MAX_ENUM_KHR;
     }
 
     const VkPresentModeKHR desired_mode = VK_PRESENT_MODE_MAILBOX_KHR;
